@@ -13,9 +13,10 @@ func main() {
 	awsConfig := aws.NewAWSConfig()
 
 	// initialize and configure client
-	vaultClient, err := vault.VaultClient(vaultConfig)
+	vaultClient, err := vault.NewVaultClient(vaultConfig)
 	if err != nil {
-		log.Fatalln("Vault client initialization and configuration failed")
+		log.Fatal("Vault client initialization and configuration failed")
+		log.Fatal(err)
 	}
 
 	// vault raft snapshot

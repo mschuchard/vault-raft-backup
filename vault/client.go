@@ -3,7 +3,6 @@ package vault
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -105,46 +104,53 @@ func (config *VaultConfig) SnapshotPath() string {
 
 // vault client configuration
 func NewVaultClient(config *VaultConfig) (*vault.Client, error) {
-	// initialize config
+	// initialize vault api config
 	vaultConfig := &vault.Config{Address: config.address}
 	err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: config.insecure})
 	if err != nil {
-		fmt.Println("Vault TLS configuration failed to initialize")
-		fmt.Println(err)
+		log.Print("Vault TLS configuration failed to initialize")
+		log.Print(err)
 		return nil, err
 	}
 
 	// initialize client
 	client, err := vault.NewClient(vaultConfig)
 	if err != nil {
-		fmt.Println("Vault client failed to initialize")
-		fmt.Println(err)
+		log.Print("Vault client failed to initialize")
+		log.Print(err)
 		return nil, err
 	}
 
 	// determine authentication method
-	if token == "aws-iam" {
+	switch config.engine {
+	case vaultToken:
+		client.SetToken(config.token)
+	case awsIam:
+		// determine iam role login option
+		var loginOption auth.LoginOption
+
+		if len(config.awsRole) > 0 {
+			// use explicitly specified iam role
+			loginOption = auth.WithRole(config.awsRole)
+		} else {
+			// use default iam role
+			loginOption = auth.WithIAMAuth()
+		}
 		// authenticate with aws iam
-		awsAuth, err := auth.NewAWSAuth(auth.WithIAMAuth())
+		awsAuth, err := auth.NewAWSAuth(loginOption)
 		if err != nil {
 			return nil, errors.New("Unable to initialize AWS IAM authentication")
 		}
 
-		authInfo, err := client.Auth().Login(context.TODO(), awsAuth)
+		authInfo, err := client.Auth().Login(context.Background(), awsAuth)
 		if err != nil {
 			return nil, errors.New("Unable to login to AWS IAM auth method")
 		}
 		if authInfo == nil {
 			return nil, errors.New("No auth info was returned after login")
 		}
-	} else {
-		// authenticate with token
-		if len(token) != 26 {
-			return nil, errors.New("The Vault token is invalid")
-		}
-		client.SetToken(token)
 	}
 
-	// return vault client interface
+	// return authenticated vault client interface
 	return client, nil
 }
