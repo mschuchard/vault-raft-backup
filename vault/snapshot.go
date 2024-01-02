@@ -11,15 +11,15 @@ import (
 
 // vault raft snapshot creation
 func VaultRaftSnapshot(client *vault.Client, snapshotPath string) (*os.File, error) {
-	// prepare snapshot file
+	// prepare snapshot file for content writing and defer closing
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
-		log.Print("snapshot file at " + snapshotPath + " could not be created")
+		log.Printf("snapshot file at %s could not be created", snapshotPath)
 		return nil, err
 	}
 	defer util.SnapshotFileClose(snapshotFile)
 
-	// execute raft snapshot
+	// execute raft snapshot to file
 	err = client.Sys().RaftSnapshot(snapshotFile)
 	if err != nil {
 		log.Print("Vault Raft snapshot creation failed")

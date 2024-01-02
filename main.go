@@ -8,11 +8,11 @@ import (
 )
 
 func main() {
-	// construct vaultconfig and awsConfig
+	// construct vault client config and aws client config
 	vaultConfig := vault.NewVaultConfig()
 	awsConfig := aws.NewAWSConfig()
 
-	// initialize and configure client
+	// initialize and configure vault client
 	vaultClient, err := vault.NewVaultClient(vaultConfig)
 	if err != nil {
 		log.Print("Vault client initialization and configuration failed")
@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// execute snapshot upload to s3
+	// upload snapshot to aws s3
 	_, err = aws.SnapshotS3Upload(awsConfig, snapshotFile.Name())
 	if err != nil {
 		log.Print("S3 upload failed")

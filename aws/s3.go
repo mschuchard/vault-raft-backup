@@ -12,7 +12,7 @@ import (
 	"github.com/mitodl/vault-raft-backup/util"
 )
 
-// AWSConfig is for aws interaction
+// AWSConfig defines aws client api interaction
 type AWSConfig struct {
 	s3Bucket string
 	s3Prefix string
@@ -28,9 +28,9 @@ func NewAWSConfig() *AWSConfig {
 	}
 }
 
-// snapshot upload to s3
+// snapshot upload to aws s3
 func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.UploadOutput, error) {
-	// open snapshot and defer closing
+	// open snapshot file and defer closing
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {
 		log.Printf("failed to open snapshot file %q: %v", snapshotPath, err)
@@ -38,30 +38,29 @@ func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.Upload
 	}
 	defer util.SnapshotFileClose(snapshotFile)
 
-	// aws session
+	// aws session in specified region
 	awsSession := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(config.s3Region),
 	}))
 
-	// initialize an uploader with the session and default options
+	// initialize an s3 uploader with the session and default options
 	uploader := s3manager.NewUploader(awsSession)
-
-	// determine vault backup base for s3 key
+	// determine vault backup base filename for s3 key
 	snapshotPathBase := filepath.Base(snapshotPath)
 
-	// upload the snapshot to the s3bucket at specified key
+	// upload the snapshot file to the s3 bucket at specified key
 	uploadResult, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(config.s3Bucket),
 		Key:    aws.String(config.s3Prefix + "-" + snapshotPathBase),
 		Body:   snapshotFile,
 	})
 	if err != nil {
-		log.Print("Vault backup failed to upload to S3 bucket " + config.s3Bucket)
+		log.Printf("Vault backup failed to upload to S3 bucket %s", config.s3Bucket)
 		return nil, err
 	}
 
-	// output info
-	log.Printf("Vault Raft snapshot uploaded to, %s\n", aws.StringValue(&uploadResult.Location))
+	// output s3 uploader location info
+	log.Printf("Vault Raft snapshot uploaded to %s", aws.StringValue(&uploadResult.Location))
 
 	return uploadResult, nil
 }

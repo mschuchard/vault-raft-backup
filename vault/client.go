@@ -56,6 +56,7 @@ func NewVaultConfig() *VaultConfig {
 	if len(engine) == 0 {
 		log.Print("authentication engine for Vault not specified; using logic from other parameters to assist with determination")
 
+		// validate inputs specified for only one engine
 		if len(token) > 0 && len(awsMountPath) > 0 {
 			log.Fatal("token and AWS mount path were simultaneously specified; these are mutually exclusive options")
 		}
@@ -69,6 +70,7 @@ func NewVaultConfig() *VaultConfig {
 	}
 	// validate vault token
 	awsRole := os.Getenv("VAULT_AWS_ROLE")
+
 	if engine == vaultToken && len(token) != 28 {
 		log.Fatal("the specified Vault Token is invalid")
 	} else {
@@ -84,6 +86,7 @@ func NewVaultConfig() *VaultConfig {
 		}
 	}
 
+	// initialize vault config
 	vaultConfig := &VaultConfig{
 		address:      address,
 		insecure:     insecure,
@@ -106,13 +109,12 @@ func (config *VaultConfig) SnapshotPath() string {
 func NewVaultClient(config *VaultConfig) (*vault.Client, error) {
 	// initialize vault api config
 	vaultConfig := &vault.Config{Address: config.address}
-	err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: config.insecure})
-	if err != nil {
+	if err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: config.insecure}); err != nil {
 		log.Print("Vault TLS configuration failed to initialize")
 		return nil, err
 	}
 
-	// initialize client
+	// initialize vault client
 	client, err := vault.NewClient(vaultConfig)
 	if err != nil {
 		log.Print("Vault client failed to initialize")
@@ -134,21 +136,23 @@ func NewVaultClient(config *VaultConfig) (*vault.Client, error) {
 			// use default iam role
 			loginOption = auth.WithIAMAuth()
 		}
+
 		// authenticate with aws iam
 		awsAuth, err := auth.NewAWSAuth(loginOption)
 		if err != nil {
-			return nil, errors.New("Unable to initialize AWS IAM authentication")
+			return nil, errors.New("unable to initialize AWS IAM authentication")
 		}
 
+		// utilize aws authentication with vault client
 		authInfo, err := client.Auth().Login(context.Background(), awsAuth)
 		if err != nil {
-			return nil, errors.New("Unable to login to AWS IAM auth method")
+			return nil, errors.New("unable to login to AWS IAM auth method")
 		}
 		if authInfo == nil {
-			return nil, errors.New("No auth info was returned after login")
+			return nil, errors.New("no auth info was returned after login")
 		}
 	}
 
-	// return authenticated vault client interface
+	// return authenticated vault client
 	return client, nil
 }
