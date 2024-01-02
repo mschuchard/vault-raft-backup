@@ -1,7 +1,7 @@
 package vault
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	vault "github.com/hashicorp/vault/api"
@@ -14,20 +14,15 @@ func VaultRaftSnapshot(client *vault.Client, snapshotPath string) (*os.File, err
 	// prepare snapshot file
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
-		fmt.Println("snapshot file at " + snapshotPath + " could not be created")
-		fmt.Println(err)
+		log.Print("snapshot file at " + snapshotPath + " could not be created")
 		return nil, err
 	}
-
-	// defer snapshot close
 	defer util.SnapshotFileClose(snapshotFile)
 
 	// execute raft snapshot
 	err = client.Sys().RaftSnapshot(snapshotFile)
 	if err != nil {
-		snapshotFile.Close()
-		fmt.Println("Vault Raft snapshot invocation failed")
-		fmt.Println(err)
+		log.Print("Vault Raft snapshot creation failed")
 		return nil, err
 	}
 

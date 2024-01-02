@@ -15,19 +15,21 @@ func main() {
 	// initialize and configure client
 	vaultClient, err := vault.NewVaultClient(vaultConfig)
 	if err != nil {
-		log.Fatal("Vault client initialization and configuration failed")
+		log.Print("Vault client initialization and configuration failed")
 		log.Fatal(err)
 	}
 
 	// vault raft snapshot
 	snapshotFile, err := vault.VaultRaftSnapshot(vaultClient, vaultConfig.SnapshotPath())
 	if err != nil {
-		log.Fatalln("Vault Raft Snapshot failed")
+		log.Print("Vault Raft snapshot failed")
+		log.Fatal(err)
 	}
 
 	// execute snapshot upload to s3
 	_, err = aws.SnapshotS3Upload(awsConfig, snapshotFile.Name())
 	if err != nil {
-		log.Fatalln("S3 upload failed")
+		log.Print("S3 upload failed")
+		log.Fatal(err)
 	}
 }

@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,7 +33,7 @@ func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.Upload
 	// open snapshot and defer closing
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {
-		fmt.Printf("Failed to open snapshot file %q: %v", snapshotPath, err)
+		log.Printf("failed to open snapshot file %q: %v", snapshotPath, err)
 		return nil, err
 	}
 	defer util.SnapshotFileClose(snapshotFile)
@@ -57,8 +56,7 @@ func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.Upload
 		Body:   snapshotFile,
 	})
 	if err != nil {
-		fmt.Println("Vault backup failed to upload to S3 bucket " + config.s3Bucket)
-		fmt.Println(err)
+		log.Print("Vault backup failed to upload to S3 bucket " + config.s3Bucket)
 		return nil, err
 	}
 

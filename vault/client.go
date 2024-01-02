@@ -109,7 +109,6 @@ func NewVaultClient(config *VaultConfig) (*vault.Client, error) {
 	err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: config.insecure})
 	if err != nil {
 		log.Print("Vault TLS configuration failed to initialize")
-		log.Print(err)
 		return nil, err
 	}
 
@@ -117,7 +116,6 @@ func NewVaultClient(config *VaultConfig) (*vault.Client, error) {
 	client, err := vault.NewClient(vaultConfig)
 	if err != nil {
 		log.Print("Vault client failed to initialize")
-		log.Print(err)
 		return nil, err
 	}
 
