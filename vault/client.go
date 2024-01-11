@@ -47,8 +47,13 @@ func NewVaultConfig() (*vaultConfig, error) {
 	// validate insecure
 	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
 	if err != nil {
-		log.Printf("invalid boolean value %s for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
-		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
+		// no value specified so default to false
+		if len(os.Getenv("VAULT_SKIP_VERIFY")) == 0 {
+			insecure = false
+		} else { // assigned value could not be converted to boolean
+			log.Printf("invalid boolean value %s for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
+			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
+		}
 	}
 	// determine vault auth engine if unspecified
 	engine := authEngine(os.Getenv("VAULT_AUTH_ENGINE"))

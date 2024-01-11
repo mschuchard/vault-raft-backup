@@ -29,5 +29,7 @@ func TestNewVaultConfig(test *testing.T) {
 }
 
 func TestNewVaultClient(test *testing.T) {
+	// test client with token auth
 
+	// test client with aws iam auth
 }
