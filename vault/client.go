@@ -20,8 +20,8 @@ const (
 	vaultToken authEngine = "token"
 )
 
-// VaultConfig defines vault api client interface
-type VaultConfig struct {
+// vaultConfig defines vault api client interface
+type vaultConfig struct {
 	address      string
 	insecure     bool
 	engine       authEngine
@@ -32,7 +32,7 @@ type VaultConfig struct {
 }
 
 // vault config constructor
-func NewVaultConfig() *VaultConfig {
+func NewVaultConfig() (*vaultConfig, error) {
 	// vault address default
 	address := os.Getenv("VAULT_ADDR")
 	if len(address) == 0 {
@@ -40,13 +40,14 @@ func NewVaultConfig() *VaultConfig {
 	} else {
 		// vault address validation
 		if _, err := url.ParseRequestURI(address); err != nil {
-			log.Fatalf("%s is not a valid Vault server address", address)
+			log.Printf("%s is not a valid Vault server address", address)
+			return nil, err
 		}
 	}
 	// validate insecure
 	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
 	if err != nil {
-		log.Fatal("invalid boolean value for VAULT_SKIP_VERIFY")
+		log.Printf("invalid boolean value %s for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
 	}
 	// determine vault auth engine if unspecified
 	engine := authEngine(os.Getenv("VAULT_AUTH_ENGINE"))
@@ -58,7 +59,8 @@ func NewVaultConfig() *VaultConfig {
 
 		// validate inputs specified for only one engine
 		if len(token) > 0 && len(awsMountPath) > 0 {
-			log.Fatal("token and AWS mount path were simultaneously specified; these are mutually exclusive options")
+			log.Print("token and AWS mount path were simultaneously specified; these are mutually exclusive options")
+			return nil, errors.New("unable to deduce authentication engine")
 		}
 		if len(token) == 0 {
 			log.Print("AWS IAM authentication will be utilized with the Vault client")
@@ -72,7 +74,8 @@ func NewVaultConfig() *VaultConfig {
 	awsRole := os.Getenv("VAULT_AWS_ROLE")
 
 	if engine == vaultToken && len(token) != 28 {
-		log.Fatal("the specified Vault Token is invalid")
+		log.Print("the specified Vault Token is invalid")
+		return nil, errors.New("invalid vault token")
 	} else {
 		// default aws mount path and role
 		if engine == awsIam {
@@ -86,8 +89,8 @@ func NewVaultConfig() *VaultConfig {
 		}
 	}
 
-	// initialize vault config
-	vaultConfig := &VaultConfig{
+	// return initialized vault config
+	return &vaultConfig{
 		address:      address,
 		insecure:     insecure,
 		engine:       engine,
@@ -95,18 +98,16 @@ func NewVaultConfig() *VaultConfig {
 		awsMountPath: awsMountPath,
 		awsRole:      awsRole,
 		snapshotPath: os.Getenv("VAULT_SNAPSHOT_PATH"),
-	}
-
-	return vaultConfig
+	}, nil
 }
 
 // snapshot path reader
-func (config *VaultConfig) SnapshotPath() string {
+func (config *vaultConfig) SnapshotPath() string {
 	return config.snapshotPath
 }
 
 // vault client configuration
-func NewVaultClient(config *VaultConfig) (*vault.Client, error) {
+func NewVaultClient(config *vaultConfig) (*vault.Client, error) {
 	// initialize vault api config
 	vaultConfig := &vault.Config{Address: config.address}
 	if err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: config.insecure}); err != nil {

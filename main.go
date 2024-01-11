@@ -9,7 +9,11 @@ import (
 
 func main() {
 	// construct vault client config and aws client config
-	vaultConfig := vault.NewVaultConfig()
+	vaultConfig, err := vault.NewVaultConfig()
+	if err != nil {
+		log.Print("vault configuration failed validation")
+		log.Fatal(err)
+	}
 	awsConfig := aws.NewAWSConfig()
 
 	// initialize and configure vault client
