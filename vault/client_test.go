@@ -6,7 +6,12 @@ import (
 
 func TestNewVaultConfig(test *testing.T) {
 	// test with defaults
-	vaultConfigDefault := NewVaultConfig()
+	vaultConfigDefault, err := NewVaultConfig()
+	if err != nil {
+		test.Error("vault config constructor failed default initialization")
+		test.Error(err)
+	}
+
 	if vaultConfigDefault.address != "http://127.0.0.1:8200" || vaultConfigDefault.insecure != false || vaultConfigDefault.engine != awsIam || len(vaultConfigDefault.token) != 0 || vaultConfigDefault.awsMountPath != "aws" || len(vaultConfigDefault.awsRole) != 0 || len(vaultConfigDefault.snapshotPath) != 0 {
 		test.Error("vault config default constructor did not initialize with expected values")
 		test.Errorf("address expected: http://127.0.0.1:8200, actual: %s", vaultConfigDefault.address)

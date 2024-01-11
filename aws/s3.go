@@ -20,12 +20,12 @@ type AWSConfig struct {
 }
 
 // aws config constructor
-func NewAWSConfig() *AWSConfig {
+func NewAWSConfig() (*AWSConfig, error) {
 	return &AWSConfig{
 		s3Bucket: os.Getenv("S3_BUCKET"),
 		s3Prefix: os.Getenv("S3_PREFIX"),
 		s3Region: os.Getenv("AWS_REGION"),
-	}
+	}, nil
 }
 
 // snapshot upload to aws s3

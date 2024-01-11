@@ -14,7 +14,11 @@ func main() {
 		log.Print("vault configuration failed validation")
 		log.Fatal(err)
 	}
-	awsConfig := aws.NewAWSConfig()
+	awsConfig, err := aws.NewAWSConfig()
+	if err != nil {
+		log.Print("aws configuration failed validation")
+		log.Fatal(err)
+	}
 
 	// initialize and configure vault client
 	vaultClient, err := vault.NewVaultClient(vaultConfig)
