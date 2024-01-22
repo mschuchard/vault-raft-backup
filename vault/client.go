@@ -44,6 +44,7 @@ func NewVaultConfig() (*vaultConfig, error) {
 			return nil, err
 		}
 	}
+
 	// validate insecure
 	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
 	if err != nil {
@@ -55,17 +56,19 @@ func NewVaultConfig() (*vaultConfig, error) {
 			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 		}
 	}
+
 	// determine vault auth engine if unspecified
 	engine := authEngine(os.Getenv("VAULT_AUTH_ENGINE"))
 	token := os.Getenv("VAULT_TOKEN")
 	awsMountPath := os.Getenv("VAULT_AWS_MOUNT")
+	awsRole := os.Getenv("VAULT_AWS_ROLE")
 
 	if len(engine) == 0 {
 		log.Print("authentication engine for Vault not specified; using logic from other parameters to assist with determination")
 
 		// validate inputs specified for only one engine
-		if len(token) > 0 && len(awsMountPath) > 0 {
-			log.Print("token and AWS mount path were simultaneously specified; these are mutually exclusive options")
+		if len(token) > 0 && (len(awsMountPath) > 0 || len(awsRole) > 0) {
+			log.Print("token and AWS mount path or AWS role were simultaneously specified; these are mutually exclusive options")
 			return nil, errors.New("unable to deduce authentication engine")
 		}
 		if len(token) == 0 {
@@ -75,23 +78,26 @@ func NewVaultConfig() (*vaultConfig, error) {
 			log.Print("token authentication will be utilized with the Vault client")
 			engine = vaultToken
 		}
+	} else { // validate engine if unspecified
+		if engine != awsIam && engine != vaultToken {
+			log.Printf("%v was input as an authentication engine, but only token and aws are supported", engine)
+			return nil, errors.New("invalid Vault authentication engine")
+		}
 	}
-	// validate vault token
-	awsRole := os.Getenv("VAULT_AWS_ROLE")
 
+	// validate vault token
 	if engine == vaultToken && len(token) != 28 {
 		log.Print("the specified Vault Token is invalid")
 		return nil, errors.New("invalid vault token")
-	} else {
-		// default aws mount path and role
-		if engine == awsIam {
-			if len(awsMountPath) == 0 {
-				log.Print("using default AWS authentication mount path at 'aws'")
-				awsMountPath = "aws"
-			}
-			if len(awsRole) == 0 {
-				log.Print("using Vault role in utilized AWS authentication engine with the same name as the current utilized AWS IAM Role")
-			}
+	}
+	// default aws mount path and role
+	if engine == awsIam {
+		if len(awsMountPath) == 0 {
+			log.Print("using default AWS authentication mount path at 'aws'")
+			awsMountPath = "aws"
+		}
+		if len(awsRole) == 0 {
+			log.Print("using Vault role in utilized AWS authentication engine with the same name as the current utilized AWS IAM Role")
 		}
 	}
 
