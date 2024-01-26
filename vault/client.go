@@ -48,9 +48,14 @@ func NewVaultConfig() (*vaultConfig, error) {
 	// validate insecure
 	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
 	if err != nil {
-		// no value specified so default to false
+		// no value specified so assign based on address
 		if len(os.Getenv("VAULT_SKIP_VERIFY")) == 0 {
-			insecure = false
+			// https --> false
+			if address[0:5] == "https" {
+				insecure = false
+			} else { // http --> true
+				insecure = true
+			}
 		} else { // assigned value could not be converted to boolean
 			log.Printf("invalid boolean value %s for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
 			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
