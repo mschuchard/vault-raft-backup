@@ -16,10 +16,10 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigDefault.address != "http://127.0.0.1:8200" || vaultConfigDefault.insecure == true || vaultConfigDefault.engine != awsIam || len(vaultConfigDefault.token) != 0 || vaultConfigDefault.awsMountPath != "aws" || len(vaultConfigDefault.awsRole) != 0 || len(vaultConfigDefault.snapshotPath) != 0 {
+	if vaultConfigDefault.address != "http://127.0.0.1:8200" || vaultConfigDefault.insecure == false || vaultConfigDefault.engine != awsIam || len(vaultConfigDefault.token) != 0 || vaultConfigDefault.awsMountPath != "aws" || len(vaultConfigDefault.awsRole) != 0 || len(vaultConfigDefault.snapshotPath) != 0 {
 		test.Error("vault config default constructor did not initialize with expected values")
 		test.Errorf("address expected: http://127.0.0.1:8200, actual: %s", vaultConfigDefault.address)
-		test.Errorf("insecure expected: false, actual: %t", vaultConfigDefault.insecure)
+		test.Errorf("insecure expected: true, actual: %t", vaultConfigDefault.insecure)
 		test.Errorf("engine expected: aws, actual: %v", vaultConfigDefault.engine)
 		test.Errorf("token expected: (empty), actual: %s", vaultConfigDefault.token)
 		test.Errorf("aws mount path expected: aws, actual: %s", vaultConfigDefault.awsMountPath)
@@ -28,8 +28,7 @@ func TestNewVaultConfig(test *testing.T) {
 	}
 
 	// setup env for custom constructor inputs with token
-	os.Setenv("VAULT_ADDR", "http://127.0.0.1:8234")
-	os.Setenv("VAULT_SKIP_VERIFY", "true")
+	os.Setenv("VAULT_ADDR", "https://127.0.0.1:8234")
 	os.Setenv("VAULT_AUTH_ENGINE", "token")
 	os.Setenv("VAULT_TOKEN", util.VaultToken)
 	vaultConfigToken, err := NewVaultConfig()
@@ -38,10 +37,10 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigToken.address != "http://127.0.0.1:8234" || vaultConfigToken.insecure == false || vaultConfigToken.engine != vaultToken || vaultConfigToken.token != util.VaultToken || len(vaultConfigToken.awsMountPath) != 0 || len(vaultConfigToken.awsRole) != 0 || len(vaultConfigToken.snapshotPath) != 0 {
+	if vaultConfigToken.address != "https://127.0.0.1:8234" || vaultConfigToken.insecure == true || vaultConfigToken.engine != vaultToken || vaultConfigToken.token != util.VaultToken || len(vaultConfigToken.awsMountPath) != 0 || len(vaultConfigToken.awsRole) != 0 || len(vaultConfigToken.snapshotPath) != 0 {
 		test.Error("vault config token constructor did not initialize with expected values")
-		test.Errorf("address expected: http://127.0.0.1:8234, actual: %s", vaultConfigToken.address)
-		test.Errorf("insecure expected: true, actual: %t", vaultConfigToken.insecure)
+		test.Errorf("address expected: https://127.0.0.1:8234, actual: %s", vaultConfigToken.address)
+		test.Errorf("insecure expected: false, actual: %t", vaultConfigToken.insecure)
 		test.Errorf("engine expected: token, actual: %v", vaultConfigToken.engine)
 		test.Errorf("token expected: %s, actual: %s", util.VaultToken, vaultConfigToken.token)
 		test.Errorf("aws mount path expected: (empty), actual: %s", vaultConfigToken.awsMountPath)
@@ -50,6 +49,7 @@ func TestNewVaultConfig(test *testing.T) {
 	}
 
 	// setup env for custom constructor inputs with aws
+	os.Setenv("VAULT_SKIP_VERIFY", "true")
 	os.Setenv("VAULT_AUTH_ENGINE", "aws")
 	os.Setenv("VAULT_AWS_MOUNT", "gcp")
 	os.Setenv("VAULT_AWS_ROLE", "my_role")
@@ -59,9 +59,9 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigAWS.address != "http://127.0.0.1:8234" || vaultConfigAWS.insecure == false || vaultConfigAWS.engine != awsIam || vaultConfigAWS.token != util.VaultToken || vaultConfigAWS.awsMountPath != "gcp" || vaultConfigAWS.awsRole != "my_role" || len(vaultConfigAWS.snapshotPath) != 0 {
+	if vaultConfigAWS.address != "https://127.0.0.1:8234" || vaultConfigAWS.insecure == false || vaultConfigAWS.engine != awsIam || vaultConfigAWS.token != util.VaultToken || vaultConfigAWS.awsMountPath != "gcp" || vaultConfigAWS.awsRole != "my_role" || len(vaultConfigAWS.snapshotPath) != 0 {
 		test.Error("vault config aws constructor did not initialize with expected values")
-		test.Errorf("address expected: http://127.0.0.1:8234, actual: %s", vaultConfigAWS.address)
+		test.Errorf("address expected: https://127.0.0.1:8234, actual: %s", vaultConfigAWS.address)
 		test.Errorf("insecure expected: true, actual: %t", vaultConfigAWS.insecure)
 		test.Errorf("engine expected: aws, actual: %v", vaultConfigAWS.engine)
 		test.Errorf("token expected: %s, actual: %s", util.VaultToken, vaultConfigAWS.token)
@@ -98,7 +98,17 @@ func TestNewVaultConfig(test *testing.T) {
 }
 
 func TestNewVaultClient(test *testing.T) {
-	// test client with token auth
-
 	// test client with aws iam auth
+	vaultAWSConfig, _ := NewVaultConfig()
+	if _, err := NewVaultClient(vaultAWSConfig); err != errors.New("unable to login to AWS IAM auth method") {
+		test.Errorf("expected error: unable to login to AWS IAM auth method, actual: %v", err)
+	}
+
+	// test client with token auth
+	os.Setenv("VAULT_ADDR", "http://127.0.0.1:8234")
+	os.Setenv("VAULT_TOKEN", util.VaultToken)
+	vaultTokenConfig, _ := NewVaultConfig()
+	if _, err := NewVaultClient(vaultTokenConfig); err != nil {
+		test.Error("client failed to initialize with basic token auth config information")
+	}
 }
