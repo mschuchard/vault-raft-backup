@@ -1,7 +1,6 @@
 package vault
 
 import (
-	"errors"
 	"os"
 	"testing"
 
@@ -71,28 +70,30 @@ func TestNewVaultConfig(test *testing.T) {
 	}
 
 	// test errors in reverse validation order
+	os.Setenv("VAULT_AUTH_ENGINE", "token")
 	os.Setenv("VAULT_TOKEN", "1234")
-	if _, err = NewVaultConfig(); err != errors.New("invalid vault token") {
+	if _, err = NewVaultConfig(); err.Error() != "invalid vault token" {
 		test.Errorf("expected error: invalid vault token, actual: %v", err)
 	}
 
 	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
-	if _, err = NewVaultConfig(); err != errors.New("invalid Vault authentication engine") {
+	if _, err = NewVaultConfig(); err.Error() != "invalid Vault authentication engine" {
 		test.Errorf("expected error: invalid Vault authentication engine, actual: %v", err)
 	}
 
 	os.Setenv("VAULT_AUTH_ENGINE", "")
-	if _, err = NewVaultConfig(); err != errors.New("unable to deduce authentication engine") {
+	if _, err = NewVaultConfig(); err.Error() != "unable to deduce authentication engine" {
 		test.Errorf("expected error: unable to deduce authentication engine, actual: %v", err)
 	}
 
+	os.Setenv("VAULT_AUTH_ENGINE", "aws")
 	os.Setenv("VAULT_SKIP_VERFIY", "not a boolean")
-	if _, err = NewVaultConfig(); err != errors.New("invalid VAULT_SKIP_VERIFY value") {
+	if _, err = NewVaultConfig(); err.Error() != "invalid VAULT_SKIP_VERIFY value" {
 		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %v", err)
 	}
 
 	os.Setenv("VAULT_ADDR", "file:///foo")
-	if _, err = NewVaultConfig(); err != nil {
+	if _, err = NewVaultConfig(); err == nil {
 		test.Error("expected error for invalid Vault server address, but none was returned")
 	}
 }
@@ -100,7 +101,7 @@ func TestNewVaultConfig(test *testing.T) {
 func TestNewVaultClient(test *testing.T) {
 	// test client with aws iam auth
 	vaultAWSConfig, _ := NewVaultConfig()
-	if _, err := NewVaultClient(vaultAWSConfig); err != errors.New("unable to login to AWS IAM auth method") {
+	if _, err := NewVaultClient(vaultAWSConfig); err.Error() != "unable to login to AWS IAM auth method" {
 		test.Errorf("expected error: unable to login to AWS IAM auth method, actual: %v", err)
 	}
 
