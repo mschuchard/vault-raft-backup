@@ -39,8 +39,14 @@ func NewVaultConfig() (*vaultConfig, error) {
 		address = "http://127.0.0.1:8200"
 	} else {
 		// vault address validation
-		if _, err := url.ParseRequestURI(address); err != nil {
+		if url, err := url.ParseRequestURI(address); err != nil || len(url.Scheme) == 0 || len(url.Host) == 0 {
 			log.Printf("%s is not a valid Vault server address", address)
+
+			// assign err if it is nil
+			if err == nil {
+				err = errors.New("invalid Vault server address")
+			}
+
 			return nil, err
 		}
 	}
@@ -57,7 +63,7 @@ func NewVaultConfig() (*vaultConfig, error) {
 				insecure = true
 			}
 		} else { // assigned value could not be converted to boolean
-			log.Printf("invalid boolean value %s for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
+			log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
 			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 		}
 	}
@@ -74,6 +80,7 @@ func NewVaultConfig() (*vaultConfig, error) {
 		// validate inputs specified for only one engine
 		if len(token) > 0 && (len(awsMountPath) > 0 || len(awsRole) > 0) {
 			log.Print("token and AWS mount path or AWS role were simultaneously specified; these are mutually exclusive options")
+			log.Print("intended authentication engine could not be determined from other parameters")
 			return nil, errors.New("unable to deduce authentication engine")
 		}
 		if len(token) == 0 {
