@@ -46,10 +46,11 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Errorf("aws role expected: (empty), actual: %s", vaultConfigToken.awsRole)
 		test.Errorf("snapshot path expected: (empty), actual: %s", vaultConfigToken.snapshotPath)
 	}
+	os.Setenv("VAULT_TOKEN", "")
+	os.Setenv("VAULT_AUTH_ENGINE", "")
 
 	// setup env for custom constructor inputs with aws
 	os.Setenv("VAULT_SKIP_VERIFY", "true")
-	os.Setenv("VAULT_AUTH_ENGINE", "aws")
 	os.Setenv("VAULT_AWS_MOUNT", "gcp")
 	os.Setenv("VAULT_AWS_ROLE", "my_role")
 	vaultConfigAWS, err := NewVaultConfig()
@@ -58,7 +59,7 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigAWS.address != "https://127.0.0.1:8234" || vaultConfigAWS.insecure == false || vaultConfigAWS.engine != awsIam || vaultConfigAWS.token != util.VaultToken || vaultConfigAWS.awsMountPath != "gcp" || vaultConfigAWS.awsRole != "my_role" || len(vaultConfigAWS.snapshotPath) != 0 {
+	if vaultConfigAWS.address != "https://127.0.0.1:8234" || vaultConfigAWS.insecure == false || vaultConfigAWS.engine != awsIam || len(vaultConfigAWS.token) > 0 || vaultConfigAWS.awsMountPath != "gcp" || vaultConfigAWS.awsRole != "my_role" || len(vaultConfigAWS.snapshotPath) != 0 {
 		test.Error("vault config aws constructor did not initialize with expected values")
 		test.Errorf("address expected: https://127.0.0.1:8234, actual: %s", vaultConfigAWS.address)
 		test.Errorf("insecure expected: true, actual: %t", vaultConfigAWS.insecure)
@@ -70,32 +71,34 @@ func TestNewVaultConfig(test *testing.T) {
 	}
 
 	// test errors in reverse validation order
-	os.Setenv("VAULT_AUTH_ENGINE", "token")
 	os.Setenv("VAULT_TOKEN", "1234")
-	if _, err = NewVaultConfig(); err.Error() != "invalid vault token" {
+	os.Setenv("VAULT_AUTH_ENGINE", "token")
+	if _, err = NewVaultConfig(); err == nil || err.Error() != "invalid vault token" {
 		test.Errorf("expected error: invalid vault token, actual: %v", err)
 	}
 
 	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
-	if _, err = NewVaultConfig(); err.Error() != "invalid Vault authentication engine" {
+	if _, err = NewVaultConfig(); err == nil || err.Error() != "invalid Vault authentication engine" {
 		test.Errorf("expected error: invalid Vault authentication engine, actual: %v", err)
 	}
 
 	os.Setenv("VAULT_AUTH_ENGINE", "")
-	if _, err = NewVaultConfig(); err.Error() != "unable to deduce authentication engine" {
+	if _, err = NewVaultConfig(); err == nil || err.Error() != "unable to deduce authentication engine" {
 		test.Errorf("expected error: unable to deduce authentication engine, actual: %v", err)
 	}
+	os.Setenv("VAULT_TOKEN", "")
 
-	os.Setenv("VAULT_AUTH_ENGINE", "aws")
-	os.Setenv("VAULT_SKIP_VERFIY", "not a boolean")
-	if _, err = NewVaultConfig(); err.Error() != "invalid VAULT_SKIP_VERIFY value" {
+	os.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
+	if _, err = NewVaultConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
 		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %v", err)
 	}
+	os.Setenv("VAULT_SKIP_VERIFY", "")
 
 	os.Setenv("VAULT_ADDR", "file:///foo")
-	if _, err = NewVaultConfig(); err == nil {
+	if _, err = NewVaultConfig(); err == nil || err.Error() != "invalid Vault server address" {
 		test.Error("expected error for invalid Vault server address, but none was returned")
 	}
+	os.Setenv("VAULT_ADDR", "")
 }
 
 func TestNewVaultClient(test *testing.T) {
@@ -107,9 +110,11 @@ func TestNewVaultClient(test *testing.T) {
 
 	// test client with token auth
 	os.Setenv("VAULT_ADDR", "http://127.0.0.1:8234")
+	os.Setenv("VAULT_AUTH_ENGINE", "token")
 	os.Setenv("VAULT_TOKEN", util.VaultToken)
 	vaultTokenConfig, _ := NewVaultConfig()
 	if _, err := NewVaultClient(vaultTokenConfig); err != nil {
 		test.Error("client failed to initialize with basic token auth config information")
+		test.Error(err)
 	}
 }
