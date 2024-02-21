@@ -113,6 +113,15 @@ func NewVaultConfig() (*vaultConfig, error) {
 		}
 	}
 
+	// provide snapshot path default if unspecified
+	snapshotPath := os.Getenv("VAULT_SNAPSHOT_PATH")
+	if len(snapshotPath) == 0 {
+		log.Print("vault raft snapshot path defaulting to '/tmp/vault.bak'")
+
+		// assign default path in tmp-dir
+		snapshotPath = "/tmp/vault.bak"
+	}
+
 	// return initialized vault config
 	return &vaultConfig{
 		address:      address,
@@ -121,7 +130,7 @@ func NewVaultConfig() (*vaultConfig, error) {
 		token:        token,
 		awsMountPath: awsMountPath,
 		awsRole:      awsRole,
-		snapshotPath: os.Getenv("VAULT_SNAPSHOT_PATH"),
+		snapshotPath: snapshotPath,
 	}, nil
 }
 
