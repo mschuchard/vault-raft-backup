@@ -12,6 +12,9 @@ jobs:
     - run:
         name: build
         command: go build -v ./...
+    - run:
+        name: unit test
+        command: go test -v ./...
 
 workflows:
   execute_tests:
