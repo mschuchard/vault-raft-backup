@@ -11,13 +11,17 @@ import (
 
 // vault raft snapshot creation
 func VaultRaftSnapshot(client *vault.Client, snapshotPath string) (*os.File, error) {
-	// prepare snapshot file for content writing and defer closing
+	// prepare snapshot file for content writing
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		log.Printf("snapshot file at %s could not be created", snapshotPath)
 		return nil, err
 	}
-	defer util.SnapshotFileClose(snapshotFile)
+
+	// defer snapshot close
+	defer func() {
+		err = util.SnapshotFileClose(snapshotFile)
+	}()
 
 	// execute raft snapshot to file
 	err = client.Sys().RaftSnapshot(snapshotFile)
@@ -26,5 +30,5 @@ func VaultRaftSnapshot(client *vault.Client, snapshotPath string) (*os.File, err
 		return nil, err
 	}
 
-	return snapshotFile, nil
+	return snapshotFile, err
 }

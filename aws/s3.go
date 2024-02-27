@@ -30,13 +30,16 @@ func NewAWSConfig() (*AWSConfig, error) {
 
 // snapshot upload to aws s3
 func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.UploadOutput, error) {
-	// open snapshot file and defer closing
+	// open snapshot file
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {
 		log.Printf("failed to open snapshot file %q: %v", snapshotPath, err)
 		return nil, err
 	}
-	defer util.SnapshotFileClose(snapshotFile)
+	// defer snapshot close
+	defer func() {
+		err = util.SnapshotFileClose(snapshotFile)
+	}()
 
 	// aws session in specified region
 	awsSession := session.Must(session.NewSession(&aws.Config{
@@ -62,5 +65,5 @@ func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.Upload
 	// output s3 uploader location info
 	log.Printf("Vault Raft snapshot uploaded to %s", aws.StringValue(&uploadResult.Location))
 
-	return uploadResult, nil
+	return uploadResult, err
 }
