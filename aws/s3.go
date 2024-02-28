@@ -39,6 +39,7 @@ func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.Upload
 	// defer snapshot close
 	defer func() {
 		err = util.SnapshotFileClose(snapshotFile)
+		err = util.SnapshotFileRemove(snapshotFile)
 	}()
 
 	// aws session in specified region
