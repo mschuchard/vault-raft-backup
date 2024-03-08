@@ -43,3 +43,8 @@ export AWS_REGION=<aws region for client session>
 ```
 
 Additionally, AWS authentication must be provided with environment variables or other standard methods. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_PROFILE`, etc.).
+
+## Contributing
+Code should pass all unit and acceptance tests. New features should involve new unit tests.
+
+Please consult the GitHub Project for the current development roadmap.
