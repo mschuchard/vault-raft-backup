@@ -45,6 +45,7 @@ export VAULT_AWS_MOUNT=<vault aws auth engine mount path>
 # default: empty
 export VAULT_AWS_ROLE=<vault aws authentication role>
 # default: <tempdir>/vault.bak
+# NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
 export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
 # required
 export S3_BUCKET=<name of s3 bucket for snapshot transfer and storage>

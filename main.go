@@ -36,7 +36,8 @@ func main() {
 
 	// upload snapshot to aws s3
 	_, err = aws.SnapshotS3Upload(awsConfig, snapshotFile.Name())
-	if err != nil {
+	if err != nil && err.Error() != "snapshot not found" && err.Error() != "snapshot not removed" {
+		// not an error from failed removal so error is actually fatal
 		log.Print("S3 upload failed")
 		log.Fatal(err)
 	}
