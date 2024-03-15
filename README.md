@@ -51,11 +51,9 @@ export S3_BUCKET=<name of s3 bucket for snapshot transfer and storage>
 # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
 # default: empty
 export S3_PREFIX=<snapshot filename prefix during s3 transfer>
-# required
-export AWS_REGION=<aws region for client session>
 ```
 
-Additionally, AWS authentication must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_PROFILE` config file, environment variables, etc.).
+Additionally, AWS authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.).
 
 ## Contributing
 Code should pass all unit and acceptance tests. New features should involve new unit tests.

@@ -24,7 +24,6 @@ func NewAWSConfig() (*AWSConfig, error) {
 	return &AWSConfig{
 		s3Bucket: os.Getenv("S3_BUCKET"),
 		s3Prefix: os.Getenv("S3_PREFIX"),
-		s3Region: os.Getenv("AWS_REGION"),
 	}, nil
 }
 
@@ -42,9 +41,9 @@ func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.Upload
 		err = util.SnapshotFileRemove(snapshotFile)
 	}()
 
-	// aws session in specified region
-	awsSession := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(config.s3Region),
+	// aws session with configuration populated automatically
+	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
 	}))
 
 	// initialize an s3 uploader with the session and default options
