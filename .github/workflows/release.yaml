@@ -5,17 +5,39 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release-linux-amd64:
-    name: create linux amd64 release
+    name: create and publish vault-raft-backup release
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos:
+        - linux
+        - windows
+        - darwin
+        goarch:
+        - '386'
+        - amd64
+        - arm64
+        exclude:
+        - goos: darwin
+          goarch: '386'
+        - goos: linux
+          goarch: '386'
+        - goos: windows
+          goarch: arm64
     steps:
     - name: checkout
       uses: actions/checkout@v4
-    - uses: wangyoucao577/go-release-action@v1.22
+    - uses: wangyoucao577/go-release-action@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: linux
-        goarch: amd64
-        goversion: 1.21
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: go.mod
+        ldflags: '-s -w'
         overwrite: true
