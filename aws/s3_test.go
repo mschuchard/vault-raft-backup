@@ -22,3 +22,16 @@ func TestNewAWSConfig(test *testing.T) {
 		test.Errorf("expected prefix value: my_prefix, actual: %s", awsConfig.s3Prefix)
 	}
 }
+
+func TestSnapshotS3Upload(test *testing.T) {
+	// test this fails at s3upload
+	_, err := os.Create("foo")
+	if err != nil {
+		test.Error("test short-circuited because file could not be created and opened")
+	}
+	awsConfig := &AWSConfig{s3Bucket: "my_bucket"}
+
+	if _, err := SnapshotS3Upload(awsConfig, "foo"); err == nil || err.Error() != "MissingRegion: could not find region configuration" {
+		test.Errorf("expected error: MissingRegion: could not find region configuration, actual: %v", err)
+	}
+}
