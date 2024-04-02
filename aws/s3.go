@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,13 +17,19 @@ import (
 type AWSConfig struct {
 	s3Bucket string
 	s3Prefix string
-	s3Region string
 }
 
 // aws config constructor
 func NewAWSConfig() (*AWSConfig, error) {
+	// validate s3 bucket name input
+	s3Bucket := os.Getenv("S3_BUCKET")
+	if len(s3Bucket) == 0 {
+		return nil, errors.New("empty s3 bucket input setting")
+	}
+
+	// return constructor
 	return &AWSConfig{
-		s3Bucket: os.Getenv("S3_BUCKET"),
+		s3Bucket: s3Bucket,
 		s3Prefix: os.Getenv("S3_PREFIX"),
 	}, nil
 }
