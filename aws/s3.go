@@ -14,13 +14,13 @@ import (
 )
 
 // AWSConfig defines aws client api interaction
-type AWSConfig struct {
+type awsConfig struct {
 	s3Bucket string
 	s3Prefix string
 }
 
 // aws config constructor
-func NewAWSConfig() (*AWSConfig, error) {
+func NewAWSConfig() (*awsConfig, error) {
 	// validate s3 bucket name input
 	s3Bucket := os.Getenv("S3_BUCKET")
 	if len(s3Bucket) == 0 {
@@ -29,14 +29,14 @@ func NewAWSConfig() (*AWSConfig, error) {
 	}
 
 	// return constructor
-	return &AWSConfig{
+	return &awsConfig{
 		s3Bucket: s3Bucket,
 		s3Prefix: os.Getenv("S3_PREFIX"),
 	}, nil
 }
 
 // snapshot upload to aws s3
-func SnapshotS3Upload(config *AWSConfig, snapshotPath string) (*s3manager.UploadOutput, error) {
+func SnapshotS3Upload(config *awsConfig, snapshotPath string) (*s3manager.UploadOutput, error) {
 	// open snapshot file
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {

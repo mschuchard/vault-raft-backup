@@ -29,7 +29,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 	if err != nil {
 		test.Error("test short-circuited because file could not be created and opened")
 	}
-	awsConfig := &AWSConfig{s3Bucket: "my_bucket"}
+	awsConfig := &awsConfig{s3Bucket: "my_bucket"}
 
 	if _, err := SnapshotS3Upload(awsConfig, "foo"); err == nil || err.Error() != "MissingRegion: could not find region configuration" {
 		test.Errorf("expected error: MissingRegion: could not find region configuration, actual: %v", err)
