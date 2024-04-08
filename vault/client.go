@@ -154,6 +154,17 @@ func NewVaultClient(config *vaultConfig) (*vault.Client, error) {
 		return nil, err
 	}
 
+	// verify vault is unsealed
+	sealStatus, err := client.Sys().SealStatus()
+	if err != nil {
+		log.Print("unable to verify that the Vault cluster is unsealed")
+		return nil, err
+	}
+	if sealStatus.Sealed {
+		log.Print("the Vault server cluster is sealed and no operations can be executed")
+		return nil, errors.New("vault sealed")
+	}
+
 	// determine authentication method
 	switch config.engine {
 	case vaultToken:

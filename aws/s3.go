@@ -24,6 +24,7 @@ func NewAWSConfig() (*AWSConfig, error) {
 	// validate s3 bucket name input
 	s3Bucket := os.Getenv("S3_BUCKET")
 	if len(s3Bucket) == 0 {
+		log.Print("the name of an AWS S3 bucket is required as an input parameter value")
 		return nil, errors.New("empty s3 bucket input setting")
 	}
 
