@@ -190,7 +190,8 @@ func NewVaultClient(config *vaultConfig) (*vault.Client, error) {
 		// utilize aws authentication with vault client
 		authInfo, err := client.Auth().Login(context.Background(), awsAuth)
 		if err != nil {
-			return nil, errors.New("unable to login to AWS IAM auth method")
+			log.Print("unable to authenticate to Vault via AWS IAM auth method")
+			return nil, err
 		}
 		if authInfo == nil {
 			return nil, errors.New("no auth info was returned after login")

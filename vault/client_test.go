@@ -2,6 +2,7 @@ package vault
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/mitodl/vault-raft-backup/util"
@@ -105,13 +106,14 @@ func TestNewVaultConfig(test *testing.T) {
 
 func TestNewVaultClient(test *testing.T) {
 	// test client with aws iam auth
+	os.Setenv("AWS_REGION", "us-west-1")
 	vaultAWSConfig, _ := NewVaultConfig()
-	if _, err := NewVaultClient(vaultAWSConfig); err.Error() != "unable to login to AWS IAM auth method" {
-		test.Errorf("expected error: unable to login to AWS IAM auth method, actual: %v", err)
+	if _, err := NewVaultClient(vaultAWSConfig); !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 
 	// test client with token auth
-	os.Setenv("VAULT_ADDR", "http://127.0.0.1:8234")
+	os.Setenv("VAULT_ADDR", "http://127.0.0.1:8200")
 	os.Setenv("VAULT_AUTH_ENGINE", "token")
 	os.Setenv("VAULT_TOKEN", util.VaultToken)
 	vaultTokenConfig, _ := NewVaultConfig()
