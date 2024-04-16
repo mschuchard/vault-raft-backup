@@ -106,9 +106,8 @@ func TestNewVaultConfig(test *testing.T) {
 
 func TestNewVaultClient(test *testing.T) {
 	// test client with aws iam auth
-	os.Setenv("AWS_REGION", "us-west-1")
 	vaultAWSConfig, _ := NewVaultConfig()
-	if _, err := NewVaultClient(vaultAWSConfig); !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	if _, err := NewVaultClient(vaultAWSConfig); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 
