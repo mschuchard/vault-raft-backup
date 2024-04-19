@@ -8,6 +8,36 @@ import (
 	"github.com/mitodl/vault-raft-backup/util"
 )
 
+var (
+	expectedDefaultConfig = vaultConfig{
+		address:      "http://127.0.0.1:8200",
+		insecure:     true,
+		engine:       awsIam,
+		token:        "",
+		awsMountPath: "aws",
+		awsRole:      "",
+		snapshotPath: "/tmp/vault.bak",
+	}
+	expectedTokenConfig = vaultConfig{
+		address:      "https://127.0.0.1:8234",
+		insecure:     false,
+		engine:       vaultToken,
+		token:        util.VaultToken,
+		awsMountPath: "",
+		awsRole:      "",
+		snapshotPath: "/tmp/my_vault.backup",
+	}
+	expectedAWSConfig = vaultConfig{
+		address:      "https://127.0.0.1:8234",
+		insecure:     true,
+		engine:       awsIam,
+		token:        "",
+		awsMountPath: "gcp",
+		awsRole:      "my_role",
+		snapshotPath: "/tmp/vault.bak",
+	}
+)
+
 func TestNewVaultConfig(test *testing.T) {
 	// test with defaults
 	vaultConfigDefault, err := NewVaultConfig()
@@ -16,15 +46,10 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigDefault.address != "http://127.0.0.1:8200" || vaultConfigDefault.insecure == false || vaultConfigDefault.engine != awsIam || len(vaultConfigDefault.token) != 0 || vaultConfigDefault.awsMountPath != "aws" || len(vaultConfigDefault.awsRole) != 0 || vaultConfigDefault.snapshotPath != "/tmp/vault.bak" {
+	if *vaultConfigDefault != expectedDefaultConfig {
 		test.Error("vault config default constructor did not initialize with expected values")
-		test.Errorf("address expected: http://127.0.0.1:8200, actual: %s", vaultConfigDefault.address)
-		test.Errorf("insecure expected: true, actual: %t", vaultConfigDefault.insecure)
-		test.Errorf("engine expected: aws, actual: %v", vaultConfigDefault.engine)
-		test.Errorf("token expected: (empty), actual: %s", vaultConfigDefault.token)
-		test.Errorf("aws mount path expected: aws, actual: %s", vaultConfigDefault.awsMountPath)
-		test.Errorf("aws role expected: (empty), actual: %s", vaultConfigDefault.awsRole)
-		test.Errorf("snapshot path expected: /tmp/vault.bak, actual: %s", vaultConfigDefault.snapshotPath)
+		test.Errorf("expected vault config values: %v", expectedDefaultConfig)
+		test.Errorf("actual vault config values: %v", *vaultConfigDefault)
 	}
 
 	// setup env for custom constructor inputs with token
@@ -38,15 +63,10 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigToken.address != "https://127.0.0.1:8234" || vaultConfigToken.insecure == true || vaultConfigToken.engine != vaultToken || vaultConfigToken.token != util.VaultToken || len(vaultConfigToken.awsMountPath) != 0 || len(vaultConfigToken.awsRole) != 0 || vaultConfigToken.snapshotPath != "/tmp/my_vault.backup" {
+	if *vaultConfigToken != expectedTokenConfig {
 		test.Error("vault config token constructor did not initialize with expected values")
-		test.Errorf("address expected: https://127.0.0.1:8234, actual: %s", vaultConfigToken.address)
-		test.Errorf("insecure expected: false, actual: %t", vaultConfigToken.insecure)
-		test.Errorf("engine expected: token, actual: %v", vaultConfigToken.engine)
-		test.Errorf("token expected: %s, actual: %s", util.VaultToken, vaultConfigToken.token)
-		test.Errorf("aws mount path expected: (empty), actual: %s", vaultConfigToken.awsMountPath)
-		test.Errorf("aws role expected: (empty), actual: %s", vaultConfigToken.awsRole)
-		test.Errorf("snapshot path expected: /tmp/my_vault.backup, actual: %s", vaultConfigToken.snapshotPath)
+		test.Errorf("expected vault config values: %v", expectedTokenConfig)
+		test.Errorf("actual vault config values: %v", *vaultConfigToken)
 	}
 	os.Setenv("VAULT_TOKEN", "")
 	os.Setenv("VAULT_AUTH_ENGINE", "")
@@ -62,15 +82,10 @@ func TestNewVaultConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	if vaultConfigAWS.address != "https://127.0.0.1:8234" || vaultConfigAWS.insecure == false || vaultConfigAWS.engine != awsIam || len(vaultConfigAWS.token) > 0 || vaultConfigAWS.awsMountPath != "gcp" || vaultConfigAWS.awsRole != "my_role" || vaultConfigDefault.snapshotPath != "/tmp/vault.bak" {
+	if *vaultConfigAWS != expectedAWSConfig {
 		test.Error("vault config aws constructor did not initialize with expected values")
-		test.Errorf("address expected: https://127.0.0.1:8234, actual: %s", vaultConfigAWS.address)
-		test.Errorf("insecure expected: true, actual: %t", vaultConfigAWS.insecure)
-		test.Errorf("engine expected: aws, actual: %v", vaultConfigAWS.engine)
-		test.Errorf("token expected: %s, actual: %s", util.VaultToken, vaultConfigAWS.token)
-		test.Errorf("aws mount path expected: gcp, actual: %s", vaultConfigAWS.awsMountPath)
-		test.Errorf("aws role expected: my_role, actual: %s", vaultConfigAWS.awsRole)
-		test.Errorf("snapshot path expected: /tmp/vault.bak, actual: %s", vaultConfigAWS.snapshotPath)
+		test.Errorf("expected vault config values: %v", expectedAWSConfig)
+		test.Errorf("actual vault config values: %v", *vaultConfigAWS)
 	}
 
 	// test errors in reverse validation order
@@ -106,17 +121,14 @@ func TestNewVaultConfig(test *testing.T) {
 
 func TestNewVaultClient(test *testing.T) {
 	// test client with aws iam auth
-	vaultAWSConfig, _ := NewVaultConfig()
-	if _, err := NewVaultClient(vaultAWSConfig); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	expectedAWSConfig.address = "http://127.0.0.1:8200"
+	if _, err := NewVaultClient(&expectedAWSConfig); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 
 	// test client with token auth
-	os.Setenv("VAULT_ADDR", "http://127.0.0.1:8200")
-	os.Setenv("VAULT_AUTH_ENGINE", "token")
-	os.Setenv("VAULT_TOKEN", util.VaultToken)
-	vaultTokenConfig, _ := NewVaultConfig()
-	if _, err := NewVaultClient(vaultTokenConfig); err != nil {
+	expectedTokenConfig.address = "http://127.0.0.1:8200"
+	if _, err := NewVaultClient(&expectedTokenConfig); err != nil {
 		test.Error("client failed to initialize with basic token auth config information")
 		test.Error(err)
 	}
