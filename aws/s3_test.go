@@ -27,7 +27,7 @@ func TestNewAWSConfig(test *testing.T) {
 	}
 	if *config != expectedConfig {
 		test.Errorf("expected aws config values: %v", expectedConfig)
-		test.Errorf("actual aws config value: %v", config)
+		test.Errorf("actual aws config value: %v", *config)
 	}
 }
 
