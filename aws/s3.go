@@ -36,17 +36,19 @@ func NewAWSConfig() (*awsConfig, error) {
 }
 
 // snapshot upload to aws s3
-func SnapshotS3Upload(config *awsConfig, snapshotPath string) (*s3manager.UploadOutput, error) {
+func SnapshotS3Upload(config *awsConfig, snapshotPath string, cleanup bool) (*s3manager.UploadOutput, error) {
 	// open snapshot file
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {
 		log.Printf("failed to open snapshot file %q: %v", snapshotPath, err)
 		return nil, err
 	}
-	// defer snapshot close
+	// defer snapshot close and remove
 	defer func() {
 		err = util.SnapshotFileClose(snapshotFile)
-		err = util.SnapshotFileRemove(snapshotFile)
+		if cleanup {
+			err = util.SnapshotFileRemove(snapshotFile)
+		}
 	}()
 
 	// aws session with configuration populated automatically
