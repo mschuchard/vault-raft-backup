@@ -7,24 +7,24 @@ import (
 )
 
 type VaultConfig struct {
-	Address      string `hcl:"address"`
-	Insecure     bool   `hcl:"insecure"`
-	Engine       string `hcl:"auth_engine"`
-	Token        string `hcl:"token"`
-	AWSMountPath string `hcl:"aws_mount_path"`
-	AWSRole      string `hcl:"aws_role"`
-	SnapshotPath string `hcl:"snapshot_path"`
+	Address      string `hcl:"address,optional"`
+	Insecure     bool   `hcl:"insecure,optional"`
+	Engine       string `hcl:"auth_engine,optional"`
+	Token        string `hcl:"token,optional"`
+	AWSMountPath string `hcl:"aws_mount_path,optional"`
+	AWSRole      string `hcl:"aws_role,optional"`
+	SnapshotPath string `hcl:"snapshot_path,optional"`
 }
 
 type AWSConfig struct {
 	S3Bucket string `hcl:"s3_bucket"`
-	S3Prefix string `hcl:"s3_prefix"`
+	S3Prefix string `hcl:"s3_prefix,optional"`
 }
 
 type Config struct {
 	AWSConfig       *AWSConfig   `hcl:"aws_config,block"`
-	VaultConfig     *VaultConfig `hcl:"vault_config"`
-	SnapshotCleanup bool         `hcl:"snapshot_cleanup"`
+	VaultConfig     *VaultConfig `hcl:"vault_config,block"`
+	SnapshotCleanup bool         `hcl:"snapshot_cleanup,optional"`
 }
 
 func HclDecodeConfig(filePath string) (*Config, error) {
