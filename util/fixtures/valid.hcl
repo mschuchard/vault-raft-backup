@@ -1,11 +1,11 @@
 vault_config {
-  address = "https://127.0.0.1"
-  insecure = true
-  auth_engine = token
-  token = "foobar"
+  address        = "https://127.0.0.1"
+  insecure       = true
+  auth_engine    = "token"
+  token          = "foobar"
   aws_mount_path = "azure"
-  aws_role = "me"
-  snapshot_path = "/path/to/vault.bak"
+  aws_role       = "me"
+  snapshot_path  = "/path/to/vault.bak"
 }
 
 aws_config {
