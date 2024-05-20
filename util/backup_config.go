@@ -56,7 +56,7 @@ func OSImportConfig() (*BackupConfig, error) {
 	cleanup, err := strconv.ParseBool(os.Getenv("SNAPSHOT_CLEANUP"))
 	if err != nil {
 		log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", os.Getenv("SNAPSHOT_CLEANUP"))
-		return nil, err
+		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
 	}
 
 	return &BackupConfig{
@@ -64,7 +64,7 @@ func OSImportConfig() (*BackupConfig, error) {
 			S3Bucket: os.Getenv("S3_BUCKET"),
 			S3Prefix: os.Getenv("S3_PREFIX"),
 		},
-		VaultConfig:     &VaultConfig{
+		VaultConfig: &VaultConfig{
 			Address:      os.Getenv("VAULT_ADDR"),
 			Insecure:     insecure,
 			Engine:       os.Getenv("VAULT_AUTH_ENGINE"),
