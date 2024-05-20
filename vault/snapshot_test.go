@@ -17,5 +17,5 @@ func TestVaultRaftSnapshot(test *testing.T) {
 		test.Error("vault raft snapshot file was not actually created")
 	}
 
-	os.Remove("vault.bak")
+	os.Remove("./vault.bak")
 }
