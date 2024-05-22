@@ -1,4 +1,4 @@
-module github.com/mitodl/vault-raft-backup
+module github.com/mschuchard/vault-raft-backup
 
 go 1.21
 

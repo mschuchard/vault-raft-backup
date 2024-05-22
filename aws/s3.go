@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
-	"github.com/mitodl/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 // snapshot upload to aws s3

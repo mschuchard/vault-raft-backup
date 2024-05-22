@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/mitodl/vault-raft-backup/aws"
-	"github.com/mitodl/vault-raft-backup/vault"
+	"github.com/mschuchard/vault-raft-backup/aws"
+	"github.com/mschuchard/vault-raft-backup/vault"
 )
 
 func main() {

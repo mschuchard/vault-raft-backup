@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mitodl/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 var (
