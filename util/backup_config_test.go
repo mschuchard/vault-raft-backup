@@ -7,7 +7,7 @@ import (
 )
 
 func TestHclDecodeConfig(test *testing.T) {
-	config, err := HclDecodeConfig("fixtures/valid.hcl")
+	config, err := hclDecodeConfig("fixtures/valid.hcl")
 	if err != nil {
 		test.Error("the valid hcl file did not decode properly")
 		test.Error(err)
@@ -38,14 +38,14 @@ func TestHclDecodeConfig(test *testing.T) {
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
 
-	_, err = HclDecodeConfig("fixtures/invalid.hcl")
+	_, err = hclDecodeConfig("fixtures/invalid.hcl")
 	if err == nil || err.Error() != "fixtures/invalid.hcl:2,3-11: Unsupported argument; An argument named \"does_not\" is not expected here." {
 		test.Error("the invalid hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
 }
 
-func TestImportConfig(test *testing.T) {
+func TestOSImportConfig(test *testing.T) {
 	os.Setenv("S3_BUCKET", "my_bucket")
 	os.Setenv("S3_PREFIX", "my_prefix")
 	os.Setenv("VAULT_ADDR", "https://127.0.0.1:8234")
@@ -56,7 +56,7 @@ func TestImportConfig(test *testing.T) {
 	os.Setenv("VAULT_AWS_ROLE", "my_role")
 	os.Setenv("VAULT_SNAPSHOT_PATH", "/tmp/my_vault.backup")
 	os.Setenv("SNAPSHOT_CLEANUP", "true")
-	config, err := OSImportConfig()
+	config, err := osImportConfig()
 	awsConfig := config.AWSConfig
 	vaultConfig := config.VaultConfig
 	expectedAWSConfig := AWSConfig{
@@ -87,13 +87,13 @@ func TestImportConfig(test *testing.T) {
 	}
 
 	os.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
-	if _, err = OSImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
+	if _, err = osImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
 		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %s", err)
 	}
 	os.Setenv("VAULT_SKIP_VERIFY", "true")
 
 	os.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
-	if _, err = OSImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_CLEANUP value" {
+	if _, err = osImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_CLEANUP value" {
 		test.Errorf("expected error: invalid SNAPSHOT_CLEANUP value, actual: %s", err)
 	}
 }

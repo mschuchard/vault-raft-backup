@@ -24,14 +24,25 @@ type VaultConfig struct {
 	SnapshotPath string `hcl:"snapshot_path,optional"`
 }
 
+// while this is public to decode, the individual structs initialized from this are safely private
 type BackupConfig struct {
 	AWSConfig       *AWSConfig   `hcl:"aws_config,block"`
 	VaultConfig     *VaultConfig `hcl:"vault_config,block"`
 	SnapshotCleanup bool         `hcl:"snapshot_cleanup,optional"`
 }
 
+// config constructor
+func NewBackupConfig(filePath string) (*BackupConfig, error) {
+	// determine input structure and return accordingly
+	if len(filePath) == 0 {
+		return osImportConfig()
+	} else {
+		return hclDecodeConfig(filePath)
+	}
+}
+
 // decode hcl config file into vault raft backup config
-func HclDecodeConfig(filePath string) (*BackupConfig, error) {
+func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	// initialize config
 	var backupConfig BackupConfig
 	// decode hcl config file into vault raft backup config struct
@@ -44,7 +55,7 @@ func HclDecodeConfig(filePath string) (*BackupConfig, error) {
 }
 
 // import environment variables into vault raft backup config
-func OSImportConfig() (*BackupConfig, error) {
+func osImportConfig() (*BackupConfig, error) {
 	// import environment variables into vault raft backup config struct
 	// validate vault insecure
 	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
