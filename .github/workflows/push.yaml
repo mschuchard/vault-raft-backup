@@ -16,9 +16,15 @@ on:
 jobs:
   go-build:
     runs-on: ubuntu-22.04
-    container: golang:1.21-alpine
+    container: matthewschuchard/vault-api
     steps:
     - name: checkout
       uses: actions/checkout@v4
+    - name: install prereqs
+      run: apk add --no-cache --update build-base
     - name: build
-      run: go build -v ./...
+      run: make build
+    - name: bootstrap vault server
+      run: make bootstrap
+    - name: unit test
+      run: make unit

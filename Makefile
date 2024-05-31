@@ -17,6 +17,9 @@ bootstrap:
 	@nohup vault server -dev -dev-root-token-id="abcdefghijklmnopqrstuvwxyz09" &
 	@go test -v -run TestBootstrap ./util
 
+shutdown:
+	@killall vault
+
 install:
 	@go install .
 
