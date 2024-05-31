@@ -33,14 +33,14 @@ type BackupConfig struct {
 // decode hcl config file into vault raft backup config
 func HclDecodeConfig(filePath string) (*BackupConfig, error) {
 	// initialize config
-	var backupConfig *BackupConfig
+	var backupConfig BackupConfig
 	// decode hcl config file into vault raft backup config struct
-	err := hclsimple.DecodeFile(filePath, nil, backupConfig)
+	err := hclsimple.DecodeFile(filePath, nil, &backupConfig)
 	if err != nil {
 		log.Printf("the provided hcl config file at %s could not be parsed into a valid config for vault raft backup", filePath)
 	}
 
-	return backupConfig, err
+	return &backupConfig, err
 }
 
 // import environment variables into vault raft backup config
