@@ -6,17 +6,25 @@ import (
 	"strconv"
 
 	"github.com/mschuchard/vault-raft-backup/aws"
+	"github.com/mschuchard/vault-raft-backup/util"
 	"github.com/mschuchard/vault-raft-backup/vault"
 )
 
 func main() {
+	// construct vault raft backup config
+	backupConfig, err := util.NewBackupConfig("")
+	if err != nil {
+		log.Print("vault raft backup configuration failed validation")
+		log.Fatal(err)
+	}
+
 	// construct vault client config and aws client config
 	vaultConfig, err := vault.NewVaultConfig()
 	if err != nil {
 		log.Print("Vault configuration failed validation")
 		log.Fatal(err)
 	}
-	awsConfig, err := aws.NewAWSConfig()
+	awsConfig, err := aws.NewAWSConfig(backupConfig)
 	if err != nil {
 		log.Print("AWS configuration failed validation")
 		log.Fatal(err)

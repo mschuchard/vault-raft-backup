@@ -5,13 +5,22 @@ jobs:
   test:
     working_directory: /tmp/project
     docker:
-    - image: golang:1.21-alpine
+    - image: matthewschuchard/vault-api
     resource_class: small
     steps:
     - checkout
     - run:
+        name: install prereqs
+        command: apk add --no-cache --update build-base
+    - run:
         name: build
-        command: go build -v ./...
+        command: make build
+    - run:
+        name: bootstrap vault server
+        command: make bootstrap
+    - run:
+        name: unit test
+        command: make unit
 
 workflows:
   execute_tests:
