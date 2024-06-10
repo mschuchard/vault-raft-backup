@@ -3,7 +3,8 @@ package aws
 import (
 	"errors"
 	"log"
-	"os"
+
+	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 // AWSConfig defines aws client api interaction
@@ -13,17 +14,16 @@ type awsConfig struct {
 }
 
 // aws config constructor
-func NewAWSConfig() (*awsConfig, error) {
+func NewAWSConfig(backupConfig *util.BackupConfig) (*awsConfig, error) {
 	// validate s3 bucket name input
-	s3Bucket := os.Getenv("S3_BUCKET")
-	if len(s3Bucket) == 0 {
+	if len(backupConfig.AWSConfig.S3Bucket) == 0 {
 		log.Print("the name of an AWS S3 bucket is required as an input parameter value")
 		return nil, errors.New("empty s3 bucket input setting")
 	}
 
 	// return constructor
 	return &awsConfig{
-		s3Bucket: s3Bucket,
-		s3Prefix: os.Getenv("S3_PREFIX"),
+		s3Bucket: backupConfig.AWSConfig.S3Bucket,
+		s3Prefix: backupConfig.AWSConfig.S3Prefix,
 	}, nil
 }
