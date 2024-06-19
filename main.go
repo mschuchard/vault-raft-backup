@@ -24,7 +24,7 @@ func main() {
 		log.Print("Vault configuration failed validation")
 		log.Fatal(err)
 	}
-	awsConfig, err := aws.NewAWSConfig(backupConfig)
+	awsConfig, err := aws.NewAWSConfig(backupConfig.AWSConfig)
 	if err != nil {
 		log.Print("AWS configuration failed validation")
 		log.Fatal(err)
