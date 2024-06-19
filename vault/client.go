@@ -54,14 +54,10 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 
 	// validate insecure
 	insecure := backupVaultConfig.Insecure
-	// no value specified so assign based on address
-	if len(os.Getenv("VAULT_SKIP_VERIFY")) == 0 {
-		// https --> false
-		if address[0:5] == "https" {
-			insecure = false
-		} else { // http --> true
-			insecure = true
-		}
+	if !insecure && address[0:5] == "http:" {
+		log.Print("insecure input parameter was omitted or specified as false, and address protocol is http")
+		log.Print("insecure will be reset to value of true")
+		insecure = true
 	}
 
 	// initialize locals
@@ -69,12 +65,6 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 	token := backupVaultConfig.Token
 	awsMountPath := backupVaultConfig.AWSMountPath
 	awsRole := backupVaultConfig.AWSRole
-
-	// validate vault token
-	if engine == vaultToken && len(token) != 28 {
-		log.Print("the specified Vault Token is invalid")
-		return nil, errors.New("invalid vault token")
-	}
 
 	// determine vault auth engine if unspecified
 	if len(engine) == 0 {
@@ -98,6 +88,12 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 			log.Printf("%v was input as an authentication engine, but only token and aws are supported", engine)
 			return nil, errors.New("invalid Vault authentication engine")
 		}
+	}
+
+	// validate vault token
+	if engine == vaultToken && len(token) != 28 {
+		log.Print("the specified Vault Token is invalid")
+		return nil, errors.New("invalid vault token")
 	}
 
 	// default aws mount path and role

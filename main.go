@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"strconv"
 
 	"github.com/mschuchard/vault-raft-backup/aws"
 	"github.com/mschuchard/vault-raft-backup/util"
