@@ -6,10 +6,11 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strconv"
 
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/aws"
+
+	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 // authentication engine with pseudo-enum
@@ -32,9 +33,9 @@ type vaultConfig struct {
 }
 
 // vault config constructor
-func NewVaultConfig() (*vaultConfig, error) {
+func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 	// vault address default
-	address := os.Getenv("VAULT_ADDR")
+	address := backupVaultConfig.Address
 	if len(address) == 0 {
 		address = "http://127.0.0.1:8200"
 	} else {
@@ -52,28 +53,30 @@ func NewVaultConfig() (*vaultConfig, error) {
 	}
 
 	// validate insecure
-	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
-	if err != nil {
-		// no value specified so assign based on address
-		if len(os.Getenv("VAULT_SKIP_VERIFY")) == 0 {
-			// https --> false
-			if address[0:5] == "https" {
-				insecure = false
-			} else { // http --> true
-				insecure = true
-			}
-		} else { // assigned value could not be converted to boolean
-			log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
-			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
+	insecure := backupVaultConfig.Insecure
+	// no value specified so assign based on address
+	if len(os.Getenv("VAULT_SKIP_VERIFY")) == 0 {
+		// https --> false
+		if address[0:5] == "https" {
+			insecure = false
+		} else { // http --> true
+			insecure = true
 		}
 	}
 
-	// determine vault auth engine if unspecified
-	engine := authEngine(os.Getenv("VAULT_AUTH_ENGINE"))
-	token := os.Getenv("VAULT_TOKEN")
-	awsMountPath := os.Getenv("VAULT_AWS_MOUNT")
-	awsRole := os.Getenv("VAULT_AWS_ROLE")
+	// initialize locals
+	engine := authEngine(backupVaultConfig.Engine)
+	token := backupVaultConfig.Token
+	awsMountPath := backupVaultConfig.AWSMountPath
+	awsRole := backupVaultConfig.AWSRole
 
+	// validate vault token
+	if engine == vaultToken && len(token) != 28 {
+		log.Print("the specified Vault Token is invalid")
+		return nil, errors.New("invalid vault token")
+	}
+
+	// determine vault auth engine if unspecified
 	if len(engine) == 0 {
 		log.Print("authentication engine for Vault not specified; using logic from other parameters to assist with determination")
 
@@ -97,11 +100,6 @@ func NewVaultConfig() (*vaultConfig, error) {
 		}
 	}
 
-	// validate vault token
-	if engine == vaultToken && len(token) != 28 {
-		log.Print("the specified Vault Token is invalid")
-		return nil, errors.New("invalid vault token")
-	}
 	// default aws mount path and role
 	if engine == awsIam {
 		if len(awsMountPath) == 0 {
@@ -114,7 +112,7 @@ func NewVaultConfig() (*vaultConfig, error) {
 	}
 
 	// provide snapshot path default if unspecified
-	snapshotPath := os.Getenv("VAULT_SNAPSHOT_PATH")
+	snapshotPath := backupVaultConfig.SnapshotPath
 	if len(snapshotPath) == 0 {
 		// assign default path in tmp-dir
 		snapshotPath = os.TempDir() + "/vault.bak"
