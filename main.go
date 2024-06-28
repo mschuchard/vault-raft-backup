@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/mschuchard/vault-raft-backup/aws"
@@ -9,8 +10,11 @@ import (
 )
 
 func main() {
+	// cli flag for hcl config file path
+	hclConfigPath := flag.String("-c", "", "path to hcl file for backup configuration")
+
 	// construct vault raft backup config
-	backupConfig, err := util.NewBackupConfig("")
+	backupConfig, err := util.NewBackupConfig(*hclConfigPath)
 	if err != nil {
 		log.Print("vault raft backup configuration failed validation")
 		log.Fatal(err)

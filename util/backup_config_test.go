@@ -7,7 +7,7 @@ import (
 )
 
 func TestHclDecodeConfig(test *testing.T) {
-	config, err := hclDecodeConfig("fixtures/valid.hcl")
+	config, err := NewBackupConfig("fixtures/valid.hcl")
 	if err != nil {
 		test.Error("the valid hcl file did not decode properly")
 		test.Error(err)
@@ -56,7 +56,7 @@ func TestOSImportConfig(test *testing.T) {
 	os.Setenv("VAULT_AWS_ROLE", "my_role")
 	os.Setenv("VAULT_SNAPSHOT_PATH", "/tmp/my_vault.backup")
 	os.Setenv("SNAPSHOT_CLEANUP", "true")
-	config, err := osImportConfig()
+	config, err := NewBackupConfig("")
 	awsConfig := config.AWSConfig
 	vaultConfig := config.VaultConfig
 	expectedAWSConfig := AWSConfig{
