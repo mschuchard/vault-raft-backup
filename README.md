@@ -1,6 +1,6 @@
 ## vault-raft-backup
 
-Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3. This plugin's code at `HEAD` is currently tested against Vault version 1.14.10. The most recent release was tested against 1.14.10.
+Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3. This plugin's code at `HEAD` is currently tested against Vault version 1.15.6. The most recent release was tested against 1.15.6.
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
@@ -26,7 +26,13 @@ path "sys/storage/raft/snapshot" {
 
 ### Usage
 
-The following environment variables are read for configuration of the backup tool. This usage is due to the expectation that this tool will be executed as part of automation e.g. pipeline, service, orchestrator, etc. This is also because some inputs are sensitive, and therefore should be constrained to in-process memory.
+Vault Raft Backup can be configured with either environment variables or a HCL2 config file.
+
+Additionally, AWS authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.).
+
+#### Environment Variables
+
+The following environment variables are read for the configuration of the backup tool.
 
 ```
 # equivalent to VAULT_ADDR with vault cli executable
@@ -44,7 +50,7 @@ export VAULT_TOKEN=<vault authentication token>
 export VAULT_AWS_MOUNT=<vault aws auth engine mount path>
 # default: empty
 export VAULT_AWS_ROLE=<vault aws authentication role>
-# default: <tempdir>/vault.bak
+# default: <tmpdir>/vault.bak
 # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
 export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
 # required
@@ -52,9 +58,49 @@ export S3_BUCKET=<name of s3 bucket for snapshot transfer and storage>
 # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
 # default: empty
 export S3_PREFIX=<snapshot filename prefix during s3 transfer>
+# determines whether or not the local snapshot file is removed after a successful transfer to the final storage location
+# default: true
+export SNAPSHOT_CLEANUP=<boolean>
 ```
 
-Additionally, AWS authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.).
+#### HCL2 Config File
+
+The HCL2 config file path is passed to the `vault-raft-backup` executable via the `-c` command line argument (e.g. `vault-raft-backup -c config.hcl`). The schema can be viewed below.
+
+```hcl2
+vault_config {
+  # equivalent to VAULT_ADDR with vault cli executable
+  # default: http://127.0.0.1:8200
+  address        = <vault server cluster address>
+  # equivalent to VAULT_SKIP_VERIFY with vault cli executable
+  # default: false
+  insecure       = <boolean>
+  # default: determined based on other inputs
+  auth_engine    = <token | aws>
+  # equivalent to VAULT_TOKEN with vault cli executable
+  # default: empty
+  token          = <vault authentication token>
+  # default: aws
+  aws_mount_path = <vault aws auth engine mount path>
+  # default: empty
+  aws_role       = <vault aws authentication role>
+  # default: <tmpdir>/vault.bak
+  # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
+  snapshot_path  = <path to local filesystem for snapshot staging>
+}
+
+aws_config {
+  # required
+  s3_bucket = <name of s3 bucket for snapshot transfer and storage>
+  # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
+  # default: empty
+  s3_prefix = <snapshot filename prefix during s3 transfer>
+}
+
+# determines whether or not the local snapshot file is removed after a successful transfer to the final storage location
+# default: true
+snapshot_cleanup = <boolean>
+```
 
 ## Contributing
 Code should pass all unit and acceptance tests. New features should involve new unit tests.

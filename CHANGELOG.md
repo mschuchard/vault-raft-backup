@@ -1,4 +1,4 @@
-### 1.1.0 (Next)
+### 1.1.0
 - Convert local snapshot cleanup from forced to optional.
 - Enable configuration via HCL file.
 
