@@ -24,4 +24,7 @@ install:
 	@go install .
 
 unit:
-	@go test -v ./...
+	@go test -v ./aws ./util ./vault
+
+accept:
+	@go test -v .
