@@ -4,6 +4,8 @@ Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated s
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
+Statically linked binaries for various operating systems and processor architectures are available at the Github releases page (see link in the right column).
+
 ### Prerequsities
 
 If executing as an ad-hoc compile and run (i.e. `go run`), then the dependencies and requirements can be viewed in the [go.mod](go.mod) file. Additional setup requirements are as follows:
@@ -16,7 +18,7 @@ If executing as an ad-hoc compile and run (i.e. `go run`), then the dependencies
 - Authentication and authorization against an AWS account for listing, reading, and writing objects to a S3 bucket.
 - A S3 bucket capable of storing the snapshot.
 
-The Vault policy for executing Raft snapshots appears like:
+The Vault policy for authorizing the execution of Raft snapshots appears like:
 
 ```hcl
 path "sys/storage/raft/snapshot" {

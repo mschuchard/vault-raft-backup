@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// cli flag for hcl config file path
-	hclConfigPath := flag.String("-c", "", "path to hcl file for backup configuration")
+	hclConfigPath := flag.String("c", "", "path to hcl file for backup configuration")
 	flag.Parse()
 
 	// construct vault raft backup config
