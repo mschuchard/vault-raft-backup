@@ -1,5 +1,6 @@
 ### 1.1.1 (Next)
 - Fix invalid CLI argument character for HCL file value.
+- Fix empty env settings for insecure and cleanup.
 
 ### 1.1.0
 - Convert local snapshot cleanup from forced to optional.

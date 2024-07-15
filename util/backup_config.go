@@ -35,7 +35,7 @@ type BackupConfig struct {
 func NewBackupConfig(filePath string) (*BackupConfig, error) {
 	// determine input structure and return accordingly
 	if len(filePath) == 0 {
-		return osImportConfig()
+		return envImportConfig()
 	} else {
 		return hclDecodeConfig(filePath)
 	}
@@ -55,18 +55,22 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 }
 
 // import environment variables into vault raft backup config
-func osImportConfig() (*BackupConfig, error) {
+func envImportConfig() (*BackupConfig, error) {
 	// import environment variables into vault raft backup config struct
 	// validate vault insecure
-	insecure, err := strconv.ParseBool(os.Getenv("VAULT_SKIP_VERIFY"))
-	if err != nil { // assigned value could not be converted to boolean
-		log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", os.Getenv("VAULT_SKIP_VERIFY"))
+	insecureEnv := os.Getenv("VAULT_SKIP_VERIFY")
+	insecure, err := strconv.ParseBool(insecureEnv)
+	if err != nil && len(insecureEnv) > 0 { // assigned value could not be converted to boolean
+		log.Print(err)
+		log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", insecureEnv)
 		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 	}
 	// validate snapshot cleanup
-	cleanup, err := strconv.ParseBool(os.Getenv("SNAPSHOT_CLEANUP"))
-	if err != nil {
-		log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", os.Getenv("SNAPSHOT_CLEANUP"))
+	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
+	cleanup, err := strconv.ParseBool(cleanupEnv)
+	if err != nil && len(cleanupEnv) > 0 { // assigned value could not be converted to boolean
+		log.Print(err)
+		log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", cleanupEnv)
 		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
 	}
 

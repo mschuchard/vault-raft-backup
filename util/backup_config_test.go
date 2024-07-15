@@ -56,7 +56,13 @@ func TestOSImportConfig(test *testing.T) {
 	os.Setenv("VAULT_AWS_ROLE", "my_role")
 	os.Setenv("VAULT_SNAPSHOT_PATH", "/tmp/my_vault.backup")
 	os.Setenv("SNAPSHOT_CLEANUP", "true")
+
 	config, err := NewBackupConfig("")
+	if err != nil {
+		test.Error("vault raft backup config failed to construct from environment variables")
+		test.Error(err)
+	}
+
 	awsConfig := config.AWSConfig
 	vaultConfig := config.VaultConfig
 	expectedAWSConfig := AWSConfig{
@@ -72,12 +78,8 @@ func TestOSImportConfig(test *testing.T) {
 		AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
 		SnapshotPath: os.Getenv("VAULT_SNAPSHOT_PATH"),
 	}
-	if err != nil {
-		test.Error("vault raft backup config failed to construct from environment variables")
-		test.Error(err)
-	}
 	if *awsConfig != expectedAWSConfig || *vaultConfig != expectedVaultConfig || !config.SnapshotCleanup {
-		test.Error("imported config struct did not initialize with expected values")
+		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", *vaultConfig)
 		test.Errorf("expected aws: %v", expectedAWSConfig)
@@ -86,14 +88,13 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
 
-	os.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
-	if _, err = osImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
-		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %s", err)
-	}
-	os.Setenv("VAULT_SKIP_VERIFY", "true")
-
 	os.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
-	if _, err = osImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_CLEANUP value" {
+	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_CLEANUP value" {
 		test.Errorf("expected error: invalid SNAPSHOT_CLEANUP value, actual: %s", err)
+	}
+
+	os.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
+	if _, err = envImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
+		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %s", err)
 	}
 }
