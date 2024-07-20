@@ -1,4 +1,4 @@
-### 1.1.1 (Next)
+### 1.1.1
 - Fix invalid CLI argument character for HCL file value.
 - Fix empty env settings for insecure and cleanup.
 
