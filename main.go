@@ -10,9 +10,16 @@ import (
 )
 
 func main() {
-	// cli flag for hcl config file path
+	// cli flags for hcl config file path and version
 	hclConfigPath := flag.String("c", "", "path to hcl file for backup configuration")
+	version := flag.Bool("version", false, "display current version")
 	flag.Parse()
+
+	// version output
+	if *version {
+		log.Print("1.1.2")
+		return
+	}
 
 	// construct vault raft backup config
 	backupConfig, err := util.NewBackupConfig(*hclConfigPath)
