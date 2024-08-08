@@ -110,8 +110,16 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 	// provide snapshot path default if unspecified
 	snapshotPath := backupVaultConfig.SnapshotPath
 	if len(snapshotPath) == 0 {
-		// assign default path in tmp-dir
-		snapshotPath = os.TempDir() + "/vault.bak"
+		// create random tmp file in tmp dir and then close it for later backup
+		snapshotTmpFile, err := os.CreateTemp(os.TempDir(), "vault*.bak")
+		if err != nil {
+			log.Printf("could not create a temporary file for the local snapshot file in the temporary directory '%s'", os.TempDir())
+			return nil, err
+		}
+		snapshotTmpFile.Close()
+
+		// assign to snapshot path config field member
+		snapshotPath = snapshotTmpFile.Name()
 		log.Printf("vault raft snapshot path defaulting to '%s'", snapshotPath)
 	}
 
