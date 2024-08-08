@@ -14,7 +14,7 @@ func VaultRaftSnapshot(client *vault.Client, snapshotPath string) (*os.File, err
 	// prepare snapshot file for content writing
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
-		log.Printf("snapshot file at %s could not be created or opened", snapshotPath)
+		log.Printf("snapshot file at '%s' could not be created or opened", snapshotPath)
 		return nil, err
 	}
 
@@ -29,6 +29,8 @@ func VaultRaftSnapshot(client *vault.Client, snapshotPath string) (*os.File, err
 		log.Print("Vault Raft snapshot creation failed")
 		return nil, err
 	}
+
+	log.Printf("snapshot file created on local filesystem at '%s'", snapshotFile.Name())
 
 	return snapshotFile, err
 }
