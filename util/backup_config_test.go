@@ -46,16 +46,29 @@ func TestHclDecodeConfig(test *testing.T) {
 }
 
 func TestOSImportConfig(test *testing.T) {
-	os.Setenv("S3_BUCKET", "my_bucket")
-	os.Setenv("S3_PREFIX", "my_prefix")
-	os.Setenv("VAULT_ADDR", "https://127.0.0.1:8234")
-	os.Setenv("VAULT_SKIP_VERIFY", "false")
-	os.Setenv("VAULT_AUTH_ENGINE", "token")
-	os.Setenv("VAULT_TOKEN", "abcdefg")
-	os.Setenv("VAULT_AWS_MOUNT", "gcp")
-	os.Setenv("VAULT_AWS_ROLE", "my_role")
-	os.Setenv("VAULT_SNAPSHOT_PATH", "/tmp/my_vault.backup")
-	os.Setenv("SNAPSHOT_CLEANUP", "true")
+	// source of truth for values
+	const (
+		bucket       string = "my_bucket"
+		prefix       string = "my_prefix"
+		addr         string = "https://127.0.0.1:8234"
+		skipVerify   string = "false"
+		authEngine   string = "token"
+		token        string = "abcdefg"
+		awsMount     string = "gcp"
+		awsRole      string = "my_role"
+		snapshotPath string = "/tmp/my_vault.backup"
+	)
+
+	os.Setenv("S3_BUCKET", bucket)
+	os.Setenv("S3_PREFIX", prefix)
+	os.Setenv("VAULT_ADDR", addr)
+	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
+	os.Setenv("VAULT_AUTH_ENGINE", authEngine)
+	os.Setenv("VAULT_TOKEN", token)
+	os.Setenv("VAULT_AWS_MOUNT", awsMount)
+	os.Setenv("VAULT_AWS_ROLE", awsRole)
+	os.Setenv("VAULT_SNAPSHOT_PATH", snapshotPath)
+	os.Setenv("SNAPSHOT_CLEANUP", "false")
 
 	config, err := NewBackupConfig("")
 	if err != nil {
@@ -66,25 +79,25 @@ func TestOSImportConfig(test *testing.T) {
 	awsConfig := config.AWSConfig
 	vaultConfig := config.VaultConfig
 	expectedAWSConfig := AWSConfig{
-		S3Bucket: os.Getenv("S3_BUCKET"),
-		S3Prefix: os.Getenv("S3_PREFIX"),
+		S3Bucket: bucket,
+		S3Prefix: prefix,
 	}
 	expectedVaultConfig := VaultConfig{
-		Address:      os.Getenv("VAULT_ADDR"),
+		Address:      addr,
 		Insecure:     false,
-		Engine:       os.Getenv("VAULT_AUTH_ENGINE"),
-		Token:        os.Getenv("VAULT_TOKEN"),
-		AWSMountPath: os.Getenv("VAULT_AWS_MOUNT"),
-		AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
-		SnapshotPath: os.Getenv("VAULT_SNAPSHOT_PATH"),
+		Engine:       authEngine,
+		Token:        token,
+		AWSMountPath: awsMount,
+		AWSRole:      awsRole,
+		SnapshotPath: snapshotPath,
 	}
-	if *awsConfig != expectedAWSConfig || *vaultConfig != expectedVaultConfig || !config.SnapshotCleanup {
+	if *awsConfig != expectedAWSConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup {
 		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", *vaultConfig)
 		test.Errorf("expected aws: %v", expectedAWSConfig)
 		test.Errorf("actual aws: %v", *awsConfig)
-		test.Error("expected snapshot cleanup: true")
+		test.Error("expected snapshot cleanup: false")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
 
