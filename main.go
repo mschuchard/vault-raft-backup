@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 
 	"github.com/mschuchard/vault-raft-backup/aws"
@@ -10,16 +9,8 @@ import (
 )
 
 func main() {
-	// cli flags for hcl config file path and version
-	hclConfigPath := flag.String("c", "", "path to hcl file for backup configuration")
-	version := flag.Bool("version", false, "display current version")
-	flag.Parse()
-
-	// version output
-	if *version {
-		log.Print("1.1.2")
-		return
-	}
+	// invoke cli parsing
+  hclConfigPath := util.Cli()
 
 	// construct vault raft backup config
 	backupConfig, err := util.NewBackupConfig(*hclConfigPath)
