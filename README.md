@@ -52,7 +52,7 @@ export VAULT_TOKEN=<vault authentication token>
 export VAULT_AWS_MOUNT=<vault aws auth engine mount path>
 # default: empty
 export VAULT_AWS_ROLE=<vault aws authentication role>
-# default: <tmpdir>/vault.bak
+# default: <tmpdir>/vault<\d+>.bak
 # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
 export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
 # required
@@ -86,7 +86,7 @@ vault_config {
   aws_mount_path = <vault aws auth engine mount path>
   # default: empty
   aws_role       = <vault aws authentication role>
-  # default: <tmpdir>/vault.bak
+  # default: <tmpdir>/vault<\d+>.bak
   # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
   snapshot_path  = <path to local filesystem for snapshot staging>
 }

@@ -1,4 +1,4 @@
-### 1.1.2 (Next)
+### 1.1.2
 - Add version flag
 - Add random number string to default snapshot filename suffix for uniqueness.
 
