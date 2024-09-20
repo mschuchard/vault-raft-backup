@@ -3,14 +3,14 @@ package main
 import (
 	"log"
 
-	"github.com/mschuchard/vault-raft-backup/aws"
+	"github.com/mschuchard/vault-raft-backup/storage"
 	"github.com/mschuchard/vault-raft-backup/util"
 	"github.com/mschuchard/vault-raft-backup/vault"
 )
 
 func main() {
 	// invoke cli parsing
-  hclConfigPath := util.Cli()
+	hclConfigPath := util.Cli()
 
 	// construct vault raft backup config
 	backupConfig, err := util.NewBackupConfig(*hclConfigPath)
@@ -25,7 +25,7 @@ func main() {
 		log.Print("Vault configuration failed validation")
 		log.Fatal(err)
 	}
-	awsConfig, err := aws.NewAWSConfig(backupConfig.AWSConfig)
+	awsConfig, err := storage.NewAWSConfig(backupConfig.AWSConfig)
 	if err != nil {
 		log.Print("AWS configuration failed validation")
 		log.Fatal(err)
@@ -46,7 +46,7 @@ func main() {
 	}
 
 	// upload snapshot to aws s3
-	_, err = aws.SnapshotS3Upload(awsConfig, snapshotFile.Name(), backupConfig.SnapshotCleanup)
+	_, err = storage.SnapshotS3Upload(awsConfig, snapshotFile.Name(), backupConfig.SnapshotCleanup)
 	if err != nil && err.Error() != "snapshot not found" && err.Error() != "snapshot not removed" {
 		// not an error from failed removal so error is actually fatal
 		log.Print("S3 upload failed")
