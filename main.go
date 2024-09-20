@@ -25,7 +25,7 @@ func main() {
 		log.Print("Vault configuration failed validation")
 		log.Fatal(err)
 	}
-	awsConfig, err := storage.NewAWSConfig(backupConfig.AWSConfig)
+	storageConfig, err := storage.NewConfig(backupConfig.AWSConfig)
 	if err != nil {
 		log.Print("AWS configuration failed validation")
 		log.Fatal(err)
@@ -46,7 +46,7 @@ func main() {
 	}
 
 	// upload snapshot to aws s3
-	_, err = storage.SnapshotS3Upload(awsConfig, snapshotFile.Name(), backupConfig.SnapshotCleanup)
+	_, err = storage.StorageTransfer(storageConfig, snapshotFile.Name(), backupConfig.SnapshotCleanup)
 	if err != nil && err.Error() != "snapshot not found" && err.Error() != "snapshot not removed" {
 		// not an error from failed removal so error is actually fatal
 		log.Print("S3 upload failed")
