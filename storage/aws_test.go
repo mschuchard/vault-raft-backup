@@ -19,13 +19,13 @@ var (
 )
 
 func TestNewAWSConfig(test *testing.T) {
-	_, err := NewAWSConfig(backupAWSConfig)
+	_, err := newAWSConfig(backupAWSConfig)
 	if err == nil || err.Error() != "empty s3 bucket input setting" {
 		test.Errorf("expected error: empty s3 bucket input setting, actual %v", err)
 	}
 
 	backupAWSConfig.S3Bucket = bucket
-	config, err := NewAWSConfig(backupAWSConfig)
+	config, err := newAWSConfig(backupAWSConfig)
 	if err != nil {
 		test.Errorf("constructor unexpectedly errored with %v", err)
 	}
@@ -43,7 +43,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 		test.Error("test short-circuited because file could not be created and opened")
 	}
 
-	if _, err := SnapshotS3Upload(&expectedConfig, "./foo", true); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	if _, err := snapshotS3Upload(&expectedConfig, "./foo", true); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 }

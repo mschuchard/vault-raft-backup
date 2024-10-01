@@ -20,7 +20,7 @@ type awsConfig struct {
 }
 
 // aws config constructor
-func NewAWSConfig(backupAWSConfig *util.AWSConfig) (*awsConfig, error) {
+func newAWSConfig(backupAWSConfig *util.AWSConfig) (*awsConfig, error) {
 	// validate s3 bucket name input
 	if len(backupAWSConfig.S3Bucket) == 0 {
 		log.Print("the name of an AWS S3 bucket is required as an input parameter value")
@@ -35,7 +35,7 @@ func NewAWSConfig(backupAWSConfig *util.AWSConfig) (*awsConfig, error) {
 }
 
 // snapshot upload to aws s3
-func SnapshotS3Upload(config *awsConfig, snapshotPath string, cleanup bool) (*s3manager.UploadOutput, error) {
+func snapshotS3Upload(config *awsConfig, snapshotPath string, cleanup bool) (*s3manager.UploadOutput, error) {
 	// open snapshot file
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {
