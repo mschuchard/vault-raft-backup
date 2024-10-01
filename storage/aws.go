@@ -2,9 +2,8 @@ package storage
 
 import (
 	"errors"
+	"io"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -35,21 +34,7 @@ func newAWSConfig(backupAWSConfig *util.AWSConfig) (*awsConfig, error) {
 }
 
 // snapshot upload to aws s3
-func snapshotS3Upload(config *awsConfig, snapshotPath string, cleanup bool) (*s3manager.UploadOutput, error) {
-	// open snapshot file
-	snapshotFile, err := os.Open(snapshotPath)
-	if err != nil {
-		log.Printf("failed to open snapshot file %q: %v", snapshotPath, err)
-		return nil, err
-	}
-	// defer snapshot close and remove
-	defer func() {
-		err = util.SnapshotFileClose(snapshotFile)
-		if cleanup {
-			err = util.SnapshotFileRemove(snapshotFile)
-		}
-	}()
-
+func snapshotS3Upload(config *awsConfig, snapshotFile io.Reader, snapshotName string) (*s3manager.UploadOutput, error) {
 	// aws session with configuration populated automatically
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -57,13 +42,11 @@ func snapshotS3Upload(config *awsConfig, snapshotPath string, cleanup bool) (*s3
 
 	// initialize an s3 uploader with the session and default options
 	uploader := s3manager.NewUploader(awsSession)
-	// determine vault backup base filename for s3 key
-	snapshotPathBase := filepath.Base(snapshotPath)
 
 	// upload the snapshot file to the s3 bucket at specified key
 	uploadResult, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(config.s3Bucket),
-		Key:    aws.String(config.s3Prefix + "-" + snapshotPathBase),
+		Key:    aws.String(snapshotName),
 		Body:   snapshotFile,
 	})
 	if err != nil {
