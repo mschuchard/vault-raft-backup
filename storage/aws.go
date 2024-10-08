@@ -10,7 +10,7 @@ import (
 )
 
 // snapshot upload to aws s3
-func snapshotS3Upload(config *storageConfig, snapshotFile io.Reader, snapshotName string) (*s3manager.UploadOutput, error) {
+func snapshotS3Upload(config *config, snapshotFile io.Reader, snapshotName string) (*s3manager.UploadOutput, error) {
 	// aws session with configuration populated automatically
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,

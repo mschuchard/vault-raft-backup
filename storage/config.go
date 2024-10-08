@@ -7,21 +7,21 @@ import (
 	"github.com/mschuchard/vault-raft-backup/util"
 )
 
-// storageConfig defines parameters for storage backend
-type storageConfig struct {
+// config defines parameters configured for storage backend
+type config struct {
 	object string
 	prefix string
 }
 
-func NewConfig(backupConfig *util.AWSConfig) (*storageConfig, error) {
+func NewConfig(backupConfig *util.AWSConfig) (*config, error) {
 	// validate s3 bucket name input
 	if len(backupConfig.S3Bucket) == 0 {
-		log.Print("the name of an AWS S3 bucket is required as an input parameter value")
-		return nil, errors.New("empty s3 bucket input setting")
+		log.Print("the name of a destination storage object is required as an input parameter value")
+		return nil, errors.New("empty storage object input setting")
 	}
 
 	// return constructor
-	return &storageConfig{
+	return &config{
 		object: backupConfig.S3Bucket,
 		prefix: backupConfig.S3Prefix,
 	}, nil

@@ -10,7 +10,7 @@ import (
 	"github.com/mschuchard/vault-raft-backup/util"
 )
 
-func StorageTransfer(config *storageConfig, snapshotPath string, cleanup bool) (*s3manager.UploadOutput, error) {
+func StorageTransfer(config *config, snapshotPath string, cleanup bool) (*s3manager.UploadOutput, error) {
 	// use supplied prefix and snapshot base filename for full name
 	snapshotName := config.prefix + "-" + filepath.Base(snapshotPath)
 
