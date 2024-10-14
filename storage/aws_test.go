@@ -16,7 +16,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 	defer fooFile.Close()
 	defer os.Remove("./foo")
 
-	if _, err := snapshotS3Upload(&expectedConfig, fooFile, "prefix-foo"); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	if _, err := snapshotS3Upload(object, fooFile, "prefix-foo"); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 }

@@ -10,7 +10,7 @@ import (
 )
 
 // snapshot upload to aws s3
-func snapshotS3Upload(config *config, snapshotFile io.Reader, snapshotName string) (*s3manager.UploadOutput, error) {
+func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName string) (*s3manager.UploadOutput, error) {
 	// aws session with configuration populated automatically
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -21,12 +21,12 @@ func snapshotS3Upload(config *config, snapshotFile io.Reader, snapshotName strin
 
 	// upload the snapshot file to the s3 bucket at specified key
 	uploadResult, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(config.object),
+		Bucket: aws.String(s3Bucket),
 		Key:    aws.String(snapshotName),
 		Body:   snapshotFile,
 	})
 	if err != nil {
-		log.Printf("Vault backup failed to upload to S3 bucket %s", config.object)
+		log.Printf("Vault backup failed to upload to S3 bucket %s", s3Bucket)
 		return nil, err
 	}
 
