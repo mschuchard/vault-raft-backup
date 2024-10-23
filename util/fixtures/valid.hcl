@@ -13,4 +13,9 @@ aws_config {
   s3_prefix = "prefix"
 }
 
+gcp_config {
+  cs_bucket = "my_bucket"
+  cs_prefix = "prefix"
+}
+
 snapshot_cleanup = true

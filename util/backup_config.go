@@ -9,11 +9,19 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
 
+// while these are public to decode, the individual structs initialized from this are safely private
+// storage configs
 type AWSConfig struct {
 	S3Bucket string `hcl:"s3_bucket"`
 	S3Prefix string `hcl:"s3_prefix,optional"`
 }
 
+type GCPConfig struct {
+	CSBucket string `hcl:"cs_bucket"`
+	CSPrefix string `hcl:"cs_prefix"`
+}
+
+// vault config
 type VaultConfig struct {
 	Address      string `hcl:"address,optional"`
 	Insecure     bool   `hcl:"insecure,optional"`
@@ -24,9 +32,10 @@ type VaultConfig struct {
 	SnapshotPath string `hcl:"snapshot_path,optional"`
 }
 
-// while this is public to decode, the individual structs initialized from this are safely private
+// overall vault raft backup config
 type BackupConfig struct {
 	AWSConfig       *AWSConfig   `hcl:"aws_config,block"`
+	GCPConfig       *GCPConfig   `hcl:"gcp_config,block"`
 	VaultConfig     *VaultConfig `hcl:"vault_config,block"`
 	SnapshotCleanup bool         `hcl:"snapshot_cleanup,optional"`
 }
