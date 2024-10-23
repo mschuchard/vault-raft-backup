@@ -30,5 +30,5 @@ func StorageTransfer(config *config, snapshotPath string, cleanup bool) (*s3mana
 	}()
 
 	// TODO: clobbers deferred err from snapshot close and remove
-	return snapshotS3Upload(config, snapshotFile, snapshotName)
+	return snapshotS3Upload(config.object, snapshotFile, snapshotName)
 }
