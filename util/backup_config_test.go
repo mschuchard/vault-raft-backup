@@ -14,6 +14,7 @@ func TestHclDecodeConfig(test *testing.T) {
 	}
 	vaultConfig := *config.VaultConfig
 	awsConfig := *config.AWSConfig
+	gcpConfig := *config.GCPConfig
 	expectedVaultConfig := VaultConfig{
 		Address:      "https://127.0.0.1",
 		Insecure:     true,
@@ -27,13 +28,19 @@ func TestHclDecodeConfig(test *testing.T) {
 		S3Bucket: "my_bucket",
 		S3Prefix: "prefix",
 	}
+	expectedGCPConfig := GCPConfig{
+		CSBucket: "my_bucket",
+		CSPrefix: "prefix",
+	}
 
-	if vaultConfig != expectedVaultConfig || awsConfig != expectedAWSConfig || !config.SnapshotCleanup {
+	if vaultConfig != expectedVaultConfig || awsConfig != expectedAWSConfig || gcpConfig != expectedGCPConfig || !config.SnapshotCleanup {
 		test.Error("decoded config struct did not contain expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", vaultConfig)
 		test.Errorf("expected aws: %v", expectedAWSConfig)
 		test.Errorf("actual aws: %v", awsConfig)
+		test.Errorf("expected gcp: %v", expectedGCPConfig)
+		test.Errorf("actual gcp: %v", gcpConfig)
 		test.Error("expected snapshot cleanup: true")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
