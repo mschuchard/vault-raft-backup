@@ -1,6 +1,6 @@
 ## vault-raft-backup
 
-Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3. This plugin's code at `HEAD` is currently tested against Vault version 1.15.6. The most recent release was tested against 1.15.6.
+Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3. This plugin's code at `HEAD` is currently tested against Vault version 1.16.3. The most recent release was tested against 1.15.6.
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
