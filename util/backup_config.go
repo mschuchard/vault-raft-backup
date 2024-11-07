@@ -88,6 +88,10 @@ func envImportConfig() (*BackupConfig, error) {
 			S3Bucket: os.Getenv("S3_BUCKET"),
 			S3Prefix: os.Getenv("S3_PREFIX"),
 		},
+		GCPConfig: &GCPConfig{
+			CSBucket: os.Getenv("CS_BUCKET"),
+			CSPrefix: os.Getenv("CS_PREFIX"),
+		},
 		VaultConfig: &VaultConfig{
 			Address:      os.Getenv("VAULT_ADDR"),
 			Insecure:     insecure,

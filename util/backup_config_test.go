@@ -68,6 +68,8 @@ func TestOSImportConfig(test *testing.T) {
 
 	os.Setenv("S3_BUCKET", bucket)
 	os.Setenv("S3_PREFIX", prefix)
+	os.Setenv("CS_BUCKET", bucket)
+	os.Setenv("CS_PREFIX", prefix)
 	os.Setenv("VAULT_ADDR", addr)
 	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
 	os.Setenv("VAULT_AUTH_ENGINE", authEngine)
@@ -85,9 +87,14 @@ func TestOSImportConfig(test *testing.T) {
 
 	awsConfig := config.AWSConfig
 	vaultConfig := config.VaultConfig
+	gcpConfig := config.GCPConfig
 	expectedAWSConfig := AWSConfig{
 		S3Bucket: bucket,
 		S3Prefix: prefix,
+	}
+	expectedGCPConfig := GCPConfig{
+		CSBucket: bucket,
+		CSPrefix: prefix,
 	}
 	expectedVaultConfig := VaultConfig{
 		Address:      addr,
@@ -98,7 +105,7 @@ func TestOSImportConfig(test *testing.T) {
 		AWSRole:      awsRole,
 		SnapshotPath: snapshotPath,
 	}
-	if *awsConfig != expectedAWSConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup {
+	if *awsConfig != expectedAWSConfig || *gcpConfig != expectedGCPConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup {
 		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", *vaultConfig)

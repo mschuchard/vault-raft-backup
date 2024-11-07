@@ -14,7 +14,7 @@ func Cli() *string {
 
 	// version output
 	if *version {
-		log.Print("1.1.2")
+		log.Print("1.2.0")
 		os.Exit(0)
 	}
 
