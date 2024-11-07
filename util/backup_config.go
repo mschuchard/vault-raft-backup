@@ -11,14 +11,10 @@ import (
 
 // while these are public to decode, the individual structs initialized from this are safely private
 // storage configs
-type AWSConfig struct {
-	S3Bucket string `hcl:"s3_bucket"`
-	S3Prefix string `hcl:"s3_prefix,optional"`
-}
-
-type GCPConfig struct {
-	CSBucket string `hcl:"cs_bucket"`
-	CSPrefix string `hcl:"cs_prefix"`
+type CloudConfig struct {
+	Container string `hcl:"container"`
+	Platform  string `hcl:"platform"`
+	Prefix    string `hcl:"prefix,optional"`
 }
 
 // vault config
@@ -34,8 +30,7 @@ type VaultConfig struct {
 
 // overall vault raft backup config
 type BackupConfig struct {
-	AWSConfig       *AWSConfig   `hcl:"aws_config,block"`
-	GCPConfig       *GCPConfig   `hcl:"gcp_config,block"`
+	CloudConfig     *CloudConfig `hcl:"cloud_config,block"`
 	VaultConfig     *VaultConfig `hcl:"vault_config,block"`
 	SnapshotCleanup bool         `hcl:"snapshot_cleanup,optional"`
 }
@@ -84,13 +79,10 @@ func envImportConfig() (*BackupConfig, error) {
 	}
 
 	return &BackupConfig{
-		AWSConfig: &AWSConfig{
-			S3Bucket: os.Getenv("S3_BUCKET"),
-			S3Prefix: os.Getenv("S3_PREFIX"),
-		},
-		GCPConfig: &GCPConfig{
-			CSBucket: os.Getenv("CS_BUCKET"),
-			CSPrefix: os.Getenv("CS_PREFIX"),
+		CloudConfig: &CloudConfig{
+			Container: os.Getenv("CONTAINER"),
+			Platform:  os.Getenv("PLATFORM"),
+			Prefix:    os.Getenv("PREFIX"),
 		},
 		VaultConfig: &VaultConfig{
 			Address:      os.Getenv("VAULT_ADDR"),

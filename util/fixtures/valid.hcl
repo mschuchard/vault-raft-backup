@@ -8,14 +8,10 @@ vault_config {
   snapshot_path  = "/path/to/vault.bak"
 }
 
-aws_config {
-  s3_bucket = "my_bucket"
-  s3_prefix = "prefix"
-}
-
-gcp_config {
-  cs_bucket = "my_bucket"
-  cs_prefix = "prefix"
+cloud_config {
+  container = "my_bucket"
+  platform  = "aws"
+  prefix    = "prefix"
 }
 
 snapshot_cleanup = true

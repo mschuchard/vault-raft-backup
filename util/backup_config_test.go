@@ -13,8 +13,7 @@ func TestHclDecodeConfig(test *testing.T) {
 		test.Error(err)
 	}
 	vaultConfig := *config.VaultConfig
-	awsConfig := *config.AWSConfig
-	gcpConfig := *config.GCPConfig
+	cloudConfig := *config.CloudConfig
 	expectedVaultConfig := VaultConfig{
 		Address:      "https://127.0.0.1",
 		Insecure:     true,
@@ -24,23 +23,18 @@ func TestHclDecodeConfig(test *testing.T) {
 		AWSRole:      "me",
 		SnapshotPath: "/path/to/vault.bak",
 	}
-	expectedAWSConfig := AWSConfig{
-		S3Bucket: "my_bucket",
-		S3Prefix: "prefix",
-	}
-	expectedGCPConfig := GCPConfig{
-		CSBucket: "my_bucket",
-		CSPrefix: "prefix",
+	expectedCloudConfig := CloudConfig{
+		Container: "my_bucket",
+		Platform:  "aws",
+		Prefix:    "prefix",
 	}
 
-	if vaultConfig != expectedVaultConfig || awsConfig != expectedAWSConfig || gcpConfig != expectedGCPConfig || !config.SnapshotCleanup {
+	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || !config.SnapshotCleanup {
 		test.Error("decoded config struct did not contain expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", vaultConfig)
-		test.Errorf("expected aws: %v", expectedAWSConfig)
-		test.Errorf("actual aws: %v", awsConfig)
-		test.Errorf("expected gcp: %v", expectedGCPConfig)
-		test.Errorf("actual gcp: %v", gcpConfig)
+		test.Errorf("expected aws: %v", expectedCloudConfig)
+		test.Errorf("actual aws: %v", cloudConfig)
 		test.Error("expected snapshot cleanup: true")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
@@ -56,6 +50,7 @@ func TestOSImportConfig(test *testing.T) {
 	// source of truth for values
 	const (
 		bucket       string = "my_bucket"
+		platform     string = "gcp"
 		prefix       string = "my_prefix"
 		addr         string = "https://127.0.0.1:8234"
 		skipVerify   string = "false"
@@ -66,10 +61,9 @@ func TestOSImportConfig(test *testing.T) {
 		snapshotPath string = "/tmp/my_vault.backup"
 	)
 
-	os.Setenv("S3_BUCKET", bucket)
-	os.Setenv("S3_PREFIX", prefix)
-	os.Setenv("CS_BUCKET", bucket)
-	os.Setenv("CS_PREFIX", prefix)
+	os.Setenv("CONTAINER", bucket)
+	os.Setenv("PLATFORM", platform)
+	os.Setenv("PREFIX", prefix)
 	os.Setenv("VAULT_ADDR", addr)
 	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
 	os.Setenv("VAULT_AUTH_ENGINE", authEngine)
@@ -85,16 +79,12 @@ func TestOSImportConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	awsConfig := config.AWSConfig
 	vaultConfig := config.VaultConfig
-	gcpConfig := config.GCPConfig
-	expectedAWSConfig := AWSConfig{
-		S3Bucket: bucket,
-		S3Prefix: prefix,
-	}
-	expectedGCPConfig := GCPConfig{
-		CSBucket: bucket,
-		CSPrefix: prefix,
+	cloudConfig := config.CloudConfig
+	expectedCloudConfig := CloudConfig{
+		Container: bucket,
+		Platform:  platform,
+		Prefix:    prefix,
 	}
 	expectedVaultConfig := VaultConfig{
 		Address:      addr,
@@ -105,12 +95,12 @@ func TestOSImportConfig(test *testing.T) {
 		AWSRole:      awsRole,
 		SnapshotPath: snapshotPath,
 	}
-	if *awsConfig != expectedAWSConfig || *gcpConfig != expectedGCPConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup {
+	if *cloudConfig != expectedCloudConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup {
 		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", *vaultConfig)
-		test.Errorf("expected aws: %v", expectedAWSConfig)
-		test.Errorf("actual aws: %v", *awsConfig)
+		test.Errorf("expected aws: %v", expectedCloudConfig)
+		test.Errorf("actual aws: %v", *cloudConfig)
 		test.Error("expected snapshot cleanup: false")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
