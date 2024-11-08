@@ -57,7 +57,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// validate a cloud config block was specified
-	if *backupConfig.CloudConfig == (CloudConfig{}) {
+	if backupConfig.CloudConfig == nil {
 		log.Print("the cloud_config block is required in the input configuration file")
 		return nil, errors.New("cloud_config block absent")
 	}
