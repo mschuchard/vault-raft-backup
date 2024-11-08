@@ -9,6 +9,7 @@ import (
 	"github.com/mschuchard/vault-raft-backup/util"
 )
 
+// unified function for interfacing with all snapshot storage transfers
 func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool) error {
 	// use supplied prefix and snapshot base filename for full name
 	snapshotName := config.Prefix + "-" + filepath.Base(snapshotPath)

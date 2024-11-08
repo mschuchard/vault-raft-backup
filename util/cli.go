@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// rudimentary cli for inputting hcl configuration file and emitting version
 func Cli() *string {
 	// cli flags for hcl config file path and version
 	hclConfigPath := flag.String("c", "", "path to hcl file for backup configuration")

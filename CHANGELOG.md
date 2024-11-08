@@ -1,3 +1,6 @@
+### 1.2.0 (Next)
+- Add GCP storage support.
+
 ### 1.1.2
 - Add version flag
 - Add random number string to default snapshot filename suffix for uniqueness.
