@@ -49,13 +49,20 @@ func NewBackupConfig(filePath string) (*BackupConfig, error) {
 func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	// initialize config
 	var backupConfig BackupConfig
+
 	// decode hcl config file into vault raft backup config struct
-	err := hclsimple.DecodeFile(filePath, nil, &backupConfig)
-	if err != nil {
+	if err := hclsimple.DecodeFile(filePath, nil, &backupConfig); err != nil {
 		log.Printf("the provided hcl config file at %s could not be parsed into a valid config for vault raft backup", filePath)
+		return nil, err
 	}
 
-	return &backupConfig, err
+	// validate a cloud config block was specified
+	if *backupConfig.CloudConfig == (CloudConfig{}) {
+		log.Print("the cloud_config block is required in the input configuration file")
+		return nil, errors.New("cloud_config block absent")
+	}
+
+	return &backupConfig, nil
 }
 
 // import environment variables into vault raft backup config
@@ -69,6 +76,7 @@ func envImportConfig() (*BackupConfig, error) {
 		log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", insecureEnv)
 		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 	}
+
 	// validate snapshot cleanup
 	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
 	cleanup, err := strconv.ParseBool(cleanupEnv)
@@ -78,10 +86,18 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
 	}
 
+	// validate container and platform were specified
+	container := os.Getenv("CONTAINER")
+	platform := os.Getenv("PLATFORM")
+	if len(container) == 0 || len(platform) == 0 {
+		log.Print("CONTAINER and PLATFORM are both required input values, and one or both was unspecified as an environment variable")
+		return nil, errors.New("environment variable absent")
+	}
+
 	return &BackupConfig{
 		CloudConfig: &CloudConfig{
-			Container: os.Getenv("CONTAINER"),
-			Platform:  os.Getenv("PLATFORM"),
+			Container: container,
+			Platform:  platform,
 			Prefix:    os.Getenv("PREFIX"),
 		},
 		VaultConfig: &VaultConfig{

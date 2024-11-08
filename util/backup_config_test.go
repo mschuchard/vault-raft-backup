@@ -44,6 +44,12 @@ func TestHclDecodeConfig(test *testing.T) {
 		test.Error("the invalid hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
+
+	_, err = hclDecodeConfig("fixtures/no_cloud_config.hcl")
+	if err == nil || err.Error() != "cloud_config block absent" {
+		test.Error("the no_cloud_config hcl file did not error, or errored unexpectedly")
+		test.Error(err)
+	}
 }
 
 func TestOSImportConfig(test *testing.T) {
@@ -103,6 +109,11 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual aws: %v", *cloudConfig)
 		test.Error("expected snapshot cleanup: false")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
+	}
+
+	os.Unsetenv("CONTAINER")
+	if _, err = envImportConfig(); err == nil || err.Error() != "environment variable absent" {
+		test.Errorf("expected error: environment variable absent, actual: %s", err)
 	}
 
 	os.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
