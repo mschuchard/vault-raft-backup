@@ -6,6 +6,8 @@ import vault "github.com/hashicorp/vault/api"
 const (
 	VaultAddress = "http://127.0.0.1:8200"
 	VaultToken   = "abcdefghijklmnopqrstuvwxyz09"
+	Container    = "my_bucket"
+	Prefix       = "prefix"
 )
 
 var (

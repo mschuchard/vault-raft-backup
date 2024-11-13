@@ -24,9 +24,9 @@ func TestHclDecodeConfig(test *testing.T) {
 		SnapshotPath: "/path/to/vault.bak",
 	}
 	expectedCloudConfig := CloudConfig{
-		Container: "my_bucket",
+		Container: Container,
 		Platform:  "aws",
-		Prefix:    "prefix",
+		Prefix:    Prefix,
 	}
 
 	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || !config.SnapshotCleanup {
@@ -55,9 +55,7 @@ func TestHclDecodeConfig(test *testing.T) {
 func TestOSImportConfig(test *testing.T) {
 	// source of truth for values
 	const (
-		bucket       string = "my_bucket"
 		platform     string = "gcp"
-		prefix       string = "my_prefix"
 		addr         string = "https://127.0.0.1:8234"
 		skipVerify   string = "false"
 		authEngine   string = "token"
@@ -67,9 +65,9 @@ func TestOSImportConfig(test *testing.T) {
 		snapshotPath string = "/tmp/my_vault.backup"
 	)
 
-	os.Setenv("CONTAINER", bucket)
+	os.Setenv("CONTAINER", Container)
 	os.Setenv("PLATFORM", platform)
-	os.Setenv("PREFIX", prefix)
+	os.Setenv("PREFIX", Prefix)
 	os.Setenv("VAULT_ADDR", addr)
 	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
 	os.Setenv("VAULT_AUTH_ENGINE", authEngine)
@@ -88,9 +86,9 @@ func TestOSImportConfig(test *testing.T) {
 	vaultConfig := config.VaultConfig
 	cloudConfig := config.CloudConfig
 	expectedCloudConfig := CloudConfig{
-		Container: bucket,
+		Container: Container,
 		Platform:  platform,
-		Prefix:    prefix,
+		Prefix:    Prefix,
 	}
 	expectedVaultConfig := VaultConfig{
 		Address:      addr,

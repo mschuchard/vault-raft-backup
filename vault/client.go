@@ -83,11 +83,9 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 			log.Print("token authentication will be utilized with the Vault client")
 			engine = vaultToken
 		}
-	} else { // validate engine if unspecified
-		if engine != awsIam && engine != vaultToken {
-			log.Printf("%v was input as an authentication engine, but only token and aws are supported", engine)
-			return nil, errors.New("invalid Vault authentication engine")
-		}
+	} else if engine != awsIam && engine != vaultToken { // validate engine if unspecified
+		log.Printf("%v was input as an authentication engine, but only token and aws are supported", engine)
+		return nil, errors.New("invalid Vault authentication engine")
 	}
 
 	// validate vault token

@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 func TestSnapshotS3Upload(test *testing.T) {
@@ -16,7 +18,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 	defer fooFile.Close()
 	defer os.Remove("./foo")
 
-	if err := snapshotS3Upload(object, fooFile, "prefix-foo"); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	if err := snapshotS3Upload(util.Container, fooFile, "prefix-foo"); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 }
