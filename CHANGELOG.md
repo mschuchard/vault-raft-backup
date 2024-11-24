@@ -1,4 +1,4 @@
-### 1.2.0 (Next)
+### 1.2.0
 - Add GCP storage support.
 
 ### 1.1.2

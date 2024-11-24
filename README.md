@@ -1,6 +1,6 @@
 ## vault-raft-backup
 
-Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3. This plugin's code at `HEAD` is currently tested against Vault version 1.16.3. The most recent release was tested against 1.15.6.
+Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3 or GCP Cloud Storage. This plugin's code at `HEAD` is currently tested against Vault version 1.16.3. The most recent release was tested against 1.15.6.
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
@@ -15,8 +15,8 @@ If executing as an ad-hoc compile and run (i.e. `go run`), then the dependencies
   - Authentication can be input in general as a token.
   - Authentication can also specified as AWS IAM. In this situation, the Vault server cluster must have a role configured and mapped to an AWS IAM role. This AWS IAM role authorization must also be accessible by the Vault Raft Backup tool somehow (e.g. tool executed on EC2 instance with appropriate IAM Instance profile corresponding to AWS IAM role).
 - A local filesystem with permissions and storage capable of staging the snapshot.
-- Authentication and authorization against an AWS account for listing, reading, and writing objects to a S3 bucket.
-- A S3 bucket capable of storing the snapshot.
+- Authentication and authorization against an AWS or GCP account for listing, reading, and writing objects to a S3 bucket or Cloud Storage bucket.
+- A S3 or Cloud Storage bucket capable of storing the snapshot.
 
 The Vault policy for authorizing the execution of Raft snapshots appears like:
 
@@ -30,13 +30,14 @@ path "sys/storage/raft/snapshot" {
 
 Vault Raft Backup can be configured with either environment variables or a HCL2 config file.
 
-Additionally, AWS authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.).
+Additionally, AWS or GCP authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.). The GCP Golang SDK behaves similarly for analogous authentication settings.
 
 #### Environment Variables
 
 The following environment variables are read for the configuration of the backup tool.
 
 ```
+# VAULT
 # equivalent to VAULT_ADDR with vault cli executable
 # default: http://127.0.0.1:8200
 export VAULT_ADDR=<vault server cluster address>
@@ -55,11 +56,17 @@ export VAULT_AWS_ROLE=<vault aws authentication role>
 # default: <tmpdir>/vault<\d+>.bak
 # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
 export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
+
+# CLOUD STORAGE
 # required
-export S3_BUCKET=<name of s3 bucket for snapshot transfer and storage>
+export CONTAINER=<name of cloud storage destination for snapshot transfer and storage>
+# required
+export PLATFORM=<aws or gcp>
 # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
 # default: empty
-export S3_PREFIX=<snapshot filename prefix during s3 transfer>
+export PREFIX=<snapshot filename prefix during storage transfer>
+
+# MISCELLANEOUS
 # determines whether or not the local snapshot file is removed after a successful transfer to the final storage location
 # default: true
 export SNAPSHOT_CLEANUP=<boolean>
@@ -91,12 +98,14 @@ vault_config {
   snapshot_path  = <path to local filesystem for snapshot staging>
 }
 
-aws_config {
+cloud_config {
   # required
-  s3_bucket = <name of s3 bucket for snapshot transfer and storage>
+  container = <name of s3 bucket for snapshot transfer and storage>
+  # required
+  platform  = <aws or gcp>
   # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
   # default: empty
-  s3_prefix = <snapshot filename prefix during s3 transfer>
+  prefix    = <snapshot filename prefix during storage transfer>
 }
 
 # determines whether or not the local snapshot file is removed after a successful transfer to the final storage location
