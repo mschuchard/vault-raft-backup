@@ -21,7 +21,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4
     - name: install prereqs
-      run: apk add --no-cache --update build-base
+      run: apk add --no-cache --update make
     - name: build
       run: make build
     - name: bootstrap vault server

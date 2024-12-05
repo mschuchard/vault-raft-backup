@@ -19,6 +19,13 @@ func Cli() *string {
 		os.Exit(0)
 	}
 
+	// verify config file existence
+	if len(*hclConfigPath) > 0 {
+		if _, err := os.Stat(*hclConfigPath); err != nil {
+			log.Fatalf("the config file at %s does not exist", *hclConfigPath)
+		}
+	}
+
 	// return path to hcl config file
 	return hclConfigPath
 }
