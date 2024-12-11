@@ -9,12 +9,20 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
 
+// platform with pseudo-enum
+type platform string
+
+const (
+	AWS platform = "aws"
+	GCP platform = "gcp"
+)
+
 // while these are public to decode, the individual structs initialized from this are safely private
 // storage configs
 type CloudConfig struct {
-	Container string `hcl:"container"`
-	Platform  string `hcl:"platform"`
-	Prefix    string `hcl:"prefix,optional"`
+	Container string   `hcl:"container"`
+	Platform  platform `hcl:"platform"`
+	Prefix    string   `hcl:"prefix,optional"`
 }
 
 // vault config
@@ -88,7 +96,7 @@ func envImportConfig() (*BackupConfig, error) {
 
 	// validate container and platform were specified
 	container := os.Getenv("CONTAINER")
-	platform := os.Getenv("PLATFORM")
+	platform := platform(os.Getenv("PLATFORM"))
 	if len(container) == 0 || len(platform) == 0 {
 		log.Print("CONTAINER and PLATFORM are both required input values, and one or both was unspecified as an environment variable")
 		return nil, errors.New("environment variable absent")

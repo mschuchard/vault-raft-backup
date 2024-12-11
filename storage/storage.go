@@ -31,9 +31,9 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 
 	// TODO: clobbers deferred err from snapshot close and remove
 	switch config.Platform {
-	case "aws":
+	case util.AWS:
 		return snapshotS3Upload(config.Container, snapshotFile, snapshotName)
-	case "gcp":
+	case util.GCP:
 		return snapshotCSUpload(config.Container, snapshotFile, snapshotName)
 	default:
 		log.Printf("an invalid cloud platform was specified: %s", config.Platform)
