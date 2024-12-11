@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"time"
 
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/aws"
@@ -108,8 +109,12 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 	// provide snapshot path default if unspecified
 	snapshotPath := backupVaultConfig.SnapshotPath
 	if len(snapshotPath) == 0 {
+		// create timestamp for default filename suffix
+		timestamp := time.Now().Local().Format("2006-01-02-150405")
+		defaultFilename := "vault-" + timestamp + "-*.bak"
+
 		// create random tmp file in tmp dir and then close it for later backup
-		snapshotTmpFile, err := os.CreateTemp(os.TempDir(), "vault*.bak")
+		snapshotTmpFile, err := os.CreateTemp(os.TempDir(), defaultFilename)
 		if err != nil {
 			log.Printf("could not create a temporary file for the local snapshot file in the temporary directory '%s'", os.TempDir())
 			return nil, err

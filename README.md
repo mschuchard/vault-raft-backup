@@ -1,6 +1,6 @@
 ## vault-raft-backup
 
-Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3 or GCP Cloud Storage. This plugin's code at `HEAD` is currently tested against Vault version 1.16.3. The most recent release was tested against 1.15.6.
+Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3 or GCP Cloud Storage. This plugin's code at `HEAD` is currently tested against Vault version 1.16.3. The most recent release was tested against 1.16.3.
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
@@ -53,7 +53,7 @@ export VAULT_TOKEN=<vault authentication token>
 export VAULT_AWS_MOUNT=<vault aws auth engine mount path>
 # default: empty
 export VAULT_AWS_ROLE=<vault aws authentication role>
-# default: <tmpdir>/vault<\d+>.bak
+# default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
 # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
 export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
 
@@ -93,7 +93,7 @@ vault_config {
   aws_mount_path = <vault aws auth engine mount path>
   # default: empty
   aws_role       = <vault aws authentication role>
-  # default: <tmpdir>/vault<\d+>.bak
+  # default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
   # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
   snapshot_path  = <path to local filesystem for snapshot staging>
 }
