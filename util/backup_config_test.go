@@ -25,7 +25,7 @@ func TestHclDecodeConfig(test *testing.T) {
 	}
 	expectedCloudConfig := CloudConfig{
 		Container: Container,
-		Platform:  "aws",
+		Platform:  AWS,
 		Prefix:    Prefix,
 	}
 
@@ -55,18 +55,18 @@ func TestHclDecodeConfig(test *testing.T) {
 func TestOSImportConfig(test *testing.T) {
 	// source of truth for values
 	const (
-		platform     string = "gcp"
-		addr         string = "https://127.0.0.1:8234"
-		skipVerify   string = "false"
-		authEngine   string = "token"
-		token        string = "abcdefg"
-		awsMount     string = "gcp"
-		awsRole      string = "my_role"
-		snapshotPath string = "/tmp/my_vault.backup"
+		platform     platform = GCP
+		addr         string   = "https://127.0.0.1:8234"
+		skipVerify   string   = "false"
+		authEngine   string   = "token"
+		token        string   = "abcdefg"
+		awsMount     string   = "gcp"
+		awsRole      string   = "my_role"
+		snapshotPath string   = "/tmp/my_vault.backup"
 	)
 
 	os.Setenv("CONTAINER", Container)
-	os.Setenv("PLATFORM", platform)
+	os.Setenv("PLATFORM", string(platform))
 	os.Setenv("PREFIX", Prefix)
 	os.Setenv("VAULT_ADDR", addr)
 	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
@@ -107,6 +107,11 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual aws: %v", *cloudConfig)
 		test.Error("expected snapshot cleanup: false")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
+	}
+
+	os.Setenv("PLATFORM", "foo")
+	if _, err := envImportConfig(); err == nil || err.Error() != "unsupported platform" {
+		test.Errorf("expected error: unsupported platform, actual: %s", err)
 	}
 
 	os.Unsetenv("CONTAINER")

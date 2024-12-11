@@ -70,6 +70,13 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, errors.New("cloud_config block absent")
 	}
 
+	// validate platform
+	platform := backupConfig.CloudConfig.Platform
+	if platform != AWS && platform != GCP {
+		log.Printf("PLATFORM %s is not supported", platform)
+		return nil, errors.New("unsupported platform")
+	}
+
 	return &backupConfig, nil
 }
 
@@ -100,6 +107,10 @@ func envImportConfig() (*BackupConfig, error) {
 	if len(container) == 0 || len(platform) == 0 {
 		log.Print("CONTAINER and PLATFORM are both required input values, and one or both was unspecified as an environment variable")
 		return nil, errors.New("environment variable absent")
+	}
+	if platform != AWS && platform != GCP {
+		log.Printf("PLATFORM %s is not supported", platform)
+		return nil, errors.New("unsupported platform")
 	}
 
 	return &BackupConfig{
