@@ -1,26 +1,32 @@
 package storage
 
 import (
+	"context"
 	"io"
 	"log"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 // snapshot upload to aws s3
 func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName string) error { //(*s3manager.UploadOutput, error) {
 	// aws session with configuration populated automatically
-	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
+	ctx := context.TODO()
+	config, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Print("failed to load AWS shared configuration and/or credentials")
+		return err
+	}
 
-	// initialize an s3 uploader with the session and default options
-	uploader := s3manager.NewUploader(awsSession)
+	// initialize a s3 uploader from the s3 client from the shared configuration
+	s3Client := s3.NewFromConfig(config)
+	s3Uploader := manager.NewUploader(s3Client)
 
 	// upload the snapshot file to the s3 bucket at specified key
-	uploadResult, err := uploader.Upload(&s3manager.UploadInput{
+	uploadResult, err := s3Uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s3Bucket),
 		Key:    aws.String(snapshotName),
 		Body:   snapshotFile,
@@ -31,7 +37,7 @@ func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName stri
 	}
 
 	// output s3 uploader location info
-	log.Printf("Vault Raft snapshot uploaded to %s", aws.StringValue(&uploadResult.Location))
+	log.Printf("Vault Raft snapshot uploaded to %s", uploadResult.Location)
 
 	return err
 	// return uploadResult, err

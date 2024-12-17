@@ -1,5 +1,6 @@
 ### 1.2.1 (Next)
 - Add timestamp suffix to default snapshot file name.
+- Migrate AWS storage support to SDK v2.
 
 ### 1.2.0
 - Add GCP storage support.
