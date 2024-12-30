@@ -17,6 +17,7 @@ func TestSnapshotFileClose(test *testing.T) {
 		test.Error("generic file failed to close")
 		test.Error(err)
 	}
+	os.Remove("foo")
 }
 
 func TestSnapshotFileRemove(test *testing.T) {
@@ -28,12 +29,18 @@ func TestSnapshotFileRemove(test *testing.T) {
 	if err := SnapshotFileRemove(genericFile); err != nil {
 		test.Error("failed to remove generic file")
 		test.Error(err)
+		os.Remove("foo")
 	}
 
-	// false positive probably because of race condition
-	/*if _, err := genericFile.Stat(); err == nil {
+	genericFile.Close()
+	if _, err = genericFile.Stat(); err == nil {
 		test.Error("validation that generic file was removed returned no path error")
-	}*/
+	}
+
+	if err = SnapshotFileRemove(genericFile); err == nil || err.Error() != "snapshot not found" {
+		test.Error("unexpected or no error returned")
+		test.Errorf("expected: snapshot not found, actual: %s", err)
+	}
 }
 
 // bootstrap vault server for testing
