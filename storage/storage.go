@@ -12,7 +12,7 @@ import (
 // unified function for interfacing with all snapshot storage transfers
 func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool) error {
 	// use supplied prefix and snapshot base filename for full name
-	snapshotName := config.Prefix + "-" + filepath.Base(snapshotPath)
+	snapshotName := config.Prefix + filepath.Base(snapshotPath)
 
 	// open snapshot file
 	snapshotFile, err := os.Open(snapshotPath)

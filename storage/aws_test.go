@@ -16,7 +16,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 	}
 	defer fooFile.Close()
 
-	if err := snapshotS3Upload(util.Container, fooFile, ""); err == nil || !strings.Contains(err.Error(), "get credentials: failed to refresh cached credentials") {
+	if err := snapshotS3Upload(util.Container, fooFile, "empty"); err == nil || !strings.Contains(err.Error(), "get credentials: failed to refresh cached credentials") {
 		test.Errorf("expected error (contains): get credentials: failed to refresh cached credentials, actual: %v", err)
 	}
 }
