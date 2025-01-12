@@ -1,4 +1,4 @@
-### 1.2.1 (Next)
+### 1.2.1
 - Add timestamp suffix to default snapshot file name.
 - Migrate AWS storage support to SDK v2.
 - Remove `-` after `prefix` in storage snapshot name.
