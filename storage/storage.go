@@ -35,6 +35,8 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 		err = snapshotS3Upload(config.Container, snapshotFile, snapshotName)
 	case util.GCP:
 		err = snapshotCSUpload(config.Container, snapshotFile, snapshotName)
+	case util.LOCAL:
+		err = snapshotFSCopy(config.Container, snapshotFile, snapshotName)
 	default:
 		log.Printf("an invalid cloud platform was specified: %s", config.Platform)
 		err = errors.New("invalid cloud platform")

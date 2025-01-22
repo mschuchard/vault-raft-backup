@@ -13,8 +13,9 @@ import (
 type platform string
 
 const (
-	AWS platform = "aws"
-	GCP platform = "gcp"
+	AWS   platform = "aws"
+	GCP   platform = "gcp"
+	LOCAL platform = "local"
 )
 
 // while these are public to decode, the individual structs initialized from this are safely private
@@ -72,7 +73,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 
 	// validate platform
 	platform := backupConfig.CloudConfig.Platform
-	if platform != AWS && platform != GCP {
+	if platform != AWS && platform != GCP && platform != LOCAL {
 		log.Printf("PLATFORM %s is not supported", platform)
 		return nil, errors.New("unsupported platform")
 	}
@@ -108,7 +109,7 @@ func envImportConfig() (*BackupConfig, error) {
 		log.Print("CONTAINER and PLATFORM are both required input values, and one or both was unspecified as an environment variable")
 		return nil, errors.New("environment variable absent")
 	}
-	if platform != AWS && platform != GCP {
+	if platform != AWS && platform != GCP && platform != LOCAL {
 		log.Printf("PLATFORM %s is not supported", platform)
 		return nil, errors.New("unsupported platform")
 	}
