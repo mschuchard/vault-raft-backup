@@ -38,6 +38,5 @@ func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName stri
 
 	// output s3 uploader location info
 	log.Printf("Vault Raft snapshot uploaded to %s with key %s", uploadResult.Location, *uploadResult.Key)
-
 	return err
 }

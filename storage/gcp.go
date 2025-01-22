@@ -42,5 +42,6 @@ func snapshotCSUpload(csBucket string, snapshotFile io.Reader, snapshotName stri
 		return err
 	}
 
+	log.Printf("Vault Raft snapshot successfully uploaded to %s bucket with name %s", csBucket, snapshotName)
 	return nil
 }
