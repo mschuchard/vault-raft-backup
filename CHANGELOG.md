@@ -1,3 +1,6 @@
+### 1.3.0 (Next)
+- Add local filesystem storage support.
+
 ### 1.2.1
 - Add timestamp suffix to default snapshot file name.
 - Migrate AWS storage support to SDK v2.
