@@ -13,6 +13,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 	fooFile, err := os.Open("../.gitignore")
 	if err != nil {
 		test.Error("test short-circuited because file could not be opened")
+		return
 	}
 	defer fooFile.Close()
 

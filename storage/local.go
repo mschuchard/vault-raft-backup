@@ -17,8 +17,8 @@ func snapshotFSCopy(directory string, snapshotFile io.Reader, snapshotName strin
 	}
 
 	// open output file
-	destination := directory + snapshotName
-	destinationWriter, err := os.Open(destination)
+	destination := directory + "/" + snapshotName
+	destinationWriter, err := os.OpenFile(destination, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		log.Printf("a destination file at %s could not be opened for streaming", destination)
 		return err
