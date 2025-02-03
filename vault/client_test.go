@@ -2,7 +2,6 @@ package vault
 
 import (
 	"os"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -32,7 +31,6 @@ var (
 		token:        util.VaultToken,
 		awsMountPath: "",
 		awsRole:      "",
-		snapshotPath: "/tmp/my_vault.backup",
 	}
 	backupVaultAWSConfig = &util.VaultConfig{
 		Address:      "https://127.0.0.1:8234",
@@ -59,12 +57,9 @@ func TestNewVaultConfig(test *testing.T) {
 	}
 
 	if *vaultConfigDefault != expectedDefaultConfig {
-		// regexp match for random vault raft snapshot tmp file
-		if matched, _ := regexp.MatchString(`/tmp/vault-\d{4}-\d{2}-\d{2}-\d{6}-\d+\.bak`, vaultConfigDefault.snapshotPath); !matched {
-			test.Error("vault config default constructor did not initialize with expected values")
-			test.Errorf("expected vault config values: %v", expectedDefaultConfig)
-			test.Errorf("actual vault config values: %v", *vaultConfigDefault)
-		}
+		test.Error("vault config default constructor did not initialize with expected values")
+		test.Errorf("expected vault config values: %v", expectedDefaultConfig)
+		test.Errorf("actual vault config values: %v", *vaultConfigDefault)
 	}
 
 	// test with token
@@ -88,12 +83,9 @@ func TestNewVaultConfig(test *testing.T) {
 	}
 
 	if *vaultConfigAWS != expectedAWSConfig {
-		// regexp match for random vault raft snapshot tmp file
-		if matched, _ := regexp.MatchString(`/tmp/vault-\d{4}-\d{2}-\d{2}-\d{6}-\d+\.bak`, vaultConfigDefault.snapshotPath); !matched {
-			test.Error("vault config aws constructor did not initialize with expected values")
-			test.Errorf("expected vault config values: %v", expectedAWSConfig)
-			test.Errorf("actual vault config values: %v", *vaultConfigAWS)
-		}
+		test.Error("vault config aws constructor did not initialize with expected values")
+		test.Errorf("expected vault config values: %v", expectedAWSConfig)
+		test.Errorf("actual vault config values: %v", *vaultConfigAWS)
 	}
 
 	// test errors in reverse validation order
