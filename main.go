@@ -22,21 +22,21 @@ func main() {
 	// construct vault client config
 	vaultConfig, err := vault.NewVaultConfig(backupConfig.VaultConfig)
 	if err != nil {
-		log.Print("Vault configuration failed validation")
+		log.Print("vault configuration failed validation")
 		log.Fatal(err)
 	}
 
 	// initialize and configure vault client
 	vaultClient, err := vault.NewVaultClient(vaultConfig)
 	if err != nil {
-		log.Print("Vault client initialization and configuration failed")
+		log.Print("vault client initialization and configuration failed")
 		log.Fatal(err)
 	}
 
 	// vault raft snapshot
-	snapshotFile, err := vault.VaultRaftSnapshot(vaultClient, vaultConfig.SnapshotPath())
+	snapshotFile, err := vault.VaultRaftSnapshot(vaultClient, backupConfig.VaultConfig.SnapshotPath)
 	if err != nil {
-		log.Print("Vault Raft snapshot failed")
+		log.Print("vault raft snapshot failed")
 		log.Fatal(err)
 	}
 

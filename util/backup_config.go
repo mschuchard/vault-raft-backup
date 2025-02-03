@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
@@ -60,7 +61,8 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	var backupConfig BackupConfig
 
 	// decode hcl config file into vault raft backup config struct
-	if err := hclsimple.DecodeFile(filePath, nil, &backupConfig); err != nil {
+	err := hclsimple.DecodeFile(filePath, nil, &backupConfig)
+	if err != nil {
 		log.Printf("the provided hcl config file at %s could not be parsed into a valid config for vault raft backup", filePath)
 		return nil, err
 	}
@@ -71,11 +73,10 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, errors.New("cloud_config block absent")
 	}
 
-	// validate platform
-	platform := backupConfig.CloudConfig.Platform
-	if platform != AWS && platform != GCP && platform != LOCAL {
-		log.Printf("PLATFORM %s is not supported", platform)
-		return nil, errors.New("unsupported platform")
+	// validate parameters and finalize snapshot path
+	backupConfig.VaultConfig.SnapshotPath, err = validateParameters(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.SnapshotPath)
+	if err != nil {
+		return nil, err
 	}
 
 	return &backupConfig, nil
@@ -109,9 +110,11 @@ func envImportConfig() (*BackupConfig, error) {
 		log.Print("CONTAINER and PLATFORM are both required input values, and one or both was unspecified as an environment variable")
 		return nil, errors.New("environment variable absent")
 	}
-	if platform != AWS && platform != GCP && platform != LOCAL {
-		log.Printf("PLATFORM %s is not supported", platform)
-		return nil, errors.New("unsupported platform")
+
+	// validate parameters and finalize snapshot path
+	snapshotPath, err := validateParameters(platform, os.Getenv("VAULT_SNAPSHOT_PATH"))
+	if err != nil {
+		return nil, err
 	}
 
 	return &BackupConfig{
@@ -127,8 +130,38 @@ func envImportConfig() (*BackupConfig, error) {
 			Token:        os.Getenv("VAULT_TOKEN"),
 			AWSMountPath: os.Getenv("VAULT_AWS_MOUNT"),
 			AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
-			SnapshotPath: os.Getenv("VAULT_SNAPSHOT_PATH"),
+			SnapshotPath: snapshotPath,
 		},
 		SnapshotCleanup: cleanup,
 	}, nil
+}
+
+// general parameter validation for both hcl2 and env inputs, and returns final snapshot path
+func validateParameters(platform platform, snapshotPath string) (string, error) {
+	// validate platform
+	if platform != AWS && platform != GCP && platform != LOCAL {
+		log.Printf("PLATFORM %s is not supported", platform)
+		return "", errors.New("unsupported platform")
+	}
+
+	// provide snapshot path default if unspecified
+	if len(snapshotPath) == 0 {
+		// create timestamp for default filename suffix
+		timestamp := time.Now().Local().Format("2006-01-02-150405")
+		defaultFilename := "vault-" + timestamp + "-*.bak"
+
+		// create random tmp file in tmp dir and then close it for later backup
+		snapshotTmpFile, err := os.CreateTemp(os.TempDir(), defaultFilename)
+		if err != nil {
+			log.Printf("could not create a temporary file for the local snapshot file in the temporary directory '%s'", os.TempDir())
+			return "", err
+		}
+		snapshotTmpFile.Close()
+
+		// assign to snapshot path config field member
+		snapshotPath = snapshotTmpFile.Name()
+		log.Printf("vault raft snapshot path defaulting to '%s'", snapshotPath)
+	}
+
+	return snapshotPath, nil
 }
