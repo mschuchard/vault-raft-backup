@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"regexp"
 
 	"testing"
 )
@@ -127,5 +128,23 @@ func TestOSImportConfig(test *testing.T) {
 	os.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
 	if _, err = envImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
 		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %s", err)
+	}
+}
+
+func TestValidateParameters(test *testing.T) {
+	if _, err := validateParameters("invalid", "/tmp"); err == nil || err.Error() != "unsupported platform" {
+		test.Error("did not error as expected with unsupported platform input parameter")
+		test.Errorf("expected: unsupported platform, actual: %s", err)
+	}
+
+	snapshotPath, err := validateParameters(GCP, "")
+	if err != nil {
+		test.Error("errored with valid input parameters")
+		test.Error(err)
+	}
+	// regexp match for random vault raft snapshot tmp file
+	if matched, _ := regexp.MatchString(`/tmp/vault-\d{4}-\d{2}-\d{2}-\d{6}-\d+\.bak`, snapshotPath); !matched {
+		test.Error("default snapshot path is not of expected format")
+		test.Errorf("expected default snapshot path: /tmp/vault-<datetime>.bak, actual: %s", snapshotPath)
 	}
 }
