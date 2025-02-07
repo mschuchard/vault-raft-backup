@@ -12,8 +12,8 @@ func TestStorageTransfer(test *testing.T) {
 		test.Error(err)
 	}
 
-	if err := StorageTransfer(&util.CloudConfig{Platform: "doesnotexist"}, "../.gitignore", false); err == nil || err.Error() != "invalid cloud platform" {
+	if err := StorageTransfer(&util.CloudConfig{Platform: "doesnotexist"}, "../.gitignore", false); err == nil || err.Error() != "invalid storage platform" {
 		test.Error("unexpected or no error returned")
-		test.Errorf("expected: invalid cloud platform, actual: %s", err)
+		test.Errorf("expected: invalid storage platform, actual: %s", err)
 	}
 }

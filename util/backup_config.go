@@ -89,8 +89,8 @@ func envImportConfig() (*BackupConfig, error) {
 	insecureEnv := os.Getenv("VAULT_SKIP_VERIFY")
 	insecure, err := strconv.ParseBool(insecureEnv)
 	if err != nil && len(insecureEnv) > 0 { // assigned value could not be converted to boolean
-		log.Print(err)
 		log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", insecureEnv)
+		log.Print(err)
 		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 	}
 
@@ -98,8 +98,8 @@ func envImportConfig() (*BackupConfig, error) {
 	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
 	cleanup, err := strconv.ParseBool(cleanupEnv)
 	if err != nil && len(cleanupEnv) > 0 { // assigned value could not be converted to boolean
-		log.Print(err)
 		log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", cleanupEnv)
+		log.Print(err)
 		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
 	}
 

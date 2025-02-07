@@ -1,5 +1,6 @@
 ### 1.3.0 (Next)
 - Add local filesystem storage support.
+- Improve Vault client configuration.
 
 ### 1.2.1
 - Add timestamp suffix to default snapshot file name.
