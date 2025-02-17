@@ -20,18 +20,8 @@ const (
 	vaultToken authEngine = "token"
 )
 
-// vaultConfig defines vault api client interface
-type vaultConfig struct {
-	address      string
-	insecure     bool
-	engine       authEngine
-	token        string
-	awsMountPath string
-	awsRole      string
-}
-
-// vault config constructor
-func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
+// configured vault client validated constructor
+func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) {
 	// vault address default
 	address := backupVaultConfig.Address
 	if len(address) == 0 {
@@ -103,22 +93,9 @@ func NewVaultConfig(backupVaultConfig *util.VaultConfig) (*vaultConfig, error) {
 		}
 	}
 
-	// return initialized vault config
-	return &vaultConfig{
-		address:      address,
-		insecure:     insecure,
-		engine:       engine,
-		token:        token,
-		awsMountPath: awsMountPath,
-		awsRole:      awsRole,
-	}, nil
-}
-
-// vault client configuration
-func NewVaultClient(config *vaultConfig) (*vault.Client, error) {
 	// initialize vault api config
-	vaultConfig := &vault.Config{Address: config.address}
-	if err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: config.insecure}); err != nil {
+	vaultConfig := &vault.Config{Address: address}
+	if err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: insecure}); err != nil {
 		log.Print("Vault TLS configuration failed to initialize")
 		return nil, err
 	}
@@ -142,16 +119,16 @@ func NewVaultClient(config *vaultConfig) (*vault.Client, error) {
 	}
 
 	// determine authentication method
-	switch config.engine {
+	switch engine {
 	case vaultToken:
-		client.SetToken(config.token)
+		client.SetToken(token)
 	case awsIam:
 		// determine iam role login option
 		var loginOption auth.LoginOption
 
-		if len(config.awsRole) > 0 {
+		if len(awsRole) > 0 {
 			// use explicitly specified iam role
-			loginOption = auth.WithRole(config.awsRole)
+			loginOption = auth.WithRole(awsRole)
 		} else {
 			// use default iam role
 			loginOption = auth.WithIAMAuth()
