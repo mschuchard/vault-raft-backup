@@ -48,51 +48,6 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 		insecure = true
 	}
 
-	// initialize locals
-	engine := authEngine(backupVaultConfig.Engine)
-	token := backupVaultConfig.Token
-	awsMountPath := backupVaultConfig.AWSMountPath
-	awsRole := backupVaultConfig.AWSRole
-
-	// determine vault auth engine if unspecified
-	if len(engine) == 0 {
-		log.Print("authentication engine for Vault not specified; using logic from other parameters to assist with determination")
-
-		// validate inputs specified for only one engine
-		if len(token) > 0 && (len(awsMountPath) > 0 || len(awsRole) > 0) {
-			log.Print("token and AWS mount path or AWS role were simultaneously specified; these are mutually exclusive options")
-			log.Print("intended authentication engine could not be determined from other parameters")
-			return nil, errors.New("unable to deduce authentication engine")
-		}
-		if len(token) == 0 {
-			log.Print("AWS IAM authentication will be utilized with the Vault client")
-			engine = awsIam
-		} else {
-			log.Print("token authentication will be utilized with the Vault client")
-			engine = vaultToken
-		}
-	} else if engine != awsIam && engine != vaultToken { // validate engine if unspecified
-		log.Printf("%v was input as an authentication engine, but only token and aws are supported", engine)
-		return nil, errors.New("invalid Vault authentication engine")
-	}
-
-	// validate vault token
-	if engine == vaultToken && len(token) != 28 {
-		log.Print("the specified Vault Token is invalid")
-		return nil, errors.New("invalid vault token")
-	}
-
-	// default aws mount path and role
-	if engine == awsIam {
-		if len(awsMountPath) == 0 {
-			log.Print("using default AWS authentication mount path at 'aws'")
-			awsMountPath = "aws"
-		}
-		if len(awsRole) == 0 {
-			log.Print("using Vault role in utilized AWS authentication engine with the same name as the current utilized AWS IAM Role")
-		}
-	}
-
 	// initialize vault api config
 	vaultConfig := &vault.Config{Address: address}
 	if err := vaultConfig.ConfigureTLS(&vault.TLSConfig{Insecure: insecure}); err != nil {
@@ -118,26 +73,66 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 		return nil, errors.New("vault sealed")
 	}
 
+	// initialize locals
+	engine := authEngine(backupVaultConfig.Engine)
+	token := backupVaultConfig.Token
+	awsMountPath := backupVaultConfig.AWSMountPath
+	awsRole := backupVaultConfig.AWSRole
+
+	// determine vault auth engine if unspecified
+	if len(engine) == 0 {
+		log.Print("authentication engine for Vault not specified; using logic from other parameters to assist with determination")
+
+		// validate inputs specified for only one engine
+		if len(token) > 0 && (len(awsMountPath) > 0 || len(awsRole) > 0) {
+			log.Print("token and AWS mount path or AWS role were simultaneously specified; these are mutually exclusive options")
+			log.Print("intended authentication engine could not be determined from other parameters")
+			return nil, errors.New("unable to deduce authentication engine")
+		}
+		if len(token) == 0 {
+			log.Print("AWS IAM authentication will be utilized with the Vault client")
+			engine = awsIam
+		} else {
+			log.Print("token authentication will be utilized with the Vault client")
+			engine = vaultToken
+		}
+	}
+
 	// determine authentication method
 	switch engine {
 	case vaultToken:
+		// validate vault token
+		if len(token) != 28 {
+			log.Print("the specified Vault Token is invalid")
+			return nil, errors.New("invalid vault token")
+		}
+
+		// authenticate with token
 		client.SetToken(token)
 	case awsIam:
+		// default aws mount path
+		if len(awsMountPath) == 0 {
+			log.Print("using default AWS authentication mount path at 'aws'")
+			awsMountPath = "aws"
+		}
+
 		// determine iam role login option
 		var loginOption auth.LoginOption
 
 		if len(awsRole) > 0 {
-			// use explicitly specified iam role
+			// use explicitly specified aws role
+			log.Printf("using Vault AWS role %s for authentication", awsRole)
 			loginOption = auth.WithRole(awsRole)
 		} else {
-			// use default iam role
+			// use default aws iam role (i.e. instance profile)
+			log.Print("using Vault role in utilized AWS authentication engine with the same name as the currently utilized AWS IAM Role")
 			loginOption = auth.WithIAMAuth()
 		}
 
 		// authenticate with aws iam
 		awsAuth, err := auth.NewAWSAuth(loginOption)
 		if err != nil {
-			return nil, errors.New("unable to initialize AWS IAM authentication")
+			return nil, errors.New("unable to initialize Vault AWS IAM authentication")
 		}
 
 		// utilize aws authentication with vault client
@@ -149,6 +144,9 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 		if authInfo == nil {
 			return nil, errors.New("no auth info was returned after login")
 		}
+	default:
+		log.Printf("%s was input as an authentication engine, but only token and aws are supported", engine)
+		return nil, errors.New("invalid Vault authentication engine")
 	}
 
 	// return authenticated vault client

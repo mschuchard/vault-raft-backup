@@ -19,17 +19,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// construct vault client config
-	vaultConfig, err := vault.NewVaultConfig(backupConfig.VaultConfig)
+	// construct configured vault validated client
+	vaultClient, err := vault.NewVaultClient(backupConfig.VaultConfig)
 	if err != nil {
-		log.Print("vault configuration failed validation")
-		log.Fatal(err)
-	}
-
-	// initialize and configure vault client
-	vaultClient, err := vault.NewVaultClient(vaultConfig)
-	if err != nil {
-		log.Print("vault client initialization and configuration failed")
+		log.Print("configured vault client validated construction failed")
 		log.Fatal(err)
 	}
 
