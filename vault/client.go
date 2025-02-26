@@ -132,7 +132,8 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 		// authenticate with aws iam
 		awsAuth, err := auth.NewAWSAuth(loginOption)
 		if err != nil {
-			return nil, errors.New("unable to initialize Vault AWS IAM authentication")
+			log.Print("unable to initialize Vault AWS IAM authentication")
+			return nil, err
 		}
 
 		// utilize aws authentication with vault client

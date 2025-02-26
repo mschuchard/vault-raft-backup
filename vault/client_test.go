@@ -64,23 +64,23 @@ func TestNewVaultClient(test *testing.T) {
 	// test errors in reverse validation order
 	backupVaultConfig.Token = "1234"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid vault token" {
-		test.Errorf("expected error: invalid vault token, actual: %v", err)
+		test.Errorf("expected error: invalid vault token, actual: %s", err)
 	}
 
 	backupVaultConfig.Engine = "kubernetes"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid Vault authentication engine" {
-		test.Errorf("expected error: invalid Vault authentication engine, actual: %v", err)
+		test.Errorf("expected error: invalid Vault authentication engine, actual: %s", err)
 	}
 
 	backupVaultConfig.Engine = ""
 	backupVaultConfig.AWSMountPath = "azure"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "unable to deduce authentication engine" {
-		test.Errorf("expected error: unable to deduce authentication engine, actual: %v", err)
+		test.Errorf("expected error: unable to deduce authentication engine, actual: %s", err)
 	}
 	backupVaultConfig.Token = ""
 
 	backupVaultConfig.Address = "file:///foo"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid Vault server address" {
-		test.Error("expected error for invalid Vault server address, but none was returned")
+		test.Errorf("expected error: invalid Vault server address, actual: %s", err)
 	}
 }
