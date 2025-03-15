@@ -1,4 +1,4 @@
-### 1.3.0 (Next)
+### 1.3.0
 - Add local filesystem storage support.
 - Improve Vault client configuration.
 
