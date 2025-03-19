@@ -1,3 +1,6 @@
+### 1.3.1 (Next)
+- Fix AWS mount path usage in Vault client authentication.
+
 ### 1.3.0
 - Add local filesystem storage support.
 - Improve Vault client configuration.

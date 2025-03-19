@@ -115,22 +115,23 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 			log.Print("using default AWS authentication mount path at 'aws'")
 			awsMountPath = "aws"
 		}
+		mountLoginOption := auth.WithMountPath(awsMountPath)
 
 		// determine iam role login option
-		var loginOption auth.LoginOption
+		var roleLoginOption auth.LoginOption
 
 		if len(awsRole) > 0 {
 			// use explicitly specified aws role
 			log.Printf("using Vault AWS role %s for authentication", awsRole)
-			loginOption = auth.WithRole(awsRole)
+			roleLoginOption = auth.WithRole(awsRole)
 		} else {
 			// use default aws iam role (i.e. instance profile)
 			log.Print("using Vault role in utilized AWS authentication engine with the same name as the currently utilized AWS IAM Role")
-			loginOption = auth.WithIAMAuth()
+			roleLoginOption = auth.WithIAMAuth()
 		}
 
 		// authenticate with aws iam
-		awsAuth, err := auth.NewAWSAuth(loginOption)
+		awsAuth, err := auth.NewAWSAuth(roleLoginOption, mountLoginOption)
 		if err != nil {
 			log.Print("unable to initialize Vault AWS IAM authentication")
 			return nil, err
