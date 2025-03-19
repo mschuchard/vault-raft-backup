@@ -5,6 +5,8 @@ import (
 	"regexp"
 
 	"testing"
+
+	"github.com/mschuchard/vault-raft-backup/enum"
 )
 
 func TestHclDecodeConfig(test *testing.T) {
@@ -26,7 +28,7 @@ func TestHclDecodeConfig(test *testing.T) {
 	}
 	expectedCloudConfig := CloudConfig{
 		Container: Container,
-		Platform:  AWS,
+		Platform:  enum.AWS,
 		Prefix:    Prefix,
 	}
 
@@ -56,14 +58,14 @@ func TestHclDecodeConfig(test *testing.T) {
 func TestOSImportConfig(test *testing.T) {
 	// source of truth for values
 	const (
-		platform     platform = GCP
-		addr         string   = "https://127.0.0.1:8234"
-		skipVerify   string   = "false"
-		authEngine   string   = "token"
-		token        string   = "abcdefg"
-		awsMount     string   = "gcp"
-		awsRole      string   = "my_role"
-		snapshotPath string   = "/tmp/my_vault.backup"
+		platform     enum.Platform = enum.GCP
+		addr         string        = "https://127.0.0.1:8234"
+		skipVerify   string        = "false"
+		authEngine   string        = "token"
+		token        string        = "abcdefg"
+		awsMount     string        = "gcp"
+		awsRole      string        = "my_role"
+		snapshotPath string        = "/tmp/my_vault.backup"
 	)
 
 	os.Setenv("CONTAINER", Container)
@@ -132,12 +134,7 @@ func TestOSImportConfig(test *testing.T) {
 }
 
 func TestValidateParameters(test *testing.T) {
-	if _, err := validateParameters("invalid", "/tmp"); err == nil || err.Error() != "unsupported platform" {
-		test.Error("did not error as expected with unsupported platform input parameter")
-		test.Errorf("expected: unsupported platform, actual: %s", err)
-	}
-
-	snapshotPath, err := validateParameters(GCP, "")
+	snapshotPath, err := defaultSnapshotPath("")
 	if err != nil {
 		test.Error("errored with valid input parameters")
 		test.Error(err)

@@ -8,23 +8,15 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hclsimple"
-)
-
-// platform with pseudo-enum
-type platform string
-
-const (
-	AWS   platform = "aws"
-	GCP   platform = "gcp"
-	LOCAL platform = "local"
+	"github.com/mschuchard/vault-raft-backup/enum"
 )
 
 // while these are public to decode, the individual structs initialized from this are safely private
 // storage configs
 type CloudConfig struct {
-	Container string   `hcl:"container"`
-	Platform  platform `hcl:"platform"`
-	Prefix    string   `hcl:"prefix,optional"`
+	Container string        `hcl:"container"`
+	Platform  enum.Platform `hcl:"platform"`
+	Prefix    string        `hcl:"prefix,optional"`
 }
 
 // vault config
@@ -74,7 +66,11 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// validate parameters and finalize snapshot path
-	backupConfig.VaultConfig.SnapshotPath, err = validateParameters(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.SnapshotPath)
+	if _, err = enum.Platform("").From(string(backupConfig.CloudConfig.Platform)); err != nil {
+		return nil, err
+	}
+
+	backupConfig.VaultConfig.SnapshotPath, err = defaultSnapshotPath(backupConfig.VaultConfig.SnapshotPath)
 	if err != nil {
 		return nil, err
 	}
@@ -105,14 +101,17 @@ func envImportConfig() (*BackupConfig, error) {
 
 	// validate container and platform were specified
 	container := os.Getenv("CONTAINER")
-	platform := platform(os.Getenv("PLATFORM"))
-	if len(container) == 0 || len(platform) == 0 {
-		log.Print("CONTAINER and PLATFORM are both required input values, and one or both was unspecified as an environment variable")
+	if len(container) == 0 {
+		log.Print("CONTAINER is a required input value, and it was unspecified as an environment variable")
 		return nil, errors.New("environment variable absent")
+	}
+	platform, err := enum.Platform("").From(os.Getenv("PLATFORM"))
+	if err != nil {
+		return nil, err
 	}
 
 	// validate parameters and finalize snapshot path
-	snapshotPath, err := validateParameters(platform, os.Getenv("VAULT_SNAPSHOT_PATH"))
+	snapshotPath, err := defaultSnapshotPath(os.Getenv("VAULT_SNAPSHOT_PATH"))
 	if err != nil {
 		return nil, err
 	}
@@ -136,14 +135,8 @@ func envImportConfig() (*BackupConfig, error) {
 	}, nil
 }
 
-// general parameter validation for both hcl2 and env inputs, and returns final snapshot path
-func validateParameters(platform platform, snapshotPath string) (string, error) {
-	// validate platform
-	if platform != AWS && platform != GCP && platform != LOCAL {
-		log.Printf("PLATFORM %s is not supported", platform)
-		return "", errors.New("unsupported platform")
-	}
-
+// determines default snapshot path
+func defaultSnapshotPath(snapshotPath string) (string, error) {
 	// provide snapshot path default if unspecified
 	if len(snapshotPath) == 0 {
 		// create timestamp for default filename suffix

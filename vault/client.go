@@ -9,15 +9,8 @@ import (
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/aws"
 
+	"github.com/mschuchard/vault-raft-backup/enum"
 	"github.com/mschuchard/vault-raft-backup/util"
-)
-
-// authentication engine with pseudo-enum
-type authEngine string
-
-const (
-	awsIam     authEngine = "aws"
-	vaultToken authEngine = "token"
 )
 
 // configured vault client validated constructor
@@ -74,14 +67,15 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 	}
 
 	// initialize locals
-	engine := authEngine(backupVaultConfig.Engine)
+	engine, err := enum.AuthEngine("").From(backupVaultConfig.Engine)
 	token := backupVaultConfig.Token
 	awsMountPath := backupVaultConfig.AWSMountPath
 	awsRole := backupVaultConfig.AWSRole
 
 	// determine vault auth engine if unspecified
 	if len(engine) == 0 {
-		log.Print("authentication engine for Vault not specified; using logic from other parameters to assist with determination")
+		log.Print("authentication engine for Vault not specified, or specified but unsupported")
+		log.Print("using logic from other input parameters to assist with determination")
 
 		// validate inputs specified for only one engine
 		if len(token) > 0 && (len(awsMountPath) > 0 || len(awsRole) > 0) {
@@ -91,16 +85,16 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 		}
 		if len(token) == 0 {
 			log.Print("AWS IAM authentication will be utilized with the Vault client")
-			engine = awsIam
+			engine = enum.AWSIAM
 		} else {
 			log.Print("token authentication will be utilized with the Vault client")
-			engine = vaultToken
+			engine = enum.VaultToken
 		}
 	}
 
 	// determine authentication method
 	switch engine {
-	case vaultToken:
+	case enum.VaultToken:
 		// validate vault token
 		if len(token) != 28 {
 			log.Print("the specified Vault Token is invalid")
@@ -109,7 +103,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 
 		// authenticate with token
 		client.SetToken(token)
-	case awsIam:
+	case enum.AWSIAM:
 		// default aws mount path
 		if len(awsMountPath) == 0 {
 			log.Print("using default AWS authentication mount path at 'aws'")

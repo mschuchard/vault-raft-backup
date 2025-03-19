@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/mschuchard/vault-raft-backup/enum"
 	"github.com/mschuchard/vault-raft-backup/util"
 )
 
@@ -31,11 +32,11 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 
 	// upload snapshot to various storage backends
 	switch config.Platform {
-	case util.AWS:
+	case enum.AWS:
 		err = snapshotS3Upload(config.Container, snapshotFile, snapshotName)
-	case util.GCP:
+	case enum.GCP:
 		err = snapshotCSUpload(config.Container, snapshotFile, snapshotName)
-	case util.LOCAL:
+	case enum.LOCAL:
 		err = snapshotFSCopy(config.Container, snapshotFile, snapshotName)
 	default:
 		log.Printf("an invalid storage platform was specified: %s", config.Platform)
