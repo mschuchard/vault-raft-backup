@@ -67,13 +67,10 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 	}
 
 	// initialize locals
-	engine, err := enum.AuthEngine(backupVaultConfig.Engine).New()
-	if err != nil {
-		return nil, err
-	}
 	token := backupVaultConfig.Token
 	awsMountPath := backupVaultConfig.AWSMountPath
 	awsRole := backupVaultConfig.AWSRole
+	engine, err := enum.AuthEngine(backupVaultConfig.Engine).New()
 
 	// determine vault auth engine if unspecified
 	if len(engine) == 0 {
@@ -93,6 +90,8 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 			log.Print("token authentication will be utilized with the Vault client")
 			engine = enum.VaultToken
 		}
+	} else if err != nil { // return error if invalid engine was specified
+		return nil, err
 	}
 
 	// determine authentication method
