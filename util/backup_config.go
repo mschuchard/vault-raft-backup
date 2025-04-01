@@ -66,7 +66,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// validate parameters and finalize snapshot path
-	if _, err = enum.Platform("").From(string(backupConfig.CloudConfig.Platform)); err != nil {
+	if _, err = enum.Platform(backupConfig.CloudConfig.Platform).New(); err != nil {
 		return nil, err
 	}
 
@@ -105,7 +105,7 @@ func envImportConfig() (*BackupConfig, error) {
 		log.Print("CONTAINER is a required input value, and it was unspecified as an environment variable")
 		return nil, errors.New("environment variable absent")
 	}
-	platform, err := enum.Platform("").From(os.Getenv("PLATFORM"))
+	platform, err := enum.Platform(os.Getenv("PLATFORM")).New()
 	if err != nil {
 		return nil, err
 	}

@@ -67,7 +67,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 	}
 
 	// initialize locals
-	engine, err := enum.AuthEngine("").From(backupVaultConfig.Engine)
+	engine, err := enum.AuthEngine(backupVaultConfig.Engine).New()
 	if err != nil {
 		return nil, err
 	}
