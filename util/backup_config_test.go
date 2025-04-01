@@ -113,8 +113,8 @@ func TestOSImportConfig(test *testing.T) {
 	}
 
 	os.Setenv("PLATFORM", "foo")
-	if _, err := envImportConfig(); err == nil || err.Error() != "unsupported platform" {
-		test.Errorf("expected error: unsupported platform, actual: %s", err)
+	if _, err := envImportConfig(); err == nil || err.Error() != "invalid platform enum" {
+		test.Errorf("expected error: invalid platform enum, actual: %s", err)
 	}
 
 	os.Unsetenv("CONTAINER")

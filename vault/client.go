@@ -68,6 +68,9 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 
 	// initialize locals
 	engine, err := enum.AuthEngine("").From(backupVaultConfig.Engine)
+	if err != nil {
+		return nil, err
+	}
 	token := backupVaultConfig.Token
 	awsMountPath := backupVaultConfig.AWSMountPath
 	awsRole := backupVaultConfig.AWSRole
