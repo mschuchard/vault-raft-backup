@@ -15,12 +15,12 @@ const (
 )
 
 // platform type conversion
-func (Platform) From(s string) (Platform, error) {
-	if s != "aws" && s != "gcp" && s != "local" {
-		log.Printf("string %s could not be converted to Platform enum", s)
+func (p Platform) New() (Platform, error) {
+	if p != AWS && p != GCP && p != LOCAL {
+		log.Printf("string %s could not be converted to Platform enum", p)
 		return "", errors.New("invalid platform enum")
 	}
-	return Platform(s), nil
+	return p, nil
 }
 
 // authengine pseudo-enum
@@ -32,10 +32,10 @@ const (
 )
 
 // authengine type conversion
-func (AuthEngine) From(s string) (AuthEngine, error) {
-	if s != "aws" && s != "token" {
-		log.Printf("string %s could not be converted to AuthEngine enum", s)
+func (a AuthEngine) New() (AuthEngine, error) {
+	if a != AWSIAM && a != VaultToken {
+		log.Printf("string %s could not be converted to AuthEngine enum", a)
 		return "", errors.New("invalid authengine enum")
 	}
-	return AuthEngine(s), nil
+	return a, nil
 }
