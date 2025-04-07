@@ -4,7 +4,7 @@ Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated s
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
-Statically linked binaries for various operating systems and processor architectures are available at the Github releases page (see link in the right column).
+Statically linked binaries for various operating systems and processor architectures are available at the Github releases page (see link in the right column). Note that the CLI flag `version` will output version information, and then promptly exit.
 
 ### Prerequsities
 
