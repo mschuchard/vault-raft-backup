@@ -62,14 +62,14 @@ func TestNewVaultClient(test *testing.T) {
 	}*/
 
 	// test errors in reverse validation order
-	backupVaultConfig.Engine = "kubernetes"
-	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid Vault authentication engine" {
-		test.Errorf("expected error: invalid Vault authentication engine, actual: %s", err)
-	}
-
 	backupVaultConfig.Token = "1234"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid vault token" {
 		test.Errorf("expected error: invalid vault token, actual: %s", err)
+	}
+
+	backupVaultConfig.Engine = "kubernetes"
+	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid authengine enum" {
+		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
 	}
 
 	backupVaultConfig.Engine = ""

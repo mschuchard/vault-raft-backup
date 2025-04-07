@@ -2,7 +2,7 @@ package enum
 
 import "testing"
 
-func TestPlatformFromString(test *testing.T) {
+func TestPlatformFromNew(test *testing.T) {
 	platform, err := Platform("local").New()
 	if err != nil {
 		test.Error(err)
@@ -18,7 +18,7 @@ func TestPlatformFromString(test *testing.T) {
 	}
 }
 
-func TestAuthEngineFromString(test *testing.T) {
+func TestAuthEngineNew(test *testing.T) {
 	authEngine, err := AuthEngine("token").New()
 	if err != nil {
 		test.Error(err)
