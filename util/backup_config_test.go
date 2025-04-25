@@ -112,6 +112,12 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
 
+	// test errors in reverse order
+	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
+	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
+		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
+	}
+
 	os.Setenv("PLATFORM", "foo")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid platform enum" {
 		test.Errorf("expected error: invalid platform enum, actual: %s", err)
