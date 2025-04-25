@@ -58,14 +58,14 @@ func TestHclDecodeConfig(test *testing.T) {
 func TestOSImportConfig(test *testing.T) {
 	// source of truth for values
 	const (
-		platform     enum.Platform = enum.GCP
-		addr         string        = "https://127.0.0.1:8234"
-		skipVerify   string        = "false"
-		authEngine   string        = "token"
-		token        string        = "abcdefg"
-		awsMount     string        = "gcp"
-		awsRole      string        = "my_role"
-		snapshotPath string        = "/tmp/my_vault.backup"
+		platform     enum.Platform   = enum.GCP
+		addr         string          = "https://127.0.0.1:8234"
+		skipVerify   string          = "false"
+		authEngine   enum.AuthEngine = enum.VaultToken
+		token        string          = "abcdefg"
+		awsMount     string          = "gcp"
+		awsRole      string          = "my_role"
+		snapshotPath string          = "/tmp/my_vault.backup"
 	)
 
 	os.Setenv("CONTAINER", Container)
@@ -73,7 +73,7 @@ func TestOSImportConfig(test *testing.T) {
 	os.Setenv("PREFIX", Prefix)
 	os.Setenv("VAULT_ADDR", addr)
 	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
-	os.Setenv("VAULT_AUTH_ENGINE", authEngine)
+	os.Setenv("VAULT_AUTH_ENGINE", string(authEngine))
 	os.Setenv("VAULT_TOKEN", token)
 	os.Setenv("VAULT_AWS_MOUNT", awsMount)
 	os.Setenv("VAULT_AWS_ROLE", awsRole)

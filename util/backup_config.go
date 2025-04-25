@@ -21,13 +21,13 @@ type CloudConfig struct {
 
 // vault config
 type VaultConfig struct {
-	Address      string `hcl:"address,optional"`
-	Insecure     bool   `hcl:"insecure,optional"`
-	Engine       string `hcl:"auth_engine,optional"`
-	Token        string `hcl:"token,optional"`
-	AWSMountPath string `hcl:"aws_mount_path,optional"`
-	AWSRole      string `hcl:"aws_role,optional"`
-	SnapshotPath string `hcl:"snapshot_path,optional"`
+	Address      string          `hcl:"address,optional"`
+	Insecure     bool            `hcl:"insecure,optional"`
+	Engine       enum.AuthEngine `hcl:"auth_engine,optional"`
+	Token        string          `hcl:"token,optional"`
+	AWSMountPath string          `hcl:"aws_mount_path,optional"`
+	AWSRole      string          `hcl:"aws_role,optional"`
+	SnapshotPath string          `hcl:"snapshot_path,optional"`
 }
 
 // overall vault raft backup config
@@ -110,6 +110,12 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, err
 	}
 
+	// validate auth engine
+	authEngine, err := enum.AuthEngine(os.Getenv("VAULT_AUTH_ENGINE")).New()
+	if len(os.Getenv("VAULT_AUTH_ENGINE")) > 0 && err != nil {
+		return nil, err
+	}
+
 	// validate parameters and finalize snapshot path
 	snapshotPath, err := defaultSnapshotPath(os.Getenv("VAULT_SNAPSHOT_PATH"))
 	if err != nil {
@@ -125,7 +131,7 @@ func envImportConfig() (*BackupConfig, error) {
 		VaultConfig: &VaultConfig{
 			Address:      os.Getenv("VAULT_ADDR"),
 			Insecure:     insecure,
-			Engine:       os.Getenv("VAULT_AUTH_ENGINE"),
+			Engine:       authEngine,
 			Token:        os.Getenv("VAULT_TOKEN"),
 			AWSMountPath: os.Getenv("VAULT_AWS_MOUNT"),
 			AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
