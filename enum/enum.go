@@ -3,6 +3,7 @@ package enum
 import (
 	"errors"
 	"log"
+	"slices"
 )
 
 // platform pseudo-enum
@@ -10,13 +11,14 @@ type Platform string
 
 const (
 	AWS   Platform = "aws"
+	AZ    Platform = "azure"
 	GCP   Platform = "gcp"
 	LOCAL Platform = "local"
 )
 
 // platform type conversion
 func (p Platform) New() (Platform, error) {
-	if p != AWS && p != GCP && p != LOCAL {
+	if !slices.Contains([]Platform{AWS, AZ, GCP, LOCAL}, p) {
 		log.Printf("string %s could not be converted to Platform enum", p)
 		return "", errors.New("invalid platform enum")
 	}
