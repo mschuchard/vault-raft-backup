@@ -32,11 +32,11 @@ func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName stri
 		Body:   snapshotFile,
 	})
 	if err != nil {
-		log.Printf("Vault backup failed to upload to S3 bucket %s", s3Bucket)
+		log.Printf("Vault backup failed to upload snapshot file %s to S3 bucket %s", snapshotName, s3Bucket)
 		return err
 	}
 
 	// output s3 uploader location info
-	log.Printf("Vault Raft snapshot uploaded to %s with key %s", uploadResult.Location, *uploadResult.Key)
+	log.Printf("Vault Raft snapshot file %s uploaded to S3 bucket %s with key %s", snapshotName, uploadResult.Location, *uploadResult.Key)
 	return err
 }

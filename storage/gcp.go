@@ -34,14 +34,14 @@ func snapshotCSUpload(csBucket string, snapshotFile io.Reader, snapshotName stri
 	// write snapshotfile to upload target in cloud storage bucket
 	uploadTransfer := uploadTarget.NewWriter(ctx)
 	if _, err = io.Copy(uploadTransfer, snapshotFile); err != nil {
-		log.Printf("failed to upload snapshot file %s to bucket %s", uploadTarget.ObjectName(), uploadTarget.BucketName())
+		log.Printf("failed to upload snapshot file %s to cloud storage bucket %s", uploadTarget.ObjectName(), uploadTarget.BucketName())
 		return err
 	}
 	if err := uploadTransfer.Close(); err != nil {
-		log.Printf("failed to close snapshot file %s upload transfer to %s", uploadTarget.ObjectName(), uploadTarget.BucketName())
+		log.Printf("failed to close snapshot file %s upload transfer to cloud storage bucket %s", uploadTarget.ObjectName(), uploadTarget.BucketName())
 		return err
 	}
 
-	log.Printf("Vault Raft snapshot successfully uploaded to %s bucket with name %s", csBucket, snapshotName)
+	log.Printf("Vault Raft snapshot with name %s successfully uploaded to cloud storage bucket %s", snapshotName, csBucket)
 	return nil
 }
