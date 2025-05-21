@@ -10,7 +10,7 @@ import (
 )
 
 // snapshot upload to azure blob storage
-func snapshotBlobUpload(container string, snapshotFile io.Reader, snapshotName string) error {
+func snapshotBlobUpload(container string, snapshotFile io.Reader, snapshotName string, accountURL string) error {
 	// create token credential from ms entra id
 	credential, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
@@ -19,7 +19,7 @@ func snapshotBlobUpload(container string, snapshotFile io.Reader, snapshotName s
 	}
 
 	// create service client with token credential
-	client, err := azblob.NewClient("", credential, nil)
+	client, err := azblob.NewClient(accountURL, credential, nil)
 	if err != nil {
 		log.Print("unable to authenticate with entra token credential")
 		return err

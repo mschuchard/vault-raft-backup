@@ -14,9 +14,10 @@ import (
 // while these are public to decode, the individual structs initialized from this are safely private
 // storage configs
 type CloudConfig struct {
-	Container string        `hcl:"container"`
-	Platform  enum.Platform `hcl:"platform"`
-	Prefix    string        `hcl:"prefix,optional"`
+	AZAccountURL string        `hcl:"az_account_url,optional"`
+	Container    string        `hcl:"container"`
+	Platform     enum.Platform `hcl:"platform"`
+	Prefix       string        `hcl:"prefix,optional"`
 }
 
 // vault config
@@ -65,11 +66,21 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, errors.New("cloud_config block absent")
 	}
 
-	// validate parameters and finalize snapshot path
+	// validate platform and authengine
 	if _, err = enum.Platform(backupConfig.CloudConfig.Platform).New(); err != nil {
 		return nil, err
 	}
+	if _, err = enum.AuthEngine(backupConfig.VaultConfig.Engine).New(); err != nil {
+		return nil, err
+	}
 
+	// validate account url was specified if platform is azure
+	if backupConfig.CloudConfig.Platform == enum.AZ && len(backupConfig.CloudConfig.AZAccountURL) == 0 {
+		log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
+		return nil, errors.New("az_account_url parameter absent")
+	}
+
+	// finalize snapshot path
 	backupConfig.VaultConfig.SnapshotPath, err = defaultSnapshotPath(backupConfig.VaultConfig.SnapshotPath)
 	if err != nil {
 		return nil, err
@@ -103,7 +114,7 @@ func envImportConfig() (*BackupConfig, error) {
 	container := os.Getenv("CONTAINER")
 	if len(container) == 0 {
 		log.Print("CONTAINER is a required input value, and it was unspecified as an environment variable")
-		return nil, errors.New("environment variable absent")
+		return nil, errors.New("container environment variable absent")
 	}
 	platform, err := enum.Platform(os.Getenv("PLATFORM")).New()
 	if err != nil {
@@ -116,7 +127,13 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, err
 	}
 
-	// validate parameters and finalize snapshot path
+	// validate account url was specified if platform is azure
+	if platform == enum.AZ && len(os.Getenv("AZ_ACCOUNT_URL")) == 0 {
+		log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
+		return nil, errors.New("az_account_url environment variable absent")
+	}
+
+	// finalize snapshot path
 	snapshotPath, err := defaultSnapshotPath(os.Getenv("VAULT_SNAPSHOT_PATH"))
 	if err != nil {
 		return nil, err

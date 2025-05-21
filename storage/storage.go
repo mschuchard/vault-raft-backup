@@ -35,7 +35,7 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 	case enum.AWS:
 		err = snapshotS3Upload(config.Container, snapshotFile, snapshotName)
 	case enum.AZ:
-		err = snapshotBlobUpload(config.Container, snapshotFile, snapshotName)
+		err = snapshotBlobUpload(config.Container, snapshotFile, snapshotName, config.AZAccountURL)
 	case enum.GCP:
 		err = snapshotCSUpload(config.Container, snapshotFile, snapshotName)
 	case enum.LOCAL:

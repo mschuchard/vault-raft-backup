@@ -1,4 +1,6 @@
-### 1.3.1 (Next)
+### 1.4.0 (Next)
+- Add Azure storage support.
+- Improve input parameter validation.
 - Fix AWS mount path usage in Vault client authentication.
 
 ### 1.3.0
