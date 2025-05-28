@@ -128,7 +128,8 @@ func envImportConfig() (*BackupConfig, error) {
 	}
 
 	// validate account url was specified if platform is azure
-	if platform == enum.AZ && len(os.Getenv("AZ_ACCOUNT_URL")) == 0 {
+	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
+	if platform == enum.AZ && len(azAccountURL) == 0 {
 		log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
 		return nil, errors.New("az_account_url environment variable absent")
 	}
@@ -141,9 +142,10 @@ func envImportConfig() (*BackupConfig, error) {
 
 	return &BackupConfig{
 		CloudConfig: &CloudConfig{
-			Container: container,
-			Platform:  platform,
-			Prefix:    os.Getenv("PREFIX"),
+			AZAccountURL: azAccountURL,
+			Container:    container,
+			Platform:     platform,
+			Prefix:       os.Getenv("PREFIX"),
 		},
 		VaultConfig: &VaultConfig{
 			Address:      os.Getenv("VAULT_ADDR"),

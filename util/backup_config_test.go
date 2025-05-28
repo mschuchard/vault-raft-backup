@@ -134,8 +134,8 @@ func TestOSImportConfig(test *testing.T) {
 	}
 
 	os.Unsetenv("CONTAINER")
-	if _, err = envImportConfig(); err == nil || err.Error() != "environment variable absent" {
-		test.Errorf("expected error: environment variable absent, actual: %s", err)
+	if _, err = envImportConfig(); err == nil || err.Error() != "container environment variable absent" {
+		test.Errorf("expected error: container environment variable absent, actual: %s", err)
 	}
 
 	os.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
