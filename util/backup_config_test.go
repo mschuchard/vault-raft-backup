@@ -27,17 +27,18 @@ func TestHclDecodeConfig(test *testing.T) {
 		SnapshotPath: "/path/to/vault.bak",
 	}
 	expectedCloudConfig := CloudConfig{
-		Container: Container,
-		Platform:  enum.AWS,
-		Prefix:    Prefix,
+		AZAccountURL: "https://foo.com",
+		Container:    Container,
+		Platform:     enum.AWS,
+		Prefix:       Prefix,
 	}
 
 	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || !config.SnapshotCleanup {
 		test.Error("decoded config struct did not contain expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", vaultConfig)
-		test.Errorf("expected aws: %v", expectedCloudConfig)
-		test.Errorf("actual aws: %v", cloudConfig)
+		test.Errorf("expected cloud: %v", expectedCloudConfig)
+		test.Errorf("actual cloud: %v", cloudConfig)
 		test.Error("expected snapshot cleanup: true")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
@@ -58,6 +59,7 @@ func TestHclDecodeConfig(test *testing.T) {
 func TestOSImportConfig(test *testing.T) {
 	// source of truth for values
 	const (
+		azAccountURL string          = "https://foo.com"
 		platform     enum.Platform   = enum.GCP
 		addr         string          = "https://127.0.0.1:8234"
 		skipVerify   string          = "false"
@@ -68,6 +70,7 @@ func TestOSImportConfig(test *testing.T) {
 		snapshotPath string          = "/tmp/my_vault.backup"
 	)
 
+	os.Setenv("AZ_ACCOUNT_URL", azAccountURL)
 	os.Setenv("CONTAINER", Container)
 	os.Setenv("PLATFORM", string(platform))
 	os.Setenv("PREFIX", Prefix)
@@ -89,9 +92,10 @@ func TestOSImportConfig(test *testing.T) {
 	vaultConfig := config.VaultConfig
 	cloudConfig := config.CloudConfig
 	expectedCloudConfig := CloudConfig{
-		Container: Container,
-		Platform:  platform,
-		Prefix:    Prefix,
+		AZAccountURL: azAccountURL,
+		Container:    Container,
+		Platform:     platform,
+		Prefix:       Prefix,
 	}
 	expectedVaultConfig := VaultConfig{
 		Address:      addr,
@@ -106,13 +110,19 @@ func TestOSImportConfig(test *testing.T) {
 		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", *vaultConfig)
-		test.Errorf("expected aws: %v", expectedCloudConfig)
-		test.Errorf("actual aws: %v", *cloudConfig)
+		test.Errorf("expected cloud: %v", expectedCloudConfig)
+		test.Errorf("actual cloud: %v", *cloudConfig)
 		test.Error("expected snapshot cleanup: false")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
 
 	// test errors in reverse order
+	os.Setenv("PLATFORM", "azure")
+	os.Unsetenv("AZ_ACCOUNT_URL")
+	if _, err := envImportConfig(); err == nil || err.Error() != "az_account_url environment variable absent" {
+		test.Errorf("expected error: az_account_url environment variable absent, actual: %s", err)
+	}
+
 	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
 		test.Errorf("expected error: invalid authengine enum, actual: %s", err)

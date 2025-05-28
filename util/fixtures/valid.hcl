@@ -9,9 +9,10 @@ vault_config {
 }
 
 cloud_config {
-  container = "my_bucket"
-  platform  = "aws"
-  prefix    = "prefix"
+  az_account_url = "https://foo.com"
+  container      = "my_bucket"
+  platform       = "aws"
+  prefix         = "prefix"
 }
 
 snapshot_cleanup = true
