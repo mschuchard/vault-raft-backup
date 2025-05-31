@@ -1,22 +1,19 @@
 ## vault-raft-backup
 
-Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3 or GCP Cloud Storage. This plugin's code at `HEAD` is currently tested against Vault version 1.18.5. The most recent release was tested against 1.16.3.
+Vault Raft Backup is a lean tool for creating snapshots of the Raft integrated storage in [Hashicorp Vault](https://www.vaultproject.io), and transferring those backups to AWS S3, Azure Blob, or GCP Cloud Storage. This plugin's code at `HEAD` is currently tested against Vault version 1.18.5. The most recent release was tested against 1.18.5.
 
 This repository and project is based on the work performed for [MITODL](https://github.com/mitodl/vault-raft-backup), and now serves as an upstream for the project hosted within that organization. Although the original work is unlicensed, this repository maintains the BSD-3 license with copyright notice on good faith.
 
 Statically linked binaries for various operating systems and processor architectures are available at the Github releases page (see link in the right column). Note that the CLI flag `version` will output version information, and then promptly exit.
 
 ### Prerequsities
-
-If executing as an ad-hoc compile and run (i.e. `go run`), then the dependencies and requirements can be viewed in the [go.mod](go.mod) file. Additional setup requirements are as follows:
-
 - Connectivity to a functioning Vault server cluster with Raft integrated storage.
 - Authentication and authorization against the Vault server cluster for executing Raft snapshots.
   - Authentication can be input in general as a token.
   - Authentication can also specified as AWS IAM. In this situation, the Vault server cluster must have a role configured and mapped to an AWS IAM role. This AWS IAM role authorization must also be accessible by the Vault Raft Backup tool somehow (e.g. tool executed on EC2 instance with appropriate IAM Instance profile corresponding to AWS IAM role).
 - A local filesystem with permissions and storage capable of staging the snapshot.
-- Authentication and authorization against an AWS or GCP account for listing, reading, and writing objects to a S3 bucket or Cloud Storage bucket. Otherwise, authorization for writing objects to a local filesystem destination.
-- A S3 or Cloud Storage bucket, or local filesystem, capable of storing the snapshot.
+- Authentication and authorization against an AWS, Azure, or GCP account for listing, reading, and writing objects to a S3 bucket, Azure blob, or Cloud Storage bucket. Otherwise, authorization for writing objects to a local filesystem destination.
+- A S3 or Cloud Storage bucket, Blob storage, or local filesystem, capable of storing the snapshot.
 
 The Vault policy for authorizing the execution of Raft snapshots appears like:
 
@@ -30,7 +27,7 @@ path "sys/storage/raft/snapshot" {
 
 Vault Raft Backup can be configured with either environment variables or a HCL2 config file.
 
-Additionally, AWS or GCP authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.). The GCP Golang SDK behaves similarly for analogous authentication settings. If the snapshot is stored locally then authentication and authorization will vary greatly based on your environment.
+Additionally, AWS, Azure, or GCP authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.). The GCP and Azure Golang SDKs behave similarly for analogous authentication settings (note that this tool assumes Entra Security Principal authentication for Azure). If the snapshot is stored locally instead, then authentication and authorization will vary greatly based on your personal environment.
 
 #### Environment Variables
 
@@ -58,10 +55,12 @@ export VAULT_AWS_ROLE=<vault aws authentication role>
 export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
 
 # CLOUD STORAGE
+# default: empty (required if PLATFORM is "azure")
+export AZ_ACCOUNT_URL=<azure account url>
 # required
 export CONTAINER=<name of cloud storage destination, or destination directory if storage platform is "local", for final snapshot transfer and storage>
 # required
-export PLATFORM=<aws, gcp, or local>
+export PLATFORM=<aws, azure, gcp, or local>
 # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
 # default: empty
 export PREFIX=<snapshot filename prefix during storage transfer>
@@ -99,10 +98,12 @@ vault_config {
 }
 
 cloud_config {
+  # default: empty (required if platform is "azure")
+  az_account_url = <azure account url>
   # required
   container = <name of cloud storage destination, or destination directory if storage platform is "local", for final snapshot transfer and storage>
   # required
-  platform  = <aws, gcp, or local>
+  platform  = <aws, azure, gcp, or local>
   # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
   # default: empty
   prefix    = <snapshot filename prefix during storage transfer>
