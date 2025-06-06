@@ -1,3 +1,6 @@
+### 1.4.1
+- Improve input value validation. 
+
 ### 1.4.0
 - Add Azure storage support.
 - Improve input parameter validation.

@@ -68,10 +68,10 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// validate platform and authengine
-	if _, err = enum.Platform(backupConfig.CloudConfig.Platform).New(); err != nil {
+	if _, err = backupConfig.CloudConfig.Platform.New(); err != nil {
 		return nil, err
 	}
-	if _, err = enum.AuthEngine(backupConfig.VaultConfig.Engine).New(); err != nil {
+	if _, err = backupConfig.VaultConfig.Engine.New(); err != nil {
 		return nil, err
 	}
 
@@ -116,7 +116,7 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
 	}
 
-	// validate container and platform were specified
+	// validate container and platform were specified, and platform value
 	container := os.Getenv("CONTAINER")
 	if len(container) == 0 {
 		log.Print("CONTAINER is a required input value, and it was unspecified as an environment variable")

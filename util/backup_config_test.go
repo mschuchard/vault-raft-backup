@@ -153,7 +153,7 @@ func TestOSImportConfig(test *testing.T) {
 	}
 }
 
-func TestValidateParameters(test *testing.T) {
+func TestDefaultSnapshotPath(test *testing.T) {
 	snapshotPath, err := defaultSnapshotPath("")
 	if err != nil {
 		test.Error("errored with valid input parameters")
