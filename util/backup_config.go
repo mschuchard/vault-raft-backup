@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -74,10 +75,15 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, err
 	}
 
-	// validate account url was specified if platform is azure
+	// validate azure account url
 	if backupConfig.CloudConfig.Platform == enum.AZ && len(backupConfig.CloudConfig.AZAccountURL) == 0 {
-		log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
-		return nil, errors.New("az_account_url parameter absent")
+		if len(backupConfig.CloudConfig.AZAccountURL) == 0 {
+			log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
+			return nil, errors.New("az_account_url parameter absent")
+		} else if match, _ := regexp.MatchString("https://.*\\.blob\\.core\\.windows\\.net", backupConfig.CloudConfig.AZAccountURL); !match {
+			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
+			return nil, errors.New("invalid az_account_url value")
+		}
 	}
 
 	// finalize snapshot path
@@ -127,11 +133,16 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, err
 	}
 
-	// validate account url was specified if platform is azure
+	// validate azure account url
 	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
-	if platform == enum.AZ && len(azAccountURL) == 0 {
-		log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
-		return nil, errors.New("az_account_url environment variable absent")
+	if platform == enum.AZ {
+		if len(azAccountURL) == 0 {
+			log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
+			return nil, errors.New("az_account_url environment variable absent")
+		} else if match, _ := regexp.MatchString("https://.*\\.blob\\.core\\.windows\\.net", azAccountURL); !match {
+			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
+			return nil, errors.New("invalid az_account_url value")
+		}
 	}
 
 	// finalize snapshot path

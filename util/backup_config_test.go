@@ -118,6 +118,10 @@ func TestOSImportConfig(test *testing.T) {
 
 	// test errors in reverse order
 	os.Setenv("PLATFORM", "azure")
+	if _, err := envImportConfig(); err == nil || err.Error() != "invalid az_account_url value" {
+		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
+	}
+
 	os.Unsetenv("AZ_ACCOUNT_URL")
 	if _, err := envImportConfig(); err == nil || err.Error() != "az_account_url environment variable absent" {
 		test.Errorf("expected error: az_account_url environment variable absent, actual: %s", err)
