@@ -153,6 +153,20 @@ func TestOSImportConfig(test *testing.T) {
 	}
 }
 
+func TestValidateParams(test *testing.T) {
+	if err := validateParams(enum.Platform("azure"), "https://foo.com"); err == nil || err.Error() != "invalid az_account_url value" {
+		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
+	}
+
+	if err := validateParams(enum.Platform("azure"), ""); err == nil || err.Error() != "az_account_url value absent" {
+		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
+	}
+
+	if err := validateParams(enum.Platform("foo"), ""); err == nil || err.Error() != "invalid platform enum" {
+		test.Errorf("expected error: invalid platform enum, actual: %s", err)
+	}
+}
+
 func TestDefaultSnapshotPath(test *testing.T) {
 	snapshotPath, err := defaultSnapshotPath("")
 	if err != nil {
