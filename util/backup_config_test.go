@@ -116,20 +116,20 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
 	}
 
-	// test errors in reverse order
+	// test errors in reverse order for efficiency
+	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
+	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
+		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
+	}
+
 	os.Setenv("PLATFORM", "azure")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid az_account_url value" {
 		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
 	}
 
 	os.Unsetenv("AZ_ACCOUNT_URL")
-	if _, err := envImportConfig(); err == nil || err.Error() != "az_account_url environment variable absent" {
-		test.Errorf("expected error: az_account_url environment variable absent, actual: %s", err)
-	}
-
-	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
-	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
-		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
+	if _, err := envImportConfig(); err == nil || err.Error() != "az_account_url value absent" {
+		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
 	}
 
 	os.Setenv("PLATFORM", "foo")

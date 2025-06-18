@@ -67,23 +67,14 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, errors.New("cloud_config block absent")
 	}
 
-	// validate platform and authengine
-	if _, err = backupConfig.CloudConfig.Platform.New(); err != nil {
-		return nil, err
-	}
-	if _, err = backupConfig.VaultConfig.Engine.New(); err != nil {
+	// validate params
+	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.CloudConfig.AZAccountURL); err != nil {
 		return nil, err
 	}
 
-	// validate azure account url
-	if backupConfig.CloudConfig.Platform == enum.AZ && len(backupConfig.CloudConfig.AZAccountURL) == 0 {
-		if len(backupConfig.CloudConfig.AZAccountURL) == 0 {
-			log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
-			return nil, errors.New("az_account_url parameter absent")
-		} else if match, _ := regexp.MatchString("https://.*\\.blob\\.core\\.windows\\.net", backupConfig.CloudConfig.AZAccountURL); !match {
-			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
-			return nil, errors.New("invalid az_account_url value")
-		}
+	// validate authengine
+	if _, err = backupConfig.VaultConfig.Engine.New(); err != nil {
+		return nil, err
 	}
 
 	// finalize snapshot path
@@ -122,8 +113,11 @@ func envImportConfig() (*BackupConfig, error) {
 		log.Print("CONTAINER is a required input value, and it was unspecified as an environment variable")
 		return nil, errors.New("container environment variable absent")
 	}
-	platform, err := enum.Platform(os.Getenv("PLATFORM")).New()
-	if err != nil {
+
+	// validate params
+	platform := enum.Platform(os.Getenv("PLATFORM"))
+	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
+	if err = validateParams(platform, azAccountURL); err != nil {
 		return nil, err
 	}
 
@@ -131,18 +125,6 @@ func envImportConfig() (*BackupConfig, error) {
 	authEngine, err := enum.AuthEngine(os.Getenv("VAULT_AUTH_ENGINE")).New()
 	if len(os.Getenv("VAULT_AUTH_ENGINE")) > 0 && err != nil {
 		return nil, err
-	}
-
-	// validate azure account url
-	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
-	if platform == enum.AZ {
-		if len(azAccountURL) == 0 {
-			log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
-			return nil, errors.New("az_account_url environment variable absent")
-		} else if match, _ := regexp.MatchString("https://.*\\.blob\\.core\\.windows\\.net", azAccountURL); !match {
-			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
-			return nil, errors.New("invalid az_account_url value")
-		}
 	}
 
 	// finalize snapshot path
@@ -169,6 +151,27 @@ func envImportConfig() (*BackupConfig, error) {
 		},
 		SnapshotCleanup: cleanup,
 	}, nil
+}
+
+// validates various input parameters
+func validateParams(platform enum.Platform, azAccountURL string) error {
+	// validate platform
+	if _, err := platform.New(); err != nil {
+		return err
+	}
+
+	// validate azure account url
+	if platform == enum.AZ {
+		if len(azAccountURL) == 0 {
+			log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
+			return errors.New("az_account_url value absent")
+		} else if match, _ := regexp.MatchString("https://.*\\.blob\\.core\\.windows\\.net", azAccountURL); !match {
+			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
+			return errors.New("invalid az_account_url value")
+		}
+	}
+
+	return nil
 }
 
 // determines default snapshot path
