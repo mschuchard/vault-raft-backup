@@ -68,12 +68,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// validate params
-	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.CloudConfig.AZAccountURL); err != nil {
-		return nil, err
-	}
-
-	// validate authengine
-	if _, err = backupConfig.VaultConfig.Engine.New(); err != nil {
+	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.Engine, backupConfig.CloudConfig.AZAccountURL); err != nil {
 		return nil, err
 	}
 
@@ -116,14 +111,9 @@ func envImportConfig() (*BackupConfig, error) {
 
 	// validate params
 	platform := enum.Platform(os.Getenv("PLATFORM"))
+	authEngine := enum.AuthEngine(os.Getenv("VAULT_AUTH_ENGINE"))
 	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
-	if err = validateParams(platform, azAccountURL); err != nil {
-		return nil, err
-	}
-
-	// validate auth engine
-	authEngine, err := enum.AuthEngine(os.Getenv("VAULT_AUTH_ENGINE")).New()
-	if len(os.Getenv("VAULT_AUTH_ENGINE")) > 0 && err != nil {
+	if err = validateParams(platform, authEngine, azAccountURL); err != nil {
 		return nil, err
 	}
 
@@ -154,10 +144,17 @@ func envImportConfig() (*BackupConfig, error) {
 }
 
 // validates various input parameters
-func validateParams(platform enum.Platform, azAccountURL string) error {
+func validateParams(platform enum.Platform, authEngine enum.AuthEngine, azAccountURL string) error {
 	// validate platform
 	if _, err := platform.New(); err != nil {
 		return err
+	}
+
+	// validate auth engine
+	if len(authEngine) > 0 {
+		if _, err := authEngine.New(); err != nil {
+			return err
+		}
 	}
 
 	// validate azure account url
@@ -165,7 +162,7 @@ func validateParams(platform enum.Platform, azAccountURL string) error {
 		if len(azAccountURL) == 0 {
 			log.Print("azure specified as cloud platform, but co-requisite account url parameter was not specified")
 			return errors.New("az_account_url value absent")
-		} else if match, _ := regexp.MatchString("https://.*\\.blob\\.core\\.windows\\.net", azAccountURL); !match {
+		} else if match, _ := regexp.MatchString(`https://.*\.blob\.core\.windows\.net`, azAccountURL); !match {
 			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
 			return errors.New("invalid az_account_url value")
 		}
