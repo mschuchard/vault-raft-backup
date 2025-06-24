@@ -117,11 +117,6 @@ func TestOSImportConfig(test *testing.T) {
 	}
 
 	// test errors in reverse order for efficiency
-	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
-	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
-		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
-	}
-
 	os.Setenv("PLATFORM", "azure")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid az_account_url value" {
 		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
@@ -130,6 +125,11 @@ func TestOSImportConfig(test *testing.T) {
 	os.Unsetenv("AZ_ACCOUNT_URL")
 	if _, err := envImportConfig(); err == nil || err.Error() != "az_account_url value absent" {
 		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
+	}
+
+	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
+	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
+		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
 	}
 
 	os.Setenv("PLATFORM", "foo")
@@ -154,15 +154,19 @@ func TestOSImportConfig(test *testing.T) {
 }
 
 func TestValidateParams(test *testing.T) {
-	if err := validateParams(enum.Platform("azure"), "https://foo.com"); err == nil || err.Error() != "invalid az_account_url value" {
+	if err := validateParams(enum.AZ, enum.VaultToken, "https://foo.com"); err == nil || err.Error() != "invalid az_account_url value" {
 		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
 	}
 
-	if err := validateParams(enum.Platform("azure"), ""); err == nil || err.Error() != "az_account_url value absent" {
+	if err := validateParams(enum.AZ, enum.VaultToken, ""); err == nil || err.Error() != "az_account_url value absent" {
 		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
 	}
 
-	if err := validateParams(enum.Platform("foo"), ""); err == nil || err.Error() != "invalid platform enum" {
+	if err := validateParams(enum.AWS, enum.AuthEngine("foo"), ""); err == nil || err.Error() != "invalid authengine enum" {
+		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
+	}
+
+	if err := validateParams(enum.Platform("foo"), enum.VaultToken, ""); err == nil || err.Error() != "invalid platform enum" {
 		test.Errorf("expected error: invalid platform enum, actual: %s", err)
 	}
 }
