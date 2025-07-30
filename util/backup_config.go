@@ -151,10 +151,8 @@ func validateParams(platform enum.Platform, authEngine enum.AuthEngine, azAccoun
 	}
 
 	// validate auth engine
-	if len(authEngine) > 0 {
-		if _, err := authEngine.New(); err != nil {
-			return err
-		}
+	if _, err := authEngine.New(); err != nil {
+		return err
 	}
 
 	// validate azure account url

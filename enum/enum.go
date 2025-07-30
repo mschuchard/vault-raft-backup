@@ -31,11 +31,12 @@ type AuthEngine string
 const (
 	AWSIAM     AuthEngine = "aws"
 	VaultToken AuthEngine = "token"
+	Default    AuthEngine = ""
 )
 
 // authengine type conversion
 func (a AuthEngine) New() (AuthEngine, error) {
-	if a != AWSIAM && a != VaultToken {
+	if !slices.Contains([]AuthEngine{AWSIAM, VaultToken, Default}, a) {
 		log.Printf("string %s could not be converted to AuthEngine enum", a)
 		return "", errors.New("invalid authengine enum")
 	}

@@ -46,7 +46,7 @@ func TestNewVaultClient(test *testing.T) {
 	if vaultClientToken.Address() != "http://127.0.0.1:8200" || vaultClientToken.Token() != util.VaultToken {
 		test.Error("vault client token constructor did not initialize with expected values")
 		test.Errorf("expected vault client values: %s, %s", backupVaultTokenConfig.Address, backupVaultTokenConfig.Token)
-		test.Errorf("actual vault client values: %v", *vaultClientToken)
+		test.Errorf("actual vault client values: %s, %s", vaultClientToken.Address(), vaultClientToken.Token())
 	}
 
 	// test with aws
