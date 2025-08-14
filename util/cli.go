@@ -7,7 +7,7 @@ import (
 )
 
 // rudimentary cli for inputting hcl configuration file and emitting version
-func Cli() *string {
+func Cli() string {
 	// cli flags for hcl config file path and version
 	hclConfigPath := flag.String("c", "", "path to hcl file for backup configuration")
 	version := flag.Bool("version", false, "display current version")
@@ -21,11 +21,11 @@ func Cli() *string {
 
 	// verify config file existence
 	if len(*hclConfigPath) > 0 {
-		if _, err := os.Stat(*hclConfigPath); err != nil {
+		if info, err := os.Stat(*hclConfigPath); err != nil || info.IsDir() {
 			log.Fatalf("the config file at %s does not exist", *hclConfigPath)
 		}
 	}
 
 	// return path to hcl config file
-	return hclConfigPath
+	return *hclConfigPath
 }

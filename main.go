@@ -13,7 +13,7 @@ func main() {
 	hclConfigPath := util.Cli()
 
 	// construct vault raft backup config
-	backupConfig, err := util.NewBackupConfig(*hclConfigPath)
+	backupConfig, err := util.NewBackupConfig(hclConfigPath)
 	if err != nil {
 		log.Print("vault raft backup configuration failed validation")
 		log.Fatal(err)
