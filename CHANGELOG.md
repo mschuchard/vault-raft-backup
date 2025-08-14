@@ -1,5 +1,6 @@
 ### 1.4.1 (Next)
-- Improve and fix input parameter value validation. 
+- Improve and fix input parameter value validation.
+- Improve snapshot cleanup.
 
 ### 1.4.0
 - Add Azure storage support.

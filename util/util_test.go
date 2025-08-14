@@ -37,9 +37,9 @@ func TestSnapshotFileRemove(test *testing.T) {
 		test.Error("validation that generic file was removed returned no path error")
 	}
 
-	if err = SnapshotFileRemove(genericFile); err == nil || err.Error() != "snapshot not found" {
+	if err = SnapshotFileRemove(genericFile); err == nil || err.Error() != "snapshot not removed" {
 		test.Error("unexpected or no error returned")
-		test.Errorf("expected: snapshot not found, actual: %s", err)
+		test.Errorf("expected: snapshot not removed, actual: %s", err)
 	}
 }
 

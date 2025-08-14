@@ -22,23 +22,15 @@ func SnapshotFileRemove(snapshotFile *os.File) error {
 	// assign filename
 	filename := snapshotFile.Name()
 
-	// verify file existence
-	_, err := snapshotFile.Stat()
+	// remove file
+	err := os.Remove(filename)
 	if err == nil {
-		// remove file
-		err = os.Remove(filename)
-		if err == nil {
-			log.Printf("removed Vault Raft snapshot at '%s'", filename)
-		} else {
-			log.Printf("failed to remove Vault Raft snapshot at '%s'", filename)
-			log.Print("local snapshot file will need to be removed manually if desired")
-			err = errors.New("snapshot not removed")
-		}
+		log.Printf("removed Vault Raft snapshot at '%s'", filename)
 	} else {
-		// filenotfound
-		log.Printf("Vault Raft snapshot file does not exist at expected path '%s', and therefore will not be removed automatically", filename)
+		log.Printf("failed to remove Vault Raft snapshot at '%s'", filename)
+		log.Print(err)
 		log.Print("local snapshot file will need to be removed manually if desired")
-		err = errors.New("snapshot not found")
+		err = errors.New("snapshot not removed")
 	}
 
 	// need custom error to avoid collision with *os.PathError type from previously executed code since this func is normally deferred
