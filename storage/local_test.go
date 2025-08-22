@@ -13,7 +13,7 @@ func TestSnapshotFSCopy(test *testing.T) {
 	}
 	defer fooFile.Close()
 
-	if err := snapshotFSCopy("../.gitignore", fooFile, "foo"); err == nil || err.Error() != "readdirent ../.gitignore: not a directory" {
+	if err := snapshotFSCopy("../.gitignore", fooFile, "foo"); err == nil || err.Error() != "open ../.gitignore: not a directory" {
 		test.Error("snapshot copy did not fail on nonexistent destination directory")
 		test.Error(err)
 	}

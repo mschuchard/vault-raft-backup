@@ -14,7 +14,7 @@ import (
 // snapshot upload to aws s3
 func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName string) error { //(*s3manager.UploadOutput, error) {
 	// aws session with configuration populated automatically
-	ctx := context.TODO()
+	ctx := context.Background()
 	config, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		log.Print("failed to load AWS shared configuration and/or credentials")
@@ -38,5 +38,5 @@ func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName stri
 
 	// output s3 uploader location info
 	log.Printf("Vault Raft snapshot file %s uploaded to S3 bucket %s with key %s", snapshotName, uploadResult.Location, *uploadResult.Key)
-	return err
+	return nil
 }

@@ -26,7 +26,7 @@ func snapshotBlobUpload(container string, snapshotFile io.Reader, snapshotName s
 	}
 
 	// upload vault raft backup to azure blob storage
-	_, err = client.UploadStream(context.TODO(), container, snapshotName, snapshotFile, nil)
+	_, err = client.UploadStream(context.Background(), container, snapshotName, snapshotFile, nil)
 	if err != nil {
 		log.Printf("Vault backup failed to upload snapshot file %s to blob container %s", snapshotName, container)
 	}

@@ -40,5 +40,5 @@ func snapshotFSCopy(directory string, snapshotFile io.Reader, snapshotName strin
 	}
 
 	log.Printf("snapshotfile successfully copied to %s", destination)
-	return nil
+	return err
 }
