@@ -2,6 +2,7 @@
 - Improve and fix input parameter value validation.
 - Improve snapshot cleanup.
 - Fix AWS and Local storage returns.
+- Fix error handling for general snapshot transfer.
 
 ### 1.4.0
 - Add Azure storage support.

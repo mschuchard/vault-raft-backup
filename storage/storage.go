@@ -25,7 +25,7 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 	// defer snapshot close and remove
 	defer func() {
 		err = util.SnapshotFileClose(snapshotFile)
-		if cleanup {
+		if cleanup && err == nil {
 			err = util.SnapshotFileRemove(snapshotFile)
 		}
 	}()
@@ -44,6 +44,11 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 		log.Printf("an invalid storage platform was specified: %s", config.Platform)
 		err = errors.New("invalid storage platform")
 	}
+	if err != nil {
+		log.Print("snapshot storage transfer failed")
+		return err
+	}
 
+	// potentially return deferred error
 	return err
 }
