@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"strings"
 
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/aws"
@@ -35,7 +36,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 
 	// validate insecure
 	insecure := backupVaultConfig.Insecure
-	if !insecure && address[0:5] == "http:" {
+	if !insecure && strings.HasPrefix(address, "http:") {
 		log.Print("insecure input parameter was omitted or specified as false, and address protocol is http")
 		log.Print("insecure will be reset to value of true")
 		insecure = true
