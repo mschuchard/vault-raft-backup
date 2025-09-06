@@ -1,4 +1,4 @@
-### 1.4.1 (Next)
+### 1.4.1
 - Improve and fix input parameter value validation.
 - Improve snapshot cleanup.
 - Fix AWS and Local storage returns.
