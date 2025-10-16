@@ -29,7 +29,9 @@ func snapshotBlobUpload(container string, snapshotFile io.Reader, snapshotName s
 	_, err = client.UploadStream(context.Background(), container, snapshotName, snapshotFile, nil)
 	if err != nil {
 		log.Printf("Vault backup failed to upload snapshot file %s to blob container %s", snapshotName, container)
+		return err
 	}
 
-	return err
+	log.Printf("Vault Raft snapshot with name %s successfully uploaded to blob container %s", snapshotName, container)
+	return nil
 }

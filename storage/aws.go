@@ -37,6 +37,6 @@ func snapshotS3Upload(s3Bucket string, snapshotFile io.Reader, snapshotName stri
 	}
 
 	// output s3 uploader location info
-	log.Printf("Vault Raft snapshot file %s uploaded to S3 bucket %s with key %s", snapshotName, uploadResult.Location, *uploadResult.Key)
+	log.Printf("Vault Raft snapshot with name %s successfully uploaded to S3 bucket %s with key %s", snapshotName, uploadResult.Location, *uploadResult.Key)
 	return nil
 }
