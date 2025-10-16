@@ -1,3 +1,6 @@
+### 1.4.2 (Next)
+- Validate GCP client closing.
+
 ### 1.4.1
 - Improve and fix input parameter value validation.
 - Improve snapshot cleanup.

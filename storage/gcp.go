@@ -17,7 +17,16 @@ func snapshotCSUpload(csBucket string, snapshotFile io.Reader, snapshotName stri
 		log.Print("unable to initialize GCP client for transfer to cloud storage bucket")
 		return err
 	}
-	defer gcpClient.Close()
+	// defer client closing and capture any error
+	defer func() {
+		if closeErr := gcpClient.Close(); closeErr != nil {
+			log.Printf("failed to close GCP client: %s", closeErr)
+			// assign closeErr to err if no other error has occurred
+			if err == nil {
+				err = closeErr
+			}
+		}
+	}()
 
 	// initialize target in cloud storage bucket
 	uploadTarget := gcpClient.Bucket(csBucket).Object(snapshotName)
