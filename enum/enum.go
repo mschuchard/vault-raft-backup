@@ -16,9 +16,11 @@ const (
 	LOCAL Platform = "local"
 )
 
+var allPlatforms []Platform = []Platform{AWS, AZ, GCP, LOCAL}
+
 // platform type conversion
 func (p Platform) New() (Platform, error) {
-	if !slices.Contains([]Platform{AWS, AZ, GCP, LOCAL}, p) {
+	if !slices.Contains(allPlatforms, p) {
 		log.Printf("string %s could not be converted to Platform enum", p)
 		return "", errors.New("invalid platform enum")
 	}
@@ -34,9 +36,11 @@ const (
 	Default    AuthEngine = ""
 )
 
+var allAuthEngines []AuthEngine = []AuthEngine{AWSIAM, VaultToken, Default}
+
 // authengine type conversion
 func (a AuthEngine) New() (AuthEngine, error) {
-	if !slices.Contains([]AuthEngine{AWSIAM, VaultToken, Default}, a) {
+	if !slices.Contains(allAuthEngines, a) {
 		log.Printf("string %s could not be converted to AuthEngine enum", a)
 		return "", errors.New("invalid authengine enum")
 	}

@@ -1,5 +1,6 @@
 ### 1.4.2 (Next)
 - Validate GCP client closing.
+- Minor code execution optimization.
 
 ### 1.4.1
 - Improve and fix input parameter value validation.
