@@ -18,4 +18,8 @@ func TestVaultRaftSnapshot(test *testing.T) {
 	}
 
 	os.Remove("./vault.bak")
+
+	if _, err = VaultRaftSnapshot(util.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
+		test.Errorf("expected error (contains): open /foo/vault.bak: no such file or directory, actual: %s", err)
+	}
 }
