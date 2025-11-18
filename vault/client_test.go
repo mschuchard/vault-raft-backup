@@ -62,7 +62,7 @@ func TestNewVaultClient(test *testing.T) {
 	}*/
 
 	// test errors in reverse validation order
-	backupVaultConfig.Token = "1234"
+	backupVaultConfig.Token = "foobarbaz123!"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "invalid vault token" {
 		test.Errorf("expected error: invalid vault token, actual: %s", err)
 	}

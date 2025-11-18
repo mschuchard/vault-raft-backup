@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"regexp"
 	"strings"
 
 	vault "github.com/hashicorp/vault/api"
@@ -101,7 +102,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 	switch engine {
 	case enum.VaultToken:
 		// validate vault token
-		if len(token) != 28 {
+		if matched, _ := regexp.MatchString(`^[a-zA-Z0-9.]+$`, token); !matched {
 			log.Print("the specified Vault Token is invalid")
 			return nil, errors.New("invalid vault token")
 		}
