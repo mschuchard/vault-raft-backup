@@ -1,4 +1,4 @@
-### 1.4.2 (Next)
+### 1.4.2
 - Validate GCP client closing.
 - Improve authentication token format validation.
 - Minor code execution optimization.
