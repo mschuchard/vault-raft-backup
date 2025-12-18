@@ -16,3 +16,4 @@ cloud_config {
 }
 
 snapshot_cleanup = true
+snapshot_restore = true

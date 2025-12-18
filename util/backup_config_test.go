@@ -33,7 +33,7 @@ func TestHclDecodeConfig(test *testing.T) {
 		Prefix:       Prefix,
 	}
 
-	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || !config.SnapshotCleanup {
+	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || !config.SnapshotCleanup || !config.SnapshotRestore {
 		test.Error("decoded config struct did not contain expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", vaultConfig)
@@ -41,6 +41,8 @@ func TestHclDecodeConfig(test *testing.T) {
 		test.Errorf("actual cloud: %v", cloudConfig)
 		test.Error("expected snapshot cleanup: true")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
+		test.Error("expected snapshot restore: true")
+		test.Errorf("actual snapshot restore: %t", config.SnapshotRestore)
 	}
 
 	_, err = hclDecodeConfig("fixtures/invalid.hcl")
@@ -82,6 +84,7 @@ func TestOSImportConfig(test *testing.T) {
 	os.Setenv("VAULT_AWS_ROLE", awsRole)
 	os.Setenv("VAULT_SNAPSHOT_PATH", snapshotPath)
 	os.Setenv("SNAPSHOT_CLEANUP", "false")
+	os.Setenv("SNAPSHOT_RESTORE", "false")
 
 	config, err := NewBackupConfig("")
 	if err != nil {
@@ -106,7 +109,7 @@ func TestOSImportConfig(test *testing.T) {
 		AWSRole:      awsRole,
 		SnapshotPath: snapshotPath,
 	}
-	if *cloudConfig != expectedCloudConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup {
+	if *cloudConfig != expectedCloudConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup || config.SnapshotRestore {
 		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", *vaultConfig)
@@ -114,6 +117,8 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual cloud: %v", *cloudConfig)
 		test.Error("expected snapshot cleanup: false")
 		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
+		test.Error("expected snapshot restore: false")
+		test.Errorf("actual snapshot restore: %t", config.SnapshotRestore)
 	}
 
 	// test errors in reverse order for efficiency
@@ -140,6 +145,11 @@ func TestOSImportConfig(test *testing.T) {
 	os.Unsetenv("CONTAINER")
 	if _, err = envImportConfig(); err == nil || err.Error() != "container environment variable absent" {
 		test.Errorf("expected error: container environment variable absent, actual: %s", err)
+	}
+
+	os.Setenv("SNAPSHOT_RESTORE", "not a boolean")
+	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_RESTORE value" {
+		test.Errorf("expected error: invalid SNAPSHOT_RESTORE value, actual: %s", err)
 	}
 
 	os.Setenv("SNAPSHOT_CLEANUP", "not a boolean")

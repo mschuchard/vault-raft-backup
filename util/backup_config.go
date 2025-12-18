@@ -37,6 +37,7 @@ type BackupConfig struct {
 	CloudConfig     *CloudConfig `hcl:"cloud_config,block"`
 	VaultConfig     *VaultConfig `hcl:"vault_config,block"`
 	SnapshotCleanup bool         `hcl:"snapshot_cleanup,optional"`
+	SnapshotRestore bool         `hcl:"snapshot_restore,optional"`
 }
 
 // config constructor
@@ -93,13 +94,21 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 	}
 
-	// validate snapshot cleanup
+	// validate snapshot cleanup and restore
 	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
 	cleanup, err := strconv.ParseBool(cleanupEnv)
 	if err != nil { // assigned value could not be converted to boolean
 		log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", cleanupEnv)
 		log.Print(err)
 		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
+	}
+
+	restoreEnv := os.Getenv("SNAPSHOT_RESTORE")
+	restore, err := strconv.ParseBool(restoreEnv)
+	if err != nil { // assigned value could not be converted to boolean
+		log.Printf("invalid boolean value '%s' for SNAPSHOT_RESTORE", restoreEnv)
+		log.Print(err)
+		return nil, errors.New("invalid SNAPSHOT_RESTORE value")
 	}
 
 	// validate container and platform were specified, and platform value
@@ -140,6 +149,7 @@ func envImportConfig() (*BackupConfig, error) {
 			SnapshotPath: snapshotPath,
 		},
 		SnapshotCleanup: cleanup,
+		SnapshotRestore: restore,
 	}, nil
 }
 
