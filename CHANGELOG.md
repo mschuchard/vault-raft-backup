@@ -1,3 +1,6 @@
+### 1.5.0 (Next)
+- Add snapshot restoration functionality.
+
 ### 1.4.2
 - Validate GCP client closing.
 - Improve authentication token format validation.
