@@ -17,6 +17,7 @@ func TestHclDecodeConfig(test *testing.T) {
 	}
 	vaultConfig := *config.VaultConfig
 	cloudConfig := *config.CloudConfig
+	snapshotConfig := *config.SnapshotConfig
 	expectedVaultConfig := VaultConfig{
 		Address:      "https://127.0.0.1",
 		Insecure:     true,
@@ -32,17 +33,19 @@ func TestHclDecodeConfig(test *testing.T) {
 		Platform:     enum.AWS,
 		Prefix:       Prefix,
 	}
+	expectedSnapshotConfig := SnapshotConfig{
+		Cleanup: true,
+		Restore: true,
+	}
 
-	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || !config.SnapshotCleanup || !config.SnapshotRestore {
+	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || snapshotConfig != expectedSnapshotConfig {
 		test.Error("decoded config struct did not contain expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
 		test.Errorf("actual vault: %v", vaultConfig)
 		test.Errorf("expected cloud: %v", expectedCloudConfig)
 		test.Errorf("actual cloud: %v", cloudConfig)
-		test.Error("expected snapshot cleanup: true")
-		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
-		test.Error("expected snapshot restore: true")
-		test.Errorf("actual snapshot restore: %t", config.SnapshotRestore)
+		test.Errorf("expected snapshot: %v", expectedSnapshotConfig)
+		test.Errorf("actual snapshot: %v", snapshotConfig)
 	}
 
 	_, err = hclDecodeConfig("fixtures/invalid.hcl")
@@ -92,8 +95,9 @@ func TestOSImportConfig(test *testing.T) {
 		test.Error(err)
 	}
 
-	vaultConfig := config.VaultConfig
-	cloudConfig := config.CloudConfig
+	vaultConfig := *config.VaultConfig
+	cloudConfig := *config.CloudConfig
+	snapshotConfig := *config.SnapshotConfig
 	expectedCloudConfig := CloudConfig{
 		AZAccountURL: azAccountURL,
 		Container:    Container,
@@ -109,16 +113,21 @@ func TestOSImportConfig(test *testing.T) {
 		AWSRole:      awsRole,
 		SnapshotPath: snapshotPath,
 	}
-	if *cloudConfig != expectedCloudConfig || *vaultConfig != expectedVaultConfig || config.SnapshotCleanup || config.SnapshotRestore {
+	expectedSnapshotConfig := SnapshotConfig{
+		Cleanup: false,
+		Restore: false,
+	}
+
+	if cloudConfig != expectedCloudConfig || vaultConfig != expectedVaultConfig || snapshotConfig != expectedSnapshotConfig {
 		test.Error("imported config struct(s) did not initialize with expected values")
 		test.Errorf("expected vault: %v", expectedVaultConfig)
-		test.Errorf("actual vault: %v", *vaultConfig)
+		test.Errorf("actual vault: %v", vaultConfig)
 		test.Errorf("expected cloud: %v", expectedCloudConfig)
-		test.Errorf("actual cloud: %v", *cloudConfig)
+		test.Errorf("actual cloud: %v", cloudConfig)
 		test.Error("expected snapshot cleanup: false")
-		test.Errorf("actual snapshot cleanup: %t", config.SnapshotCleanup)
+		test.Errorf("actual snapshot cleanup: %t", config.SnapshotConfig.Cleanup)
 		test.Error("expected snapshot restore: false")
-		test.Errorf("actual snapshot restore: %t", config.SnapshotRestore)
+		test.Errorf("actual snapshot restore: %t", config.SnapshotConfig.Restore)
 	}
 
 	// test errors in reverse order for efficiency

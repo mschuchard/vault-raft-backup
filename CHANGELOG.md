@@ -1,5 +1,6 @@
 ### 1.5.0 (Next)
 - Add snapshot restoration functionality.
+- Migrate `snapshot_cleanup` into new `snapshot_config` HCL2 block.
 
 ### 1.4.2
 - Validate GCP client closing.

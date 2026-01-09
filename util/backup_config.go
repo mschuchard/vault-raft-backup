@@ -32,12 +32,17 @@ type VaultConfig struct {
 	SnapshotPath string          `hcl:"snapshot_path,optional"`
 }
 
+// snapshot config
+type SnapshotConfig struct {
+	Cleanup bool `hcl:"cleanup,optional"`
+	Restore bool `hcl:"restore,optional"`
+}
+
 // overall vault raft backup config
 type BackupConfig struct {
-	CloudConfig     *CloudConfig `hcl:"cloud_config,block"`
-	VaultConfig     *VaultConfig `hcl:"vault_config,block"`
-	SnapshotCleanup bool         `hcl:"snapshot_cleanup,optional"`
-	SnapshotRestore bool         `hcl:"snapshot_restore,optional"`
+	CloudConfig    *CloudConfig    `hcl:"cloud_config,block"`
+	VaultConfig    *VaultConfig    `hcl:"vault_config,block"`
+	SnapshotConfig *SnapshotConfig `hcl:"snapshot_config,block"`
 }
 
 // config constructor
@@ -148,8 +153,10 @@ func envImportConfig() (*BackupConfig, error) {
 			AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
 			SnapshotPath: snapshotPath,
 		},
-		SnapshotCleanup: cleanup,
-		SnapshotRestore: restore,
+		SnapshotConfig: &SnapshotConfig{
+			Cleanup: cleanup,
+			Restore: restore,
+		},
 	}, nil
 }
 

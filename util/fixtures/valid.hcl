@@ -15,5 +15,7 @@ cloud_config {
   prefix         = "prefix"
 }
 
-snapshot_cleanup = true
-snapshot_restore = true
+snapshot_config {
+  cleanup = true
+  restore = true
+}

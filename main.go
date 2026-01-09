@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// vault raft snapshot
-	if backupConfig.SnapshotRestore {
+	if backupConfig.SnapshotConfig.Restore {
 		// restore from snapshot
 		if err = vault.VaultRaftSnapshotRestore(vaultClient, backupConfig.VaultConfig.SnapshotPath); err != nil {
 			log.Print("vault raft snapshot restore failed")
@@ -42,7 +42,7 @@ func main() {
 		}
 
 		// transfer snapshot to cloud storage
-		if err = storage.StorageTransfer(backupConfig.CloudConfig, snapshotFile.Name(), backupConfig.SnapshotCleanup); err != nil {
+		if err = storage.StorageTransfer(backupConfig.CloudConfig, snapshotFile.Name(), backupConfig.SnapshotConfig.Cleanup); err != nil {
 			if err.Error() == "snapshot not found" || err.Error() == "snapshot not removed" {
 				// log the non-fatal error
 				log.Print("cloud storage upload succeeded, but snapshot cleanup failed")
