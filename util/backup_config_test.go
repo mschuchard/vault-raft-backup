@@ -25,7 +25,6 @@ func TestHclDecodeConfig(test *testing.T) {
 		Token:        "foobar",
 		AWSMountPath: "azure",
 		AWSRole:      "me",
-		SnapshotPath: "/path/to/vault.bak",
 	}
 	expectedCloudConfig := CloudConfig{
 		AZAccountURL: "https://foo.com",
@@ -35,6 +34,7 @@ func TestHclDecodeConfig(test *testing.T) {
 	}
 	expectedSnapshotConfig := SnapshotConfig{
 		Cleanup: true,
+		Path:    "/path/to/vault.bak",
 		Restore: true,
 	}
 
@@ -111,10 +111,10 @@ func TestOSImportConfig(test *testing.T) {
 		Token:        token,
 		AWSMountPath: awsMount,
 		AWSRole:      awsRole,
-		SnapshotPath: snapshotPath,
 	}
 	expectedSnapshotConfig := SnapshotConfig{
 		Cleanup: false,
+		Path:    snapshotPath,
 		Restore: false,
 	}
 

@@ -10,10 +10,9 @@ import (
 var (
 	backupVaultConfig      = &util.VaultConfig{}
 	backupVaultTokenConfig = &util.VaultConfig{
-		Address:      "http://127.0.0.1:8200",
-		Engine:       "token",
-		Token:        util.VaultToken,
-		SnapshotPath: "/tmp/my_vault.backup",
+		Address: "http://127.0.0.1:8200",
+		Engine:  "token",
+		Token:   util.VaultToken,
 	}
 	backupVaultAWSConfig = &util.VaultConfig{
 		Address:      "http://127.0.0.1:8200",

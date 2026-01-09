@@ -5,7 +5,6 @@ vault_config {
   token          = "foobar"
   aws_mount_path = "azure"
   aws_role       = "me"
-  snapshot_path  = "/path/to/vault.bak"
 }
 
 cloud_config {
@@ -17,5 +16,6 @@ cloud_config {
 
 snapshot_config {
   cleanup = true
+  path    = "/path/to/vault.bak"
   restore = true
 }

@@ -29,13 +29,13 @@ type VaultConfig struct {
 	Token        string          `hcl:"token,optional"`
 	AWSMountPath string          `hcl:"aws_mount_path,optional"`
 	AWSRole      string          `hcl:"aws_role,optional"`
-	SnapshotPath string          `hcl:"snapshot_path,optional"`
 }
 
 // snapshot config
 type SnapshotConfig struct {
-	Cleanup bool `hcl:"cleanup,optional"`
-	Restore bool `hcl:"restore,optional"`
+	Cleanup bool   `hcl:"cleanup,optional"`
+	Path    string `hcl:"path,optional"`
+	Restore bool   `hcl:"restore,optional"`
 }
 
 // overall vault raft backup config
@@ -79,7 +79,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// finalize snapshot path
-	backupConfig.VaultConfig.SnapshotPath, err = defaultSnapshotPath(backupConfig.VaultConfig.SnapshotPath)
+	backupConfig.SnapshotConfig.Path, err = defaultSnapshotPath(backupConfig.SnapshotConfig.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -151,10 +151,10 @@ func envImportConfig() (*BackupConfig, error) {
 			Token:        os.Getenv("VAULT_TOKEN"),
 			AWSMountPath: os.Getenv("VAULT_AWS_MOUNT"),
 			AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
-			SnapshotPath: snapshotPath,
 		},
 		SnapshotConfig: &SnapshotConfig{
 			Cleanup: cleanup,
+			Path:    snapshotPath,
 			Restore: restore,
 		},
 	}, nil

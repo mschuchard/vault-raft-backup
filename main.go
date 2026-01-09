@@ -29,13 +29,13 @@ func main() {
 	// vault raft snapshot
 	if backupConfig.SnapshotConfig.Restore {
 		// restore from snapshot
-		if err = vault.VaultRaftSnapshotRestore(vaultClient, backupConfig.VaultConfig.SnapshotPath); err != nil {
+		if err = vault.VaultRaftSnapshotRestore(vaultClient, backupConfig.SnapshotConfig.Path); err != nil {
 			log.Print("vault raft snapshot restore failed")
 			log.Fatal(err)
 		}
 	} else {
 		// create snapshot
-		snapshotFile, err := vault.VaultRaftSnapshotCreate(vaultClient, backupConfig.VaultConfig.SnapshotPath)
+		snapshotFile, err := vault.VaultRaftSnapshotCreate(vaultClient, backupConfig.SnapshotConfig.Path)
 		if err != nil {
 			log.Print("vault raft snapshot creation failed")
 			log.Fatal(err)
