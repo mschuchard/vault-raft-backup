@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"compress/gzip"
 	"errors"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -30,6 +32,22 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 		}
 	}()
 
+	// wrap in compression stream if enabled
+	// TODO: gz extension
+	/*var reader io.ReadCloser = snapshotFile
+	if compression > 0 {
+		compressedReader, err := CompressReader(snapshotFile, compressionLevel)
+		if err != nil {
+			log.Printf("failed to compress snapshot file %q: %v", snapshotPath, err)
+			return err
+		}
+		defer compressedReader.Close()
+		reader = compressedReader
+	} else {
+		log.Print("snapshot will be transferred without compression")
+
+	}*/
+
 	// upload snapshot to various storage backends
 	switch config.Platform {
 	case enum.AWS:
@@ -51,4 +69,50 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 
 	// potentially return deferred error
 	return err
+}
+
+// compression helper function that wraps a reader with gzip compression, and returns a reader for the compressed data
+func CompressReader(reader io.Reader, level int) (io.ReadCloser, error) {
+	// convert user input level to gzip level
+	switch level {
+	case 1:
+		level = gzip.BestSpeed
+	case 2:
+		level = gzip.DefaultCompression
+	case 3:
+		level = gzip.BestCompression
+	default:
+		log.Printf("invalid user input compression level %d", level)
+		return nil, errors.New("invalid compression level")
+	}
+	log.Printf("using converted gzip compression level %d", level)
+
+	// initialize pipe
+	pipeRead, pipeWrite := io.Pipe()
+	// create gzip writer
+	gzWriter, err := gzip.NewWriterLevel(pipeWrite, level)
+	if err != nil {
+		log.Printf("invalid compression level %d", level)
+		return nil, err
+	}
+
+	// start compression in background
+	go func() {
+		defer pipeWrite.Close()
+		defer gzWriter.Close()
+
+		// compress data from reader into pipe
+		if _, err := io.Copy(gzWriter, reader); err != nil {
+			pipeWrite.CloseWithError(err)
+			return
+		}
+
+		// flush gzip writer
+		if err := gzWriter.Close(); err != nil {
+			pipeWrite.CloseWithError(err)
+		}
+	}()
+
+	// return the read end of the pipe
+	return pipeRead, nil
 }
