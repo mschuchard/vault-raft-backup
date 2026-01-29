@@ -1,6 +1,7 @@
 ### 1.5.0 (Next)
 - Add snapshot restoration functionality.
 - Migrate `snapshot_cleanup` and `snapshot_path` into new `snapshot_config` HCL2 block.
+- Deprecate environment variable input parameter support.
 
 ### 1.4.2
 - Validate GCP client closing.

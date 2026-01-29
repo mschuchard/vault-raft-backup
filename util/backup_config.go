@@ -49,6 +49,7 @@ type BackupConfig struct {
 func NewBackupConfig(filePath string) (*BackupConfig, error) {
 	// determine input structure and return accordingly
 	if len(filePath) == 0 {
+		log.Print("support for input parameters through environment variables is deprecated, and will be unsupported in version 2.0.0")
 		return envImportConfig()
 	} else {
 		return hclDecodeConfig(filePath)
