@@ -20,7 +20,7 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 	// open snapshot file
 	snapshotFile, err := os.Open(snapshotPath)
 	if err != nil {
-		log.Printf("failed to open snapshot file %q: %v", snapshotPath, err)
+		log.Printf("failed to open snapshot file %s", snapshotPath)
 		return err
 	}
 
@@ -32,32 +32,32 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 		}
 	}()
 
-	// wrap in compression stream if enabled
-	// TODO: gz extension
-	/*var reader io.ReadCloser = snapshotFile
-	if compression > 0 {
-		compressedReader, err := CompressReader(snapshotFile, compressionLevel)
+	// wrap in streaming compression if enabled
+	var reader io.ReadCloser = snapshotFile
+	if config.CompressionLevel > 0 {
+		// create compressed reader at specified level
+		reader, err = CompressReader(snapshotFile, config.CompressionLevel)
 		if err != nil {
-			log.Printf("failed to compress snapshot file %q: %v", snapshotPath, err)
+			log.Printf("failed to compress snapshot file %s", snapshotPath)
 			return err
 		}
-		defer compressedReader.Close()
-		reader = compressedReader
+
+		// defer reader close
+		defer reader.Close()
 	} else {
 		log.Print("snapshot will be transferred without compression")
-
-	}*/
+	}
 
 	// upload snapshot to various storage backends
 	switch config.Platform {
 	case enum.AWS:
-		err = snapshotS3Upload(config.Container, snapshotFile, snapshotName)
+		err = snapshotS3Upload(config.Container, reader, snapshotName)
 	case enum.AZ:
-		err = snapshotBlobUpload(config.Container, snapshotFile, snapshotName, config.AZAccountURL)
+		err = snapshotBlobUpload(config.Container, reader, snapshotName, config.AZAccountURL)
 	case enum.GCP:
-		err = snapshotCSUpload(config.Container, snapshotFile, snapshotName)
+		err = snapshotCSUpload(config.Container, reader, snapshotName)
 	case enum.LOCAL:
-		err = snapshotFSCopy(config.Container, snapshotFile, snapshotName)
+		err = snapshotFSCopy(config.Container, reader, snapshotName)
 	default:
 		log.Printf("an invalid storage platform was specified: %s", config.Platform)
 		err = errors.New("invalid storage platform")
@@ -73,6 +73,8 @@ func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool
 
 // compression helper function that wraps a reader with gzip compression, and returns a reader for the compressed data
 func CompressReader(reader io.Reader, level int) (io.ReadCloser, error) {
+	log.Print("snapshot will be transferred with compression")
+
 	// convert user input level to gzip level
 	switch level {
 	case 1:
