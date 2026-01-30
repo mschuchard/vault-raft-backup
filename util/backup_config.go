@@ -33,9 +33,10 @@ type VaultConfig struct {
 
 // snapshot config
 type SnapshotConfig struct {
-	Cleanup bool   `hcl:"cleanup,optional"`
-	Path    string `hcl:"path,optional"`
-	Restore bool   `hcl:"restore,optional"`
+	Cleanup          bool   `hcl:"cleanup,optional"`
+	CompressionLevel int    `hcl:"compression_level,optional"`
+	Path             string `hcl:"path,optional"`
+	Restore          bool   `hcl:"restore,optional"`
 }
 
 // overall vault raft backup config
@@ -100,7 +101,7 @@ func envImportConfig() (*BackupConfig, error) {
 		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
 	}
 
-	// validate snapshot cleanup and restore
+	// validate snapshot cleanup, compression, and restore
 	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
 	cleanup, err := strconv.ParseBool(cleanupEnv)
 	if err != nil { // assigned value could not be converted to boolean
@@ -115,6 +116,14 @@ func envImportConfig() (*BackupConfig, error) {
 		log.Printf("invalid boolean value '%s' for SNAPSHOT_RESTORE", restoreEnv)
 		log.Print(err)
 		return nil, errors.New("invalid SNAPSHOT_RESTORE value")
+	}
+
+	compressionEnv := os.Getenv("SNAPSHOT_COMPRESSION_LEVEL")
+	compressionLevel, err := strconv.Atoi(compressionEnv)
+	if err != nil { // assigned value could not be converted to integer
+		log.Printf("invalid integer value '%s' for SNAPSHOT_COMPRESSION_LEVEL", compressionEnv)
+		log.Print(err)
+		return nil, errors.New("invalid SNAPSHOT_COMPRESSION_LEVEL value")
 	}
 
 	// validate container and platform were specified, and platform value
@@ -154,9 +163,10 @@ func envImportConfig() (*BackupConfig, error) {
 			AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
 		},
 		SnapshotConfig: &SnapshotConfig{
-			Cleanup: cleanup,
-			Path:    snapshotPath,
-			Restore: restore,
+			Cleanup:          cleanup,
+			CompressionLevel: compressionLevel,
+			Path:             snapshotPath,
+			Restore:          restore,
 		},
 	}, nil
 }
