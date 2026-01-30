@@ -10,12 +10,12 @@ import (
 )
 
 // vault raft snapshot creation
-func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) (*os.File, error) {
+func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) error {
 	// prepare snapshot file for content writing
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		log.Printf("snapshot file at '%s' could not be created or opened", snapshotPath)
-		return nil, err
+		return err
 	}
 
 	// defer snapshot close
@@ -27,12 +27,12 @@ func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) (*os.Fil
 	err = client.Sys().RaftSnapshot(snapshotFile)
 	if err != nil {
 		log.Print("Vault Raft snapshot creation failed")
-		return nil, err
+		return err
 	}
 
-	log.Printf("snapshot file created on local filesystem at '%s'", snapshotFile.Name())
+	log.Printf("snapshot file created on local filesystem at '%s'", snapshotPath)
 
-	return snapshotFile, err
+	return nil
 }
 
 // vault raft snapshot restoration
@@ -56,7 +56,7 @@ func VaultRaftSnapshotRestore(client *vault.Client, snapshotPath string) error {
 		return err
 	}
 
-	log.Printf("snapshot file restored to vault from local filesystem at '%s'", snapshotFile.Name())
+	log.Printf("snapshot file restored to vault from local filesystem at '%s'", snapshotPath)
 
 	return nil
 }

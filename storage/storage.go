@@ -13,32 +13,32 @@ import (
 )
 
 // unified function for interfacing with all snapshot storage transfers
-func StorageTransfer(config *util.CloudConfig, snapshotPath string, cleanup bool) error {
+func StorageTransfer(config *util.CloudConfig, snapshot *util.SnapshotConfig) error {
 	// use supplied prefix and snapshot base filename for full name
-	snapshotName := config.Prefix + filepath.Base(snapshotPath)
+	snapshotName := config.Prefix + filepath.Base(snapshot.Path)
 
 	// open snapshot file
-	snapshotFile, err := os.Open(snapshotPath)
+	snapshotFile, err := os.Open(snapshot.Path)
 	if err != nil {
-		log.Printf("failed to open snapshot file %s", snapshotPath)
+		log.Printf("failed to open snapshot file %s", snapshot.Path)
 		return err
 	}
 
 	// defer snapshot close and remove
 	defer func() {
 		err = util.SnapshotFileClose(snapshotFile)
-		if cleanup && err == nil {
+		if snapshot.Cleanup && err == nil {
 			err = util.SnapshotFileRemove(snapshotFile)
 		}
 	}()
 
 	// wrap in streaming compression if enabled
 	var reader io.ReadCloser = snapshotFile
-	if config.CompressionLevel > 0 {
+	if snapshot.CompressionLevel > 0 {
 		// create compressed reader at specified level
-		reader, err = CompressReader(snapshotFile, config.CompressionLevel)
+		reader, err = CompressReader(snapshotFile, snapshot.CompressionLevel)
 		if err != nil {
-			log.Printf("failed to compress snapshot file %s", snapshotPath)
+			log.Printf("failed to compress snapshot file %s", snapshot.Path)
 			return err
 		}
 
