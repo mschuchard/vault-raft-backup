@@ -33,9 +33,10 @@ func TestHclDecodeConfig(test *testing.T) {
 		Prefix:       Prefix,
 	}
 	expectedSnapshotConfig := SnapshotConfig{
-		Cleanup: true,
-		Path:    "/path/to/vault.bak",
-		Restore: true,
+		Cleanup:          true,
+		CompressionLevel: 1,
+		Path:             "/path/to/vault.bak",
+		Restore:          true,
 	}
 
 	if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || snapshotConfig != expectedSnapshotConfig {
@@ -88,6 +89,7 @@ func TestOSImportConfig(test *testing.T) {
 	os.Setenv("VAULT_SNAPSHOT_PATH", snapshotPath)
 	os.Setenv("SNAPSHOT_CLEANUP", "false")
 	os.Setenv("SNAPSHOT_RESTORE", "false")
+	os.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "1")
 
 	config, err := NewBackupConfig("")
 	if err != nil {
@@ -113,9 +115,10 @@ func TestOSImportConfig(test *testing.T) {
 		AWSRole:      awsRole,
 	}
 	expectedSnapshotConfig := SnapshotConfig{
-		Cleanup: false,
-		Path:    snapshotPath,
-		Restore: false,
+		Cleanup:          false,
+		CompressionLevel: 1,
+		Path:             snapshotPath,
+		Restore:          false,
 	}
 
 	if cloudConfig != expectedCloudConfig || vaultConfig != expectedVaultConfig || snapshotConfig != expectedSnapshotConfig {
@@ -124,10 +127,8 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("actual vault: %v", vaultConfig)
 		test.Errorf("expected cloud: %v", expectedCloudConfig)
 		test.Errorf("actual cloud: %v", cloudConfig)
-		test.Error("expected snapshot cleanup: false")
-		test.Errorf("actual snapshot cleanup: %t", config.SnapshotConfig.Cleanup)
-		test.Error("expected snapshot restore: false")
-		test.Errorf("actual snapshot restore: %t", config.SnapshotConfig.Restore)
+		test.Errorf("expected snapshot: %v", expectedSnapshotConfig)
+		test.Errorf("actual snapshot: %v", snapshotConfig)
 	}
 
 	// test errors in reverse order for efficiency
@@ -154,6 +155,11 @@ func TestOSImportConfig(test *testing.T) {
 	os.Unsetenv("CONTAINER")
 	if _, err = envImportConfig(); err == nil || err.Error() != "container environment variable absent" {
 		test.Errorf("expected error: container environment variable absent, actual: %s", err)
+	}
+
+	os.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "foo")
+	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_COMPRESSION_LEVEL value" {
+		test.Errorf("expected error: invalid SNAPSHOT_COMPRESSION_LEVEL value, actual: %s", err)
 	}
 
 	os.Setenv("SNAPSHOT_RESTORE", "not a boolean")

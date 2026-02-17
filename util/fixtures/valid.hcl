@@ -15,7 +15,8 @@ cloud_config {
 }
 
 snapshot_config {
-  cleanup = true
-  path    = "/path/to/vault.bak"
-  restore = true
+  cleanup           = true
+  compression_level = 1
+  path              = "/path/to/vault.bak"
+  restore           = true
 }
