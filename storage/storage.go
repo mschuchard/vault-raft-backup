@@ -85,7 +85,8 @@ func CompressReader(reader io.Reader, level int) (io.ReadCloser, error) {
 		level = gzip.BestCompression
 	default:
 		log.Printf("invalid user input compression level %d", level)
-		return nil, errors.New("invalid compression level")
+		log.Print("resetting to valid level")
+		level = gzip.BestSpeed
 	}
 	log.Printf("using converted gzip compression level %d", level)
 
@@ -94,7 +95,7 @@ func CompressReader(reader io.Reader, level int) (io.ReadCloser, error) {
 	// create gzip writer
 	gzWriter, err := gzip.NewWriterLevel(pipeWrite, level)
 	if err != nil {
-		log.Printf("invalid compression level %d", level)
+		log.Print("failed to create gzip writer for snapshot compression")
 		return nil, err
 	}
 
