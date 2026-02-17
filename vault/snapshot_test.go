@@ -13,8 +13,9 @@ func TestVaultRaftSnapshotCreate(test *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "GET http://127.0.0.1:8200/v1/sys/storage/raft/snapshot") {
 		test.Errorf("expected error (contains): GET http://127.0.0.1:8200/v1/sys/storage/raft/snapshot, actual: %v", err)
 	}
-	if _, err = os.Stat("./vault.bak"); err == nil {
+	if _, err = os.Stat("./vault.bak"); err != nil {
 		test.Error("vault raft snapshot file was not actually created")
+		test.Error(err)
 	}
 
 	os.Remove("./vault.bak")
