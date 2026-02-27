@@ -1,4 +1,4 @@
-### 1.5.0 (Next)
+### 1.5.0
 - Add snapshot restoration functionality.
 - Add snapshot streaming compression functionality
 - Migrate `snapshot_cleanup` and `snapshot_path` into new `snapshot_config` HCL2 block.

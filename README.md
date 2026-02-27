@@ -25,7 +25,7 @@ path "sys/storage/raft/snapshot" {
 
 ### Usage
 
-Vault Raft Backup can be configured with either environment variables or a HCL2 config file.
+Vault Raft Backup can be configured with either environment variables or a HCL2 config file. The environment variables method is deprecated as of version 1.5.0, and no new input parameters will be supported with that method.
 
 Additionally, AWS, Azure, or GCP authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.). The GCP and Azure Golang SDKs behave similarly for analogous authentication settings (note that this tool assumes Entra Security Principal authentication for Azure). If the snapshot is stored locally instead, then authentication and authorization will vary greatly based on your personal environment.
 
@@ -50,9 +50,6 @@ export VAULT_TOKEN=<vault authentication token>
 export VAULT_AWS_MOUNT=<vault aws auth engine mount path>
 # default: empty
 export VAULT_AWS_ROLE=<vault aws authentication role>
-# default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
-# NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
-export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
 
 # CLOUD STORAGE
 # default: empty (required if PLATFORM is "azure")
@@ -65,10 +62,20 @@ export PLATFORM=<aws, azure, gcp, or local>
 # default: empty
 export PREFIX=<snapshot filename prefix during storage transfer>
 
-# MISCELLANEOUS
+# SNAPSHOT
 # determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
 # default: true
 export SNAPSHOT_CLEANUP=<boolean>
+# determines the level of compression for the snapshot
+# 0: none, 1: fastest, 2: default, 3: most compressed
+# default: 0
+SNAPSHOT_COMPRESSION_LEVEL=<int>
+# default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
+# NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
+export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
+# whether to restore the snapshot instead of backing up (requires local filesystem snapshot storage and additional `write` permissions in the Vault policy)
+# default: false
+SNAPSHOT_RESTORE = <boolean>
 ```
 
 #### HCL2 Config File
@@ -92,9 +99,6 @@ vault_config {
   aws_mount_path = <vault aws auth engine mount path>
   # default: empty
   aws_role       = <vault aws authentication role>
-  # default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
-  # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
-  snapshot_path  = <path to local filesystem for snapshot staging>
 }
 
 cloud_config {
@@ -109,9 +113,21 @@ cloud_config {
   prefix    = <snapshot filename prefix during storage transfer>
 }
 
-# determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
-# default: true
-snapshot_cleanup = <boolean>
+snapshot_config {
+  # determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
+  # default: true
+  cleanup = <boolean>
+  # determines the level of compression for the snapshot
+  # 0: none, 1: fastest, 2: default, 3: most compressed
+  # default: 0
+  compression_level = <int>
+  # default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
+  # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
+  path = <path on local filesystem for snapshot staging>
+  # whether to restore the snapshot instead of backing up (requires local filesystem snapshot storage and additional `write` permissions in the Vault policy)
+  # default: false
+  restore = <boolean>
+}
 ```
 
 ## Contributing
