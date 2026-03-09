@@ -179,20 +179,28 @@ func TestOSImportConfig(test *testing.T) {
 }
 
 func TestValidateParams(test *testing.T) {
-	if err := validateParams(enum.AZ, enum.VaultToken, "https://foo.com"); err == nil || err.Error() != "invalid az_account_url value" {
+	if err := validateParams(enum.AZ, enum.VaultToken, "https://foo.com", nil); err == nil || err.Error() != "invalid az_account_url value" {
 		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
 	}
 
-	if err := validateParams(enum.AZ, enum.VaultToken, ""); err == nil || err.Error() != "az_account_url value absent" {
+	if err := validateParams(enum.AZ, enum.VaultToken, "", nil); err == nil || err.Error() != "az_account_url value absent" {
 		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
 	}
 
-	if err := validateParams(enum.AWS, enum.AuthEngine("foo"), ""); err == nil || err.Error() != "invalid authengine enum" {
+	if err := validateParams(enum.AWS, enum.AuthEngine("foo"), "", nil); err == nil || err.Error() != "invalid authengine enum" {
 		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
 	}
 
-	if err := validateParams(enum.Platform("foo"), enum.VaultToken, ""); err == nil || err.Error() != "invalid platform enum" {
+	if err := validateParams(enum.Platform("foo"), enum.VaultToken, "", nil); err == nil || err.Error() != "invalid platform enum" {
 		test.Errorf("expected error: invalid platform enum, actual: %s", err)
+	}
+
+	if err := validateParams(enum.GCP, enum.VaultToken, "", &SnapshotConfig{Restore: true, Cleanup: true}); err != nil {
+		test.Error("errored during co-specification of snapshot restore and cleanup which is only a warning")
+	}
+
+	if err := validateParams(enum.GCP, enum.VaultToken, "", &SnapshotConfig{CompressionLevel: 4}); err == nil || err.Error() != "invalid snapshot compression level" {
+		test.Errorf("expected error: invalid snapshot compression level, actual: %s", err)
 	}
 }
 

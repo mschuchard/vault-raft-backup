@@ -206,7 +206,7 @@ func validateParams(platform enum.Platform, authEngine enum.AuthEngine, azAccoun
 		} else { // validate params for backup scenario
 			// validate compression level is between 0 and 3 inclusive
 			if snapshotConfig.CompressionLevel < 0 || snapshotConfig.CompressionLevel > 3 {
-				log.Print("snapshot compression level must be an integer between 0 and 3 inclusive")
+				log.Printf("snapshot compression level must be an integer between 0 and 3 inclusive, but instead %d was specified", snapshotConfig.CompressionLevel)
 				return errors.New("invalid snapshot compression level")
 			}
 		}
