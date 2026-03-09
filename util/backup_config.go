@@ -76,7 +76,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// validate params
-	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.Engine, backupConfig.CloudConfig.AZAccountURL); err != nil {
+	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.Engine, backupConfig.CloudConfig.AZAccountURL, backupConfig.SnapshotConfig); err != nil {
 		return nil, err
 	}
 
@@ -137,7 +137,7 @@ func envImportConfig() (*BackupConfig, error) {
 	platform := enum.Platform(os.Getenv("PLATFORM"))
 	authEngine := enum.AuthEngine(os.Getenv("VAULT_AUTH_ENGINE"))
 	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
-	if err = validateParams(platform, authEngine, azAccountURL); err != nil {
+	if err = validateParams(platform, authEngine, azAccountURL, nil); err != nil {
 		return nil, err
 	}
 
@@ -172,7 +172,7 @@ func envImportConfig() (*BackupConfig, error) {
 }
 
 // validates various input parameters
-func validateParams(platform enum.Platform, authEngine enum.AuthEngine, azAccountURL string) error {
+func validateParams(platform enum.Platform, authEngine enum.AuthEngine, azAccountURL string, snapshotConfig *SnapshotConfig) error {
 	// validate platform
 	if _, err := platform.New(); err != nil {
 		return err
@@ -191,6 +191,24 @@ func validateParams(platform enum.Platform, authEngine enum.AuthEngine, azAccoun
 		} else if match, _ := regexp.MatchString(`https://.*\.blob\.core\.windows\.net`, azAccountURL); !match {
 			log.Print("the azure account url must be of the form: https://<storage-account-name>.blob.core.windows.net")
 			return errors.New("invalid az_account_url value")
+		}
+	}
+
+	// validate snapshot config params if defined
+	if snapshotConfig != nil {
+		// validate params for restoration scenario
+		if snapshotConfig.Restore {
+			// validate restore and cleanup are not both true
+			if snapshotConfig.Cleanup {
+				log.Print("snapshot cleanup is specified as 'true', but this has no effect since restore is also specified as 'true'")
+				log.Print("ignoring cleanup parameter value in restoration scenario")
+			}
+		} else { // validate params for backup scenario
+			// validate compression level is between 0 and 3 inclusive
+			if snapshotConfig.CompressionLevel < 0 || snapshotConfig.CompressionLevel > 3 {
+				log.Print("snapshot compression level must be an integer between 0 and 3 inclusive")
+				return errors.New("invalid snapshot compression level")
+			}
 		}
 	}
 
