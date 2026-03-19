@@ -37,8 +37,8 @@ func TestStorageTransfer(test *testing.T) {
 }
 
 func TestCompressReader(test *testing.T) {
-	if _, err := CompressReader(nil, 10); err != nil {
-		test.Error("invalid input compression level did not reset to 1")
+	if _, err := CompressReader(nil, 10); err == nil || err.Error() != "invalid snapshot compression level" {
+		test.Error("invalid input compression level did not fail in the expected manner")
 		test.Error(err)
 	}
 }
