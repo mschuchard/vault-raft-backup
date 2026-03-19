@@ -92,38 +92,51 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 // import environment variables into vault raft backup config
 func envImportConfig() (*BackupConfig, error) {
 	// import environment variables into vault raft backup config struct
+	// declare non-string type vars for if user omits their values
+	var insecure, cleanup, restore bool
+	var compressionLevel int
+	var err error
+
 	// validate vault insecure
 	insecureEnv := os.Getenv("VAULT_SKIP_VERIFY")
-	insecure, err := strconv.ParseBool(insecureEnv)
-	if err != nil { // assigned value could not be converted to boolean
-		log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", insecureEnv)
-		log.Print(err)
-		return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
+	if len(insecureEnv) > 0 {
+		if insecure, err = strconv.ParseBool(insecureEnv); err != nil {
+			// assigned value could not be converted to boolean
+			log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", insecureEnv)
+			log.Print(err)
+			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
+		}
 	}
 
-	// validate snapshot cleanup, compression, and restore
+	// validate snapshot cleanup, restore, and compression level
 	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
-	cleanup, err := strconv.ParseBool(cleanupEnv)
-	if err != nil { // assigned value could not be converted to boolean
-		log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", cleanupEnv)
-		log.Print(err)
-		return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
+	if len(cleanupEnv) > 0 {
+		if cleanup, err = strconv.ParseBool(cleanupEnv); err != nil {
+			// assigned value could not be converted to boolean
+			log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", cleanupEnv)
+			log.Print(err)
+			return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
+		}
 	}
 
 	restoreEnv := os.Getenv("SNAPSHOT_RESTORE")
-	restore, err := strconv.ParseBool(restoreEnv)
-	if err != nil { // assigned value could not be converted to boolean
-		log.Printf("invalid boolean value '%s' for SNAPSHOT_RESTORE", restoreEnv)
-		log.Print(err)
-		return nil, errors.New("invalid SNAPSHOT_RESTORE value")
+	if len(restoreEnv) > 0 {
+		if restore, err = strconv.ParseBool(restoreEnv); err != nil {
+			// assigned value could not be converted to boolean
+			log.Printf("invalid boolean value '%s' for SNAPSHOT_RESTORE", restoreEnv)
+			log.Print(err)
+			return nil, errors.New("invalid SNAPSHOT_RESTORE value")
+		}
 	}
 
 	compressionEnv := os.Getenv("SNAPSHOT_COMPRESSION_LEVEL")
-	compressionLevel, err := strconv.Atoi(compressionEnv)
-	if err != nil { // assigned value could not be converted to integer
-		log.Printf("invalid integer value '%s' for SNAPSHOT_COMPRESSION_LEVEL", compressionEnv)
-		log.Print(err)
-		return nil, errors.New("invalid SNAPSHOT_COMPRESSION_LEVEL value")
+	if len(compressionEnv) > 0 {
+		if compressionLevel, err = strconv.Atoi(compressionEnv); err != nil {
+			// assigned value could not be converted to integer
+			log.Printf("invalid integer value '%s' for SNAPSHOT_COMPRESSION_LEVEL", compressionEnv)
+			log.Print(err)
+			return nil, errors.New("invalid SNAPSHOT_COMPRESSION_LEVEL value")
+		}
 	}
 
 	// validate container and platform were specified, and platform value

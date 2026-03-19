@@ -64,7 +64,7 @@ export PREFIX=<snapshot filename prefix during storage transfer>
 
 # SNAPSHOT
 # determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
-# default: true
+# default: false
 export SNAPSHOT_CLEANUP=<boolean>
 # determines the level of compression for the snapshot
 # 0: none, 1: fastest, 2: default, 3: most compressed
@@ -115,7 +115,7 @@ cloud_config {
 
 snapshot_config {
   # determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
-  # default: true
+  # default: false
   cleanup = <boolean>
   # determines the level of compression for the snapshot
   # 0: none, 1: fastest, 2: default, 3: most compressed
