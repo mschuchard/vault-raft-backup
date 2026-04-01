@@ -28,3 +28,5 @@ jobs:
       run: make bootstrap
     - name: unit test
       run: make unit
+    - name: acceptance test
+      run: make accept

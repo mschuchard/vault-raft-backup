@@ -13,5 +13,5 @@ func Example() {
 	os.Setenv("PLATFORM", "local")
 
 	main()
-	// Output: foo
+	// Output:
 }

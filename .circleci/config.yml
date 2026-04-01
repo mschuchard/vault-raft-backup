@@ -21,6 +21,9 @@ jobs:
     - run:
         name: unit test
         command: make unit
+    - run:
+        name: acceptance test
+        command: make accept
 
 workflows:
   execute_tests:

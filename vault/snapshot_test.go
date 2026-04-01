@@ -9,18 +9,18 @@ import (
 )
 
 func TestVaultRaftSnapshotCreate(test *testing.T) {
-	err := VaultRaftSnapshotCreate(util.VaultClient, "vault.bak")
-	if err == nil || !strings.Contains(err.Error(), "GET http://127.0.0.1:8200/v1/sys/storage/raft/snapshot") {
-		test.Errorf("expected error (contains): GET http://127.0.0.1:8200/v1/sys/storage/raft/snapshot, actual: %v", err)
+	if err := VaultRaftSnapshotCreate(util.VaultClient, "vault.bak"); err != nil {
+		test.Error("vault raft snapshot creation failed")
+		test.Error(err)
 	}
-	if _, err = os.Stat("./vault.bak"); err != nil {
+	if _, err := os.Stat("./vault.bak"); err != nil {
 		test.Error("vault raft snapshot file was not actually created")
 		test.Error(err)
 	}
 
 	os.Remove("./vault.bak")
 
-	if err = VaultRaftSnapshotCreate(util.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
+	if err := VaultRaftSnapshotCreate(util.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
 		test.Errorf("expected error (contains): open /foo/vault.bak: no such file or directory, actual: %s", err)
 	}
 }
