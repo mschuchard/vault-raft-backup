@@ -26,7 +26,7 @@ install:
 	@go install .
 
 unit:
-	@go test -v ./enum ./storage ./util ./vault
+	@go test -v ./util ./enum ./storage ./vault
 
 accept:
 	@go test -v .
