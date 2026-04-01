@@ -81,8 +81,7 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	// finalize snapshot path
-	backupConfig.SnapshotConfig.Path, err = defaultSnapshotPath(backupConfig.SnapshotConfig.Path)
-	if err != nil {
+	if backupConfig.SnapshotConfig.Path, err = defaultSnapshotPath(backupConfig.SnapshotConfig.Path); err != nil {
 		return nil, err
 	}
 

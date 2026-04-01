@@ -8,6 +8,7 @@ const (
 	VaultToken   = "abcdefghijklmnopqrstuvwxyz09"
 	Container    = "my_bucket"
 	Prefix       = "prefix"
+	tokenFile    = "/tmp/vault-test-root-token"
 )
 
 var (

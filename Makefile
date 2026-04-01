@@ -14,8 +14,9 @@ release: tidy
 
 bootstrap:
 	@rm -f nohup.out
-	# using cli for this avoids importing the entire vault/command package
-	@nohup vault server -dev -dev-root-token-id="abcdefghijklmnopqrstuvwxyz09" &
+	@rm -rf /tmp/vault-raft-test && mkdir -p /tmp/vault-raft-test
+	@nohup vault server -config=util/fixtures/vault-test-config.hcl &
+	@sleep 2
 	@go test -v -run TestBootstrap ./util
 
 shutdown:

@@ -46,11 +46,43 @@ func TestSnapshotFileRemove(test *testing.T) {
 // bootstrap vault server for testing
 func TestBootstrap(test *testing.T) {
 	// check if we should skip bootstrap
-	auths, _ := VaultClient.Sys().ListAuth()
-	if _, ok := auths["auth/aws/"]; ok {
-		test.Skip("Vault server already bootstrapped; skipping")
+	health, err := VaultClient.Sys().Health()
+	if err == nil && health.Initialized && !health.Sealed {
+		test.Skip("Vault server already initialized; skipping bootstrap")
+	}
+
+	// initialize single key unseal
+	initResponse, err := VaultClient.Sys().Init(&vault.InitRequest{
+		SecretShares:    1,
+		SecretThreshold: 1,
+	})
+	if err != nil {
+		test.Fatalf("vault initialization failed: %s", err)
+	}
+
+	// unseal with the single key
+	if sealResponse, err := VaultClient.Sys().Unseal(initResponse.Keys[0]); err != nil || !sealResponse.Initialized || sealResponse.Sealed {
+		test.Fatalf("vault unseal failed: %s", err)
+	}
+
+	// persist root token for subsequent tests
+	if err := os.WriteFile(tokenFile, []byte(initResponse.RootToken), 0o600); err != nil {
+		test.Fatalf("failed to write root token to %s: %s", tokenFile, err)
+	}
+
+	// authenticate the client with root token for further vault configuration
+	VaultClient.SetToken(initResponse.RootToken)
+
+	// wait for raft leader election before configuring vault
+	for {
+		health, err = VaultClient.Sys().Health()
+		if err == nil && !health.Standby {
+			break
+		}
 	}
 
 	// enable auth: aws
-	VaultClient.Sys().EnableAuthWithOptions("auth/aws", &vault.EnableAuthOptions{Type: "aws"})
+	if err := VaultClient.Sys().EnableAuthWithOptions("aws", &vault.EnableAuthOptions{Type: "aws"}); err != nil {
+		test.Fatalf("failed to enable aws auth: %s", err)
+	}
 }
