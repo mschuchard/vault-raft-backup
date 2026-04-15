@@ -3,6 +3,7 @@ package util
 import (
 	"os"
 	"testing"
+	"time"
 
 	vault "github.com/hashicorp/vault/api"
 )
@@ -74,11 +75,15 @@ func TestBootstrap(test *testing.T) {
 	VaultClient.SetToken(initResponse.RootToken)
 
 	// wait for raft leader election before configuring vault
-	for {
+	for range 10 {
+		// leader elected?
 		health, err = VaultClient.Sys().Health()
+		// ...then continue
 		if err == nil && !health.Standby {
 			break
 		}
+		// otherwise wait and try again
+		time.Sleep(1 * time.Second)
 	}
 
 	// enable auth: aws
