@@ -76,20 +76,20 @@ func TestOSImportConfig(test *testing.T) {
 		snapshotPath string          = "/tmp/my_vault.backup"
 	)
 
-	os.Setenv("AZ_ACCOUNT_URL", azAccountURL)
-	os.Setenv("CONTAINER", Container)
-	os.Setenv("PLATFORM", string(platform))
-	os.Setenv("PREFIX", Prefix)
-	os.Setenv("VAULT_ADDR", addr)
-	os.Setenv("VAULT_SKIP_VERIFY", skipVerify)
-	os.Setenv("VAULT_AUTH_ENGINE", string(authEngine))
-	os.Setenv("VAULT_TOKEN", token)
-	os.Setenv("VAULT_AWS_MOUNT", awsMount)
-	os.Setenv("VAULT_AWS_ROLE", awsRole)
-	os.Setenv("VAULT_SNAPSHOT_PATH", snapshotPath)
-	os.Setenv("SNAPSHOT_CLEANUP", "false")
-	os.Setenv("SNAPSHOT_RESTORE", "false")
-	os.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "1")
+	test.Setenv("AZ_ACCOUNT_URL", azAccountURL)
+	test.Setenv("CONTAINER", Container)
+	test.Setenv("PLATFORM", string(platform))
+	test.Setenv("PREFIX", Prefix)
+	test.Setenv("VAULT_ADDR", addr)
+	test.Setenv("VAULT_SKIP_VERIFY", skipVerify)
+	test.Setenv("VAULT_AUTH_ENGINE", string(authEngine))
+	test.Setenv("VAULT_TOKEN", token)
+	test.Setenv("VAULT_AWS_MOUNT", awsMount)
+	test.Setenv("VAULT_AWS_ROLE", awsRole)
+	test.Setenv("VAULT_SNAPSHOT_PATH", snapshotPath)
+	test.Setenv("SNAPSHOT_CLEANUP", "false")
+	test.Setenv("SNAPSHOT_RESTORE", "false")
+	test.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "1")
 
 	config, err := NewBackupConfig("")
 	if err != nil {
@@ -132,7 +132,7 @@ func TestOSImportConfig(test *testing.T) {
 	}
 
 	// test errors in reverse order for efficiency
-	os.Setenv("PLATFORM", "azure")
+	test.Setenv("PLATFORM", "azure")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid az_account_url value" {
 		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
 	}
@@ -142,12 +142,12 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
 	}
 
-	os.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
+	test.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
 		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
 	}
 
-	os.Setenv("PLATFORM", "foo")
+	test.Setenv("PLATFORM", "foo")
 	if _, err := envImportConfig(); err == nil || err.Error() != "invalid platform enum" {
 		test.Errorf("expected error: invalid platform enum, actual: %s", err)
 	}
@@ -157,22 +157,22 @@ func TestOSImportConfig(test *testing.T) {
 		test.Errorf("expected error: container environment variable absent, actual: %s", err)
 	}
 
-	os.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "foo")
+	test.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "foo")
 	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_COMPRESSION_LEVEL value" {
 		test.Errorf("expected error: invalid SNAPSHOT_COMPRESSION_LEVEL value, actual: %s", err)
 	}
 
-	os.Setenv("SNAPSHOT_RESTORE", "not a boolean")
+	test.Setenv("SNAPSHOT_RESTORE", "not a boolean")
 	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_RESTORE value" {
 		test.Errorf("expected error: invalid SNAPSHOT_RESTORE value, actual: %s", err)
 	}
 
-	os.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
+	test.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
 	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_CLEANUP value" {
 		test.Errorf("expected error: invalid SNAPSHOT_CLEANUP value, actual: %s", err)
 	}
 
-	os.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
+	test.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
 	if _, err = envImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
 		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %s", err)
 	}
