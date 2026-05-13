@@ -82,7 +82,7 @@ SNAPSHOT_RESTORE = <boolean>
 
 The HCL2 config file path is passed to the `vault-raft-backup` executable via the `-c` command line argument (e.g. `vault-raft-backup -c config.hcl`). The schema can be viewed below.
 
-```hcl2
+```hcl
 vault_config {
   # equivalent to VAULT_ADDR with vault cli executable
   # default: http://127.0.0.1:8200
