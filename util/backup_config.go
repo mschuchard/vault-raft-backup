@@ -75,6 +75,11 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, errors.New("cloud_config block absent")
 	}
 
+	// check if a vault config block was specified, and provide authEngine default if unspecified
+	if backupConfig.VaultConfig == nil {
+		backupConfig.VaultConfig = &VaultConfig{Engine: enum.Default}
+	}
+
 	// validate params
 	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.Engine, backupConfig.CloudConfig.AZAccountURL, backupConfig.SnapshotConfig); err != nil {
 		return nil, err
