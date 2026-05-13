@@ -46,7 +46,7 @@ func snapshotCSUpload(csBucket string, snapshotFile io.Reader, snapshotName stri
 		log.Printf("failed to upload snapshot file %s to cloud storage bucket %s", uploadTarget.ObjectName(), uploadTarget.BucketName())
 		return err
 	}
-	if err := uploadTransfer.Close(); err != nil {
+	if err = uploadTransfer.Close(); err != nil {
 		log.Printf("failed to close snapshot file %s upload transfer to cloud storage bucket %s", uploadTarget.ObjectName(), uploadTarget.BucketName())
 		return err
 	}
