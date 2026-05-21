@@ -1,0 +1,11 @@
+.circleci
+.git
+.github
+.idea
+
+Dockerfile
+nohup.out
+vault-raft-backup
+
+*.test
+coverage.out

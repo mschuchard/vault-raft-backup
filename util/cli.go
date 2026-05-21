@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+// Version is injected by release builds.
+var Version = "dev"
+
 // rudimentary cli for inputting hcl configuration file and emitting version
 func Cli() string {
 	// cli flags for hcl config file path and version
@@ -15,7 +18,7 @@ func Cli() string {
 
 	// version output
 	if *version {
-		log.Print("1.5.0")
+		log.Print(Version)
 		os.Exit(0)
 	}
 

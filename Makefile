@@ -1,5 +1,7 @@
 .PHONY: build
 
+VERSION ?= dev
+
 fmt:
 	@go fmt ./...
 
@@ -10,7 +12,7 @@ build: tidy
 	@go build -o vault-raft-backup main.go
 
 release: tidy
-	@go build -ldflags="-s -w" -o vault-raft-backup main.go
+	@go build -trimpath -ldflags="-s -w -X github.com/mschuchard/vault-raft-backup/util.Version=$(VERSION)" -o vault-raft-backup main.go
 
 bootstrap:
 	@rm -f nohup.out

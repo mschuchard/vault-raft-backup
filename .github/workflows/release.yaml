@@ -40,5 +40,5 @@ jobs:
         goarch: ${{ matrix.goarch }}
         goversion: go.mod
         pre_command: go mod tidy
-        ldflags: '-s -w'
+        ldflags: '-s -w -X github.com/mschuchard/vault-raft-backup/util.Version=${{ github.event.release.tag_name }}'
         overwrite: true
