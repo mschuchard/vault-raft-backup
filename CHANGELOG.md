@@ -1,4 +1,4 @@
-### 1.5.1 (Next)
+### 1.5.1
 - Validate snapshot configuration input values.
 - Fix environement variable inputs for non-string type values' defaults.
 - Fix local storage snapshot copy path for Windows systems.
