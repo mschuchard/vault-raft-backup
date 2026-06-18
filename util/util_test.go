@@ -76,10 +76,8 @@ func TestBootstrap(test *testing.T) {
 
 	// wait for raft leader election before configuring vault
 	for range 10 {
-		// leader elected?
-		health, err = VaultClient.Sys().Health()
-		// ...then continue
-		if err == nil && !health.Standby {
+		// cluster healthy and leader elected?
+		if health, err := VaultClient.Sys().Health(); err == nil && !health.Standby {
 			break
 		}
 		// otherwise wait and try again
