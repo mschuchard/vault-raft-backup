@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"testing"
 
@@ -40,5 +42,33 @@ func TestCompressReader(test *testing.T) {
 	if _, err := CompressReader(nil, 10); err == nil || err.Error() != "invalid snapshot compression level" {
 		test.Error("invalid input compression level did not fail in the expected manner")
 		test.Error(err)
+	}
+}
+
+func TestDecompressReader(test *testing.T) {
+	original := []byte("vault raft snapshot test data")
+
+	compressed, err := CompressReader(bytes.NewReader(original), 1)
+	if err != nil {
+		test.Error("failed to compress input for decompression round-trip test")
+		test.Error(err)
+	}
+
+	decompressed, err := DecompressReader(compressed)
+	if err != nil {
+		test.Error("failed to decompress compressed reader")
+		test.Error(err)
+	}
+	defer decompressed.Close()
+
+	result, err := io.ReadAll(decompressed)
+	if err != nil {
+		test.Error("failed to read decompressed output")
+		test.Error(err)
+	}
+
+	if string(result) != string(original) {
+		test.Error("decompressed output did not match original input")
+		test.Errorf("expected: %s, actual: %s", original, result)
 	}
 }
