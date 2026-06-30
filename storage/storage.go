@@ -116,5 +116,22 @@ func CompressReader(reader io.Reader, level int) (io.ReadCloser, error) {
 	}()
 
 	// return the read end of the pipe
+	log.Print("snapshot has been prepared for compression")
 	return pipeRead, nil
+}
+
+// decompression helper function that wraps a reader with gzip decompression, and returns a reader for the uncompressed data
+func DecompressReader(reader io.Reader) (io.ReadCloser, error) {
+	log.Print("snapshot will be retrieved with decompression")
+
+	// create gzip reader
+	gzReader, err := gzip.NewReader(reader)
+	if err != nil {
+		log.Print("failed to create gzip reader for snapshot decompression")
+		return nil, err
+	}
+	log.Print("snapshot has been prepared for decompression")
+
+	// return gzip reader
+	return gzReader, nil
 }
