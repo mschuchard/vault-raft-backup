@@ -1,3 +1,6 @@
+### 1.5.2 (Next)
+- Add snapshot streaming decompression functionality.
+
 ### 1.5.1
 - Validate snapshot configuration input values.
 - Fix environement variable inputs for non-string type values' defaults.
