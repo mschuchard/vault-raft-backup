@@ -20,6 +20,9 @@ func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) error {
 
 	// defer snapshot close
 	defer func() {
+		if err != nil {
+			return
+		}
 		err = util.SnapshotFileClose(snapshotFile)
 	}()
 
@@ -46,6 +49,9 @@ func VaultRaftSnapshotRestore(client *vault.Client, snapshotPath string) error {
 
 	// defer snapshot close
 	defer func() {
+		if err != nil {
+			return
+		}
 		err = util.SnapshotFileClose(snapshotFile)
 	}()
 

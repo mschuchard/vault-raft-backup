@@ -33,8 +33,10 @@ func TestStorageTransfer(test *testing.T) {
 	// verify compressed file exists at destination and has expected size for gzip level 1 empty file
 	if fileInfo, err := os.Stat("/tmp/test-test.bak"); err != nil || fileInfo.Size() != 23 {
 		test.Error("compressed snapshot file was not found at expected destination")
-		test.Errorf("expected file size: 23, actual file size: %d", fileInfo.Size())
-		test.Error(err)
+		test.Errorf("expected file size: ~23, actual file size: %d", fileInfo.Size())
+		if err != nil {
+			test.Error(err)
+		}
 	}
 }
 

@@ -26,8 +26,13 @@ func StorageTransfer(config *util.CloudConfig, snapshot *util.SnapshotConfig) er
 
 	// defer snapshot close and remove
 	defer func() {
-		err = util.SnapshotFileClose(snapshotFile)
-		if snapshot.Cleanup && err == nil {
+		if err != nil {
+			return
+		}
+		if err = util.SnapshotFileClose(snapshotFile); err != nil {
+			return
+		}
+		if snapshot.Cleanup {
 			err = util.SnapshotFileRemove(snapshotFile)
 		}
 	}()
