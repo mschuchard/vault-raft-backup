@@ -1,39 +1,28 @@
 ---
-name: publish release
-
+name: release
 on:
-  release:
-    types: [created]
-
-permissions:
-  contents: write
-  packages: write
+  push:
+    tags:
+    - 'v*'
 
 jobs:
-  release-linux-amd64:
+  goreleaser:
     name: create and publish vault-raft-backup release
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos:
-        - linux
-        - windows
-        - darwin
-        goarch:
-        - amd64
-        - arm64
-        exclude:
-        - goos: windows
-          goarch: arm64
     steps:
     - name: checkout
       uses: actions/checkout@v4
-    - uses: wangyoucao577/go-release-action@v1
+    - name: unshallow
+      run: git fetch --prune --unshallow
+    - name: set up Go
+      uses: actions/setup-go@v5
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        goversion: go.mod
-        pre_command: go mod tidy
-        ldflags: '-s -w'
-        overwrite: true
+        go-version-file: 'go.mod'
+        cache: true
+    - name: run GoReleaser
+      uses: goreleaser/goreleaser-action@v7
+      with:
+        version: '~> v2'
+        args: release --clean
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
