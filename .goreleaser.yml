@@ -1,0 +1,42 @@
+version: 2
+project_name: vault-raft-backup
+changelog:
+  disable: true
+before:
+  hooks:
+  - go mod tidy
+builds:
+- id: vault-raft-backup
+  main: ./main.go
+  binary: '{{ .ProjectName }}'
+  env:
+  - CGO_ENABLED=0
+  flags:
+  - -trimpath
+  ldflags:
+  - '-s -w'
+  goos:
+  - linux
+  - windows
+  - darwin
+  goarch:
+  - amd64
+  - arm64
+  ignore:
+  - goos: windows
+    goarch: arm64
+archives:
+- id: default
+  formats: [tar.gz]
+  format_overrides:
+  - goos: windows
+    formats: [zip]
+  name_template: >-
+    {{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}
+checksum:
+  name_template: '{{ .ProjectName }}_v{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+release:
+  github:
+    owner: mschuchard
+    name: vault-raft-backup
