@@ -1,4 +1,4 @@
-.PHONY: build
+.PHONY: build fmt tidy release bootstrap shutdown install unit accept
 
 fmt:
 	@go fmt ./...

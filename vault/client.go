@@ -74,7 +74,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 	awsRole := backupVaultConfig.AWSRole
 	engine, err := enum.AuthEngine(backupVaultConfig.Engine).New()
 	if err != nil {
-		log.Printf("invalid vault authentication engine %s specified", engine)
+		log.Printf("invalid vault authentication engine %s specified", backupVaultConfig.Engine)
 		return nil, err
 	}
 
@@ -147,7 +147,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 			return nil, errors.New("no auth info was returned after login")
 		}
 	default:
-		log.Printf("%s was input as an authentication engine, but only token and aws are supported", engine)
+		log.Printf("%s was input as an authentication engine, but only token and aws are supported", backupVaultConfig.Engine)
 		return nil, errors.New("invalid Vault authentication engine")
 	}
 

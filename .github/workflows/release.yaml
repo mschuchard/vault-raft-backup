@@ -12,8 +12,6 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4
-    - name: unshallow
-      run: git fetch --prune --unshallow
     - name: set up Go
       uses: actions/setup-go@v5
       with:
