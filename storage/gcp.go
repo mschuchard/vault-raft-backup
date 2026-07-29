@@ -9,7 +9,7 @@ import (
 )
 
 // snapshot upload to gcp cloud storage
-func snapshotCSUpload(csBucket string, snapshotFile io.Reader, snapshotName string) error {
+func snapshotCSUpload(csBucket string, snapshotFile io.Reader, snapshotName string) (err error) {
 	// gcp client
 	ctx := context.Background()
 	gcpClient, err := storage.NewClient(ctx)

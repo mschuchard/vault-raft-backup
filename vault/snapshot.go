@@ -10,7 +10,7 @@ import (
 )
 
 // vault raft snapshot creation
-func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) error {
+func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) (err error) {
 	// prepare snapshot file for content writing
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
@@ -39,7 +39,7 @@ func VaultRaftSnapshotCreate(client *vault.Client, snapshotPath string) error {
 }
 
 // vault raft snapshot restoration
-func VaultRaftSnapshotRestore(client *vault.Client, snapshotPath string) error {
+func VaultRaftSnapshotRestore(client *vault.Client, snapshotPath string) (err error) {
 	// prepare snapshot file for content reading
 	snapshotFile, err := os.OpenFile(snapshotPath, os.O_RDONLY, 0o600)
 	if err != nil {

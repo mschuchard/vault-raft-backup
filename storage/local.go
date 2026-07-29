@@ -10,7 +10,7 @@ import (
 )
 
 // snapshot copy to local filesystem
-func snapshotFSCopy(directory string, snapshotFile io.Reader, snapshotName string) error {
+func snapshotFSCopy(directory string, snapshotFile io.Reader, snapshotName string) (err error) {
 	// validate destination directory
 	if _, err := os.ReadDir(directory); err != nil {
 		log.Printf("the destination directory at %s is unsuitable for copying the snapshot file", directory)
@@ -27,6 +27,9 @@ func snapshotFSCopy(directory string, snapshotFile io.Reader, snapshotName strin
 
 	// defer snapshot destination close
 	defer func() {
+		if err != nil {
+			return
+		}
 		err = util.SnapshotFileClose(destinationWriter)
 	}()
 

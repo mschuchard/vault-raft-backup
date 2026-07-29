@@ -13,7 +13,7 @@ import (
 )
 
 // unified function for interfacing with all snapshot storage transfers
-func StorageTransfer(config *util.CloudConfig, snapshot *util.SnapshotConfig) error {
+func StorageTransfer(config *util.CloudConfig, snapshot *util.SnapshotConfig) (err error) {
 	// use supplied prefix and snapshot base filename for full name
 	snapshotName := config.Prefix + filepath.Base(snapshot.Path)
 
