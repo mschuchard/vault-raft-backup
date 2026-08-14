@@ -42,7 +42,7 @@ func main() {
 
 		// transfer snapshot to cloud storage
 		if err = storage.StorageTransfer(backupConfig.CloudConfig, backupConfig.SnapshotConfig); err != nil {
-			if err.Error() == "snapshot not found" || err.Error() == "snapshot not removed" {
+			if err.Error() == "snapshot not removed" {
 				// log the non-fatal error
 				log.Print("cloud storage upload succeeded, but snapshot cleanup failed")
 				log.Print(err)

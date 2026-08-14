@@ -1,6 +1,7 @@
 ### 1.5.2 (Next)
 - Add snapshot streaming decompression functionality.
 - Fix deferred function error swallowing in file closures and removals.
+- Minor code optimization and logging improvements.
 
 ### 1.5.1
 - Validate snapshot configuration input values.

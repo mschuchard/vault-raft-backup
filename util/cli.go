@@ -22,7 +22,7 @@ func Cli() string {
 	// verify config file existence
 	if len(*hclConfigPath) > 0 {
 		if info, err := os.Stat(*hclConfigPath); err != nil || info.IsDir() {
-			log.Fatalf("the config file at %s does not exist", *hclConfigPath)
+			log.Fatalf("the config file at %s does not exist or is a directory instead", *hclConfigPath)
 		}
 	}
 
