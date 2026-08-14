@@ -72,7 +72,7 @@ func NewVaultClient(backupVaultConfig *util.VaultConfig) (*vault.Client, error) 
 	token := backupVaultConfig.Token
 	awsMountPath := backupVaultConfig.AWSMountPath
 	awsRole := backupVaultConfig.AWSRole
-	engine, err := enum.AuthEngine(backupVaultConfig.Engine).New()
+	engine, err := backupVaultConfig.Engine.New()
 	if err != nil {
 		log.Printf("invalid vault authentication engine %s specified", backupVaultConfig.Engine)
 		return nil, err
