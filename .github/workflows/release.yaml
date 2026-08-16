@@ -5,6 +5,9 @@ on:
     tags:
     - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   goreleaser:
     name: create and publish vault-raft-backup release
