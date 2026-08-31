@@ -23,12 +23,16 @@ type CloudConfig struct {
 
 // vault config
 type VaultConfig struct {
-	Address      string          `hcl:"address,optional"`
-	Insecure     bool            `hcl:"insecure,optional"`
-	Engine       enum.AuthEngine `hcl:"auth_engine,optional"`
-	Token        string          `hcl:"token,optional"`
-	AWSMountPath string          `hcl:"aws_mount_path,optional"`
-	AWSRole      string          `hcl:"aws_role,optional"`
+	Address    string          `hcl:"address,optional"`
+	Insecure   bool            `hcl:"insecure,optional"`
+	Engine     enum.AuthEngine `hcl:"auth_engine,optional"`
+	Token      string          `hcl:"token,optional"`
+	SecretID   string          `hcl:"secret_id"`
+	WrapToken  string          `hcl:"wrap_token"`
+	AzResource string          `hcl:"az_resource"`
+	AuthMount  string          `hcl:"auth_mount_path,optional"`
+	VaultRole  string          `hcl:"vault_role,optional"`
+	Namespace  string          `hcl:"namespace,optional"`
 }
 
 // snapshot config
