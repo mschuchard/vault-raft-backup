@@ -30,7 +30,7 @@ type VaultConfig struct {
 	SecretID   string          `hcl:"secret_id"`
 	WrapToken  string          `hcl:"wrap_token"`
 	AzResource string          `hcl:"az_resource"`
-	AuthMount  string          `hcl:"auth_mount_path,optional"`
+	AuthMount  string          `hcl:"auth_mount,optional"`
 	VaultRole  string          `hcl:"vault_role,optional"`
 	Namespace  string          `hcl:"namespace,optional"`
 }
