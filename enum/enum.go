@@ -27,16 +27,18 @@ func (p Platform) New() (Platform, error) {
 	return p, nil
 }
 
-// authengine pseudo-enum
+// authentication engine with pseudo-enum
 type AuthEngine string
 
 const (
-	AWSIAM     AuthEngine = "aws"
-	VaultToken AuthEngine = "token"
-	Default    AuthEngine = ""
+	AppRole      AuthEngine = "approle"
+	AWSIAM       AuthEngine = "aws"
+	AzureIMDS    AuthEngine = "azure"
+	KubernetesSA AuthEngine = "kubernetes"
+	VaultToken   AuthEngine = "token"
 )
 
-var authEngines []AuthEngine = []AuthEngine{AWSIAM, VaultToken, Default}
+var authEngines []AuthEngine = []AuthEngine{AppRole, AWSIAM, AzureIMDS, KubernetesSA, VaultToken}
 
 // authengine type conversion
 func (a AuthEngine) New() (AuthEngine, error) {

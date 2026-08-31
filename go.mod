@@ -12,7 +12,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/vault/api v1.23.0
+	github.com/hashicorp/vault/api/auth/approle v0.12.0
 	github.com/hashicorp/vault/api/auth/aws v0.12.0
+	github.com/hashicorp/vault/api/auth/azure v0.11.0
+	github.com/hashicorp/vault/api/auth/kubernetes v0.12.0
 )
 
 require (
