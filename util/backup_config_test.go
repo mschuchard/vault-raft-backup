@@ -18,12 +18,16 @@ func TestNewBackupConfig(test *testing.T) {
 	cloudConfig := *config.CloudConfig
 	snapshotConfig := *config.SnapshotConfig
 	expectedVaultConfig := VaultConfig{
-		Address:      "https://127.0.0.1",
-		Insecure:     true,
-		Engine:       "token",
-		Token:        "foobar",
-		AWSMountPath: "azure",
-		AWSRole:      "me",
+		Address:    "https://127.0.0.1",
+		Insecure:   true,
+		Engine:     "token",
+		Token:      "foobar",
+		SecretID:   "abcdef-123456",
+		WrapToken:  "abcdef.ghijkl",
+		AzResource: "https://management.azure.com/",
+		AuthMount:  "azure",
+		VaultRole:  "myRole",
+		Namespace:  "root",
 	}
 	expectedCloudConfig := CloudConfig{
 		AZAccountURL: "https://foo.com",
