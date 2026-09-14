@@ -15,10 +15,10 @@ var (
 		Token:   util.VaultToken,
 	}
 	backupVaultAWSConfig = &util.VaultConfig{
-		Address:      "http://127.0.0.1:8200",
-		Insecure:     true,
-		AWSMountPath: "gcp",
-		AWSRole:      "my_role",
+		Address:   "http://127.0.0.1:8200",
+		Insecure:  true,
+		AuthMount: "gcp",
+		VaultRole: "myRole",
 	}
 )
 
@@ -72,7 +72,7 @@ func TestNewVaultClient(test *testing.T) {
 	}
 
 	backupVaultConfig.Engine = ""
-	backupVaultConfig.AWSMountPath = "azure"
+	backupVaultConfig.AuthMount = "azure"
 	if _, err = NewVaultClient(backupVaultConfig); err == nil || err.Error() != "unable to deduce authentication engine" {
 		test.Errorf("expected error: unable to deduce authentication engine, actual: %s", err)
 	}

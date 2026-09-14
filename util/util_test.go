@@ -84,8 +84,21 @@ func TestBootstrap(test *testing.T) {
 		time.Sleep(1 * time.Second)
 	}
 
-	// enable auth: aws
+	// enable auth: approle, aws, kubernetes (token enabled by default with dev server)
+	if err := VaultClient.Sys().EnableAuthWithOptions("approle", &vault.EnableAuthOptions{Type: "approle"}); err != nil {
+		test.Fatalf("failed to enable approle auth: %s", err)
+	}
+	if _, err := VaultClient.Logical().Write("auth/approle/role/"+AppRole, map[string]any{
+		"token_policies": "default",
+		"token_ttl":      "1h",
+		"token_max_ttl":  "4h",
+	}); err != nil {
+		test.Fatalf("failed to configure approle auth: %s", err)
+	}
 	if err := VaultClient.Sys().EnableAuthWithOptions("aws", &vault.EnableAuthOptions{Type: "aws"}); err != nil {
 		test.Fatalf("failed to enable aws auth: %s", err)
+	}
+	if err := VaultClient.Sys().EnableAuthWithOptions("kubernetes", &vault.EnableAuthOptions{Type: "kubernetes"}); err != nil {
+		test.Fatalf("failed to enable kubernetes auth: %s", err)
 	}
 }
