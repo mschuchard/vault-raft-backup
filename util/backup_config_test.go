@@ -1,7 +1,6 @@
 package util
 
 import (
-	"os"
 	"regexp"
 
 	"testing"
@@ -9,7 +8,7 @@ import (
 	"github.com/mschuchard/vault-raft-backup/enum"
 )
 
-func TestHclDecodeConfig(test *testing.T) {
+func TestNewBackupConfig(test *testing.T) {
 	config, err := NewBackupConfig("fixtures/valid.hcl")
 	if err != nil {
 		test.Error("the valid hcl file did not decode properly")
@@ -49,132 +48,16 @@ func TestHclDecodeConfig(test *testing.T) {
 		test.Errorf("actual snapshot: %v", snapshotConfig)
 	}
 
-	_, err = hclDecodeConfig("fixtures/invalid.hcl")
+	_, err = NewBackupConfig("fixtures/invalid.hcl")
 	if err == nil || err.Error() != "fixtures/invalid.hcl:2,3-11: Unsupported argument; An argument named \"does_not\" is not expected here." {
 		test.Error("the invalid hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
 
-	_, err = hclDecodeConfig("fixtures/no_cloud_config.hcl")
+	_, err = NewBackupConfig("fixtures/no_cloud_config.hcl")
 	if err == nil || err.Error() != "cloud_config block absent" {
 		test.Error("the no_cloud_config hcl file did not error, or errored unexpectedly")
 		test.Error(err)
-	}
-}
-
-func TestOSImportConfig(test *testing.T) {
-	// source of truth for values
-	const (
-		azAccountURL string          = "https://foo.com"
-		platform     enum.Platform   = enum.GCP
-		addr         string          = "https://127.0.0.1:8234"
-		skipVerify   string          = "false"
-		authEngine   enum.AuthEngine = enum.VaultToken
-		token        string          = "abcdefg"
-		awsMount     string          = "gcp"
-		awsRole      string          = "my_role"
-		snapshotPath string          = "/tmp/my_vault.backup"
-	)
-
-	test.Setenv("AZ_ACCOUNT_URL", azAccountURL)
-	test.Setenv("CONTAINER", Container)
-	test.Setenv("PLATFORM", string(platform))
-	test.Setenv("PREFIX", Prefix)
-	test.Setenv("VAULT_ADDR", addr)
-	test.Setenv("VAULT_SKIP_VERIFY", skipVerify)
-	test.Setenv("VAULT_AUTH_ENGINE", string(authEngine))
-	test.Setenv("VAULT_TOKEN", token)
-	test.Setenv("VAULT_AWS_MOUNT", awsMount)
-	test.Setenv("VAULT_AWS_ROLE", awsRole)
-	test.Setenv("VAULT_SNAPSHOT_PATH", snapshotPath)
-	test.Setenv("SNAPSHOT_CLEANUP", "false")
-	test.Setenv("SNAPSHOT_RESTORE", "false")
-	test.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "1")
-
-	config, err := NewBackupConfig("")
-	if err != nil {
-		test.Error("vault raft backup config failed to construct from environment variables")
-		test.Error(err)
-	}
-
-	vaultConfig := *config.VaultConfig
-	cloudConfig := *config.CloudConfig
-	snapshotConfig := *config.SnapshotConfig
-	expectedCloudConfig := CloudConfig{
-		AZAccountURL: azAccountURL,
-		Container:    Container,
-		Platform:     platform,
-		Prefix:       Prefix,
-	}
-	expectedVaultConfig := VaultConfig{
-		Address:      addr,
-		Insecure:     false,
-		Engine:       authEngine,
-		Token:        token,
-		AWSMountPath: awsMount,
-		AWSRole:      awsRole,
-	}
-	expectedSnapshotConfig := SnapshotConfig{
-		Cleanup:          false,
-		CompressionLevel: 1,
-		Path:             snapshotPath,
-		Restore:          false,
-	}
-
-	if cloudConfig != expectedCloudConfig || vaultConfig != expectedVaultConfig || snapshotConfig != expectedSnapshotConfig {
-		test.Error("imported config struct(s) did not initialize with expected values")
-		test.Errorf("expected vault: %v", expectedVaultConfig)
-		test.Errorf("actual vault: %v", vaultConfig)
-		test.Errorf("expected cloud: %v", expectedCloudConfig)
-		test.Errorf("actual cloud: %v", cloudConfig)
-		test.Errorf("expected snapshot: %v", expectedSnapshotConfig)
-		test.Errorf("actual snapshot: %v", snapshotConfig)
-	}
-
-	// test errors in reverse order for efficiency
-	test.Setenv("PLATFORM", "azure")
-	if _, err := envImportConfig(); err == nil || err.Error() != "invalid az_account_url value" {
-		test.Errorf("expected error: invalid az_account_url value, actual: %s", err)
-	}
-
-	os.Unsetenv("AZ_ACCOUNT_URL")
-	if _, err := envImportConfig(); err == nil || err.Error() != "az_account_url value absent" {
-		test.Errorf("expected error: az_account_url value absent, actual: %s", err)
-	}
-
-	test.Setenv("VAULT_AUTH_ENGINE", "kubernetes")
-	if _, err := envImportConfig(); err == nil || err.Error() != "invalid authengine enum" {
-		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
-	}
-
-	test.Setenv("PLATFORM", "foo")
-	if _, err := envImportConfig(); err == nil || err.Error() != "invalid platform enum" {
-		test.Errorf("expected error: invalid platform enum, actual: %s", err)
-	}
-
-	os.Unsetenv("CONTAINER")
-	if _, err = envImportConfig(); err == nil || err.Error() != "container environment variable absent" {
-		test.Errorf("expected error: container environment variable absent, actual: %s", err)
-	}
-
-	test.Setenv("SNAPSHOT_COMPRESSION_LEVEL", "foo")
-	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_COMPRESSION_LEVEL value" {
-		test.Errorf("expected error: invalid SNAPSHOT_COMPRESSION_LEVEL value, actual: %s", err)
-	}
-
-	test.Setenv("SNAPSHOT_RESTORE", "not a boolean")
-	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_RESTORE value" {
-		test.Errorf("expected error: invalid SNAPSHOT_RESTORE value, actual: %s", err)
-	}
-
-	test.Setenv("SNAPSHOT_CLEANUP", "not a boolean")
-	if _, err = envImportConfig(); err == nil || err.Error() != "invalid SNAPSHOT_CLEANUP value" {
-		test.Errorf("expected error: invalid SNAPSHOT_CLEANUP value, actual: %s", err)
-	}
-
-	test.Setenv("VAULT_SKIP_VERIFY", "not a boolean")
-	if _, err = envImportConfig(); err == nil || err.Error() != "invalid VAULT_SKIP_VERIFY value" {
-		test.Errorf("expected error: invalid VAULT_SKIP_VERIFY value, actual: %s", err)
 	}
 }
 

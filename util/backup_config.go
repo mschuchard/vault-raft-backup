@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hclsimple"
@@ -52,17 +51,6 @@ type BackupConfig struct {
 
 // config constructor
 func NewBackupConfig(filePath string) (*BackupConfig, error) {
-	// determine input structure and return accordingly
-	if len(filePath) == 0 {
-		log.Print("support for input parameters through environment variables is deprecated, and will be unsupported in version 2.0.0")
-		return envImportConfig()
-	} else {
-		return hclDecodeConfig(filePath)
-	}
-}
-
-// decode hcl config file into vault raft backup config
-func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	// initialize config
 	var backupConfig BackupConfig
 
@@ -79,11 +67,6 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 		return nil, errors.New("cloud_config block absent")
 	}
 
-	// check if a vault config block was specified, and provide authEngine default if unspecified
-	if backupConfig.VaultConfig == nil {
-		backupConfig.VaultConfig = &VaultConfig{Engine: enum.Default}
-	}
-
 	// validate params
 	if err = validateParams(backupConfig.CloudConfig.Platform, backupConfig.VaultConfig.Engine, backupConfig.CloudConfig.AZAccountURL, backupConfig.SnapshotConfig); err != nil {
 		return nil, err
@@ -95,101 +78,6 @@ func hclDecodeConfig(filePath string) (*BackupConfig, error) {
 	}
 
 	return &backupConfig, nil
-}
-
-// import environment variables into vault raft backup config
-func envImportConfig() (*BackupConfig, error) {
-	// import environment variables into vault raft backup config struct
-	// declare non-string type vars for if user omits their values
-	var insecure, cleanup, restore bool
-	var compressionLevel int
-	var err error
-
-	// validate vault insecure
-	insecureEnv := os.Getenv("VAULT_SKIP_VERIFY")
-	if len(insecureEnv) > 0 {
-		if insecure, err = strconv.ParseBool(insecureEnv); err != nil {
-			// assigned value could not be converted to boolean
-			log.Printf("invalid boolean value '%s' for VAULT_SKIP_VERIFY", insecureEnv)
-			log.Print(err)
-			return nil, errors.New("invalid VAULT_SKIP_VERIFY value")
-		}
-	}
-
-	// validate snapshot cleanup, restore, and compression level
-	cleanupEnv := os.Getenv("SNAPSHOT_CLEANUP")
-	if len(cleanupEnv) > 0 {
-		if cleanup, err = strconv.ParseBool(cleanupEnv); err != nil {
-			// assigned value could not be converted to boolean
-			log.Printf("invalid boolean value '%s' for SNAPSHOT_CLEANUP", cleanupEnv)
-			log.Print(err)
-			return nil, errors.New("invalid SNAPSHOT_CLEANUP value")
-		}
-	}
-
-	restoreEnv := os.Getenv("SNAPSHOT_RESTORE")
-	if len(restoreEnv) > 0 {
-		if restore, err = strconv.ParseBool(restoreEnv); err != nil {
-			// assigned value could not be converted to boolean
-			log.Printf("invalid boolean value '%s' for SNAPSHOT_RESTORE", restoreEnv)
-			log.Print(err)
-			return nil, errors.New("invalid SNAPSHOT_RESTORE value")
-		}
-	}
-
-	compressionEnv := os.Getenv("SNAPSHOT_COMPRESSION_LEVEL")
-	if len(compressionEnv) > 0 {
-		if compressionLevel, err = strconv.Atoi(compressionEnv); err != nil {
-			// assigned value could not be converted to integer
-			log.Printf("invalid integer value '%s' for SNAPSHOT_COMPRESSION_LEVEL", compressionEnv)
-			log.Print(err)
-			return nil, errors.New("invalid SNAPSHOT_COMPRESSION_LEVEL value")
-		}
-	}
-
-	// validate container and platform were specified, and platform value
-	container := os.Getenv("CONTAINER")
-	if len(container) == 0 {
-		log.Print("CONTAINER is a required input value, and it was unspecified as an environment variable")
-		return nil, errors.New("container environment variable absent")
-	}
-
-	// validate params
-	platform := enum.Platform(os.Getenv("PLATFORM"))
-	authEngine := enum.AuthEngine(os.Getenv("VAULT_AUTH_ENGINE"))
-	azAccountURL := os.Getenv("AZ_ACCOUNT_URL")
-	if err = validateParams(platform, authEngine, azAccountURL, nil); err != nil {
-		return nil, err
-	}
-
-	// finalize snapshot path
-	snapshotPath, err := defaultSnapshotPath(os.Getenv("VAULT_SNAPSHOT_PATH"))
-	if err != nil {
-		return nil, err
-	}
-
-	return &BackupConfig{
-		CloudConfig: &CloudConfig{
-			AZAccountURL: azAccountURL,
-			Container:    container,
-			Platform:     platform,
-			Prefix:       os.Getenv("PREFIX"),
-		},
-		VaultConfig: &VaultConfig{
-			Address:      os.Getenv("VAULT_ADDR"),
-			Insecure:     insecure,
-			Engine:       authEngine,
-			Token:        os.Getenv("VAULT_TOKEN"),
-			AWSMountPath: os.Getenv("VAULT_AWS_MOUNT"),
-			AWSRole:      os.Getenv("VAULT_AWS_ROLE"),
-		},
-		SnapshotConfig: &SnapshotConfig{
-			Cleanup:          cleanup,
-			CompressionLevel: compressionLevel,
-			Path:             snapshotPath,
-			Restore:          restore,
-		},
-	}, nil
 }
 
 // validates various input parameters
