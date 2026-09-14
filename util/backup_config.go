@@ -24,11 +24,11 @@ type CloudConfig struct {
 type VaultConfig struct {
 	Address    string          `hcl:"address,optional"`
 	Insecure   bool            `hcl:"insecure,optional"`
-	Engine     enum.AuthEngine `hcl:"auth_engine,optional"`
+	Engine     enum.AuthEngine `hcl:"auth_engine"`
 	Token      string          `hcl:"token,optional"`
-	SecretID   string          `hcl:"secret_id"`
-	WrapToken  string          `hcl:"wrap_token"`
-	AzResource string          `hcl:"az_resource"`
+	SecretID   string          `hcl:"secret_id,optional"`
+	WrapToken  string          `hcl:"wrap_token,optional"`
+	AzResource string          `hcl:"az_resource,optional"`
 	AuthMount  string          `hcl:"auth_mount,optional"`
 	VaultRole  string          `hcl:"vault_role,optional"`
 	Namespace  string          `hcl:"namespace,optional"`
@@ -61,10 +61,14 @@ func NewBackupConfig(filePath string) (*BackupConfig, error) {
 		return nil, err
 	}
 
-	// validate a cloud config block was specified
+	// validate cloud and vault config blocks were specified
 	if backupConfig.CloudConfig == nil {
 		log.Print("the cloud_config block is required in the input configuration file")
 		return nil, errors.New("cloud_config block absent")
+	}
+	if backupConfig.VaultConfig == nil {
+		log.Print("the vault_config block is required in the input configuration file")
+		return nil, errors.New("vault_config block absent")
 	}
 
 	// validate params

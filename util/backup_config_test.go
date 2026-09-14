@@ -59,6 +59,7 @@ func TestNewBackupConfig(test *testing.T) {
 		test.Error("the no_cloud_config hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
+	// TODO: add test for no vault config block
 }
 
 func TestValidateParams(test *testing.T) {
