@@ -1,3 +1,8 @@
+### 2.0.0 (Next)
+- Support AppRole Pull and Push, Kubernetes, and Azure authentication engine methods.
+- Support Vault Enterprise Namespaces.
+- Remove support for environment variable input parameters.
+
 ### 1.5.2
 - Add snapshot streaming decompression functionality.
 - Fix deferred function error swallowing in file closures and removals.
@@ -5,7 +10,7 @@
 
 ### 1.5.1
 - Validate snapshot configuration input values.
-- Fix environement variable inputs for non-string type values' defaults.
+- Fix environment variable inputs for non-string type values' defaults.
 - Fix local storage snapshot copy path for Windows systems.
 - Fix error shadowing in GCP client closure.
 - Fix potential nil pointer derefence during Vault configuration validation.
