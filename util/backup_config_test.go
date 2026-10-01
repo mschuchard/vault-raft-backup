@@ -81,20 +81,20 @@ func TestNewBackupConfig(test *testing.T) {
 	*/
 	// test errors
 	_, err = NewBackupConfig("fixtures/invalid.hcl")
-	if err == nil || err.Error() != "fixtures/invalid.hcl:1,14-14: Missing required argument; The argument \"auth_engine\" is required, but no definition was found., and 1 other diagnostic(s)" {
+	if err == nil || err.Error() != "fixtures/invalid.hcl:1,7-7: Missing required argument; The argument \"auth_engine\" is required, but no definition was found., and 1 other diagnostic(s)" {
 		test.Error("the invalid hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
 
 	_, err = NewBackupConfig("fixtures/no_cloud_config.hcl")
-	if err == nil || err.Error() != "cloud_config block absent" {
-		test.Error("the no_cloud_config hcl file did not error, or errored unexpectedly")
+	if err == nil || err.Error() != "cloud block absent" {
+		test.Error("the no_cloud hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
 
 	_, err = NewBackupConfig("fixtures/no_vault_config.hcl")
-	if err == nil || err.Error() != "vault_config block absent" {
-		test.Error("the no_vault_config hcl file did not error, or errored unexpectedly")
+	if err == nil || err.Error() != "vault block absent" {
+		test.Error("the no_vault hcl file did not error, or errored unexpectedly")
 		test.Error(err)
 	}
 }

@@ -1,4 +1,4 @@
-cloud_config {
+cloud {
     container = "container"
     platform  = "platform"
 }

@@ -1,8 +1,8 @@
-cloud_config {
+cloud {
     container = "/tmp"
     platform  = "local"
 }
 
-vault_config {
+vault {
     auth_engine = "token"
 }

@@ -1,11 +1,11 @@
-cloud_config {
+cloud {
   az_account_url = "https://foo.com"
   container      = "my_bucket"
   platform       = "aws"
   prefix         = "prefix"
 }
 
-vault_config {
+vault {
   address     = "https://127.0.0.1"
   insecure    = true
   auth_engine = "token"
@@ -18,7 +18,7 @@ vault_config {
   namespace   = "root"
 }
 
-snapshot_config {
+snapshot {
   cleanup           = true
   compression_level = 1
   path              = "/path/to/vault.bak"

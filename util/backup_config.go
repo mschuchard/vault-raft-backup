@@ -44,9 +44,9 @@ type SnapshotConfig struct {
 
 // overall vault raft backup config
 type BackupConfig struct {
-	CloudConfig    *CloudConfig    `hcl:"cloud_config,block"`
-	VaultConfig    *VaultConfig    `hcl:"vault_config,block"`
-	SnapshotConfig *SnapshotConfig `hcl:"snapshot_config,block"`
+	CloudConfig    *CloudConfig    `hcl:"cloud,block"`
+	VaultConfig    *VaultConfig    `hcl:"vault,block"`
+	SnapshotConfig *SnapshotConfig `hcl:"snapshot,block"`
 }
 
 // config constructor
@@ -63,12 +63,12 @@ func NewBackupConfig(filePath string) (*BackupConfig, error) {
 
 	// validate cloud and vault config blocks were specified
 	if backupConfig.CloudConfig == nil {
-		log.Print("the cloud_config block is required in the input configuration file")
-		return nil, errors.New("cloud_config block absent")
+		log.Print("the cloud block is required in the input configuration file")
+		return nil, errors.New("cloud block absent")
 	}
 	if backupConfig.VaultConfig == nil {
-		log.Print("the vault_config block is required in the input configuration file")
-		return nil, errors.New("vault_config block absent")
+		log.Print("the vault block is required in the input configuration file")
+		return nil, errors.New("vault block absent")
 	}
 
 	// validate params

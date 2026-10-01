@@ -1,4 +1,4 @@
-vault_config {
+vault {
   does_not = "exist"
 }
 

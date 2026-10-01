@@ -2,6 +2,7 @@
 - Support AppRole Pull and Push, Kubernetes, and Azure authentication engine methods.
 - Support Vault Enterprise Namespaces.
 - Remove support for environment variable input parameters.
+- Remove `_config` suffix from HCL2 block names.
 
 ### 1.5.2
 - Add snapshot streaming decompression functionality.
