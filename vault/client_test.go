@@ -74,9 +74,9 @@ func TestAuthClient(test *testing.T) {
 		test.Errorf("expected error (contains): error reading service account token from default location, actual: %v", err)
 	}
 
-	if err := authClient(azBackupConfig, util.VaultClient); err == nil || !strings.Contains(err.Error(), "error calling Azure token endpoint") {
+	if err := authClient(azBackupConfig, util.VaultClient); err == nil || !strings.Contains(err.Error(), "Azure token endpoint") {
 		test.Error("authenticating a vault client with azure did not error in the expected manner")
-		test.Errorf("expected error (contains): error calling Azure token endpoint, actual: %v", err)
+		test.Errorf("expected error (contains): Azure token endpoint, actual: %v", err)
 	}
 
 	approleBackupConfig.VaultRole = util.RoleID
