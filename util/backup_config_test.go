@@ -9,6 +9,7 @@ import (
 )
 
 func TestNewBackupConfig(test *testing.T) {
+	// test parameters
 	config, err := NewBackupConfig("fixtures/valid.hcl")
 	if err != nil {
 		test.Error("the valid hcl file did not decode properly")
@@ -51,7 +52,34 @@ func TestNewBackupConfig(test *testing.T) {
 		test.Errorf("expected snapshot: %v", expectedSnapshotConfig)
 		test.Errorf("actual snapshot: %v", snapshotConfig)
 	}
+	/*
+		// test defaults
+		config, err = NewBackupConfig("fixtures/minimal.hcl")
+		if err != nil {
+			test.Error("the minimal hcl file did not decode properly")
+			test.Error(err)
+		}
+		vaultConfig = *config.VaultConfig
+		cloudConfig = *config.CloudConfig
+		expectedVaultConfig = VaultConfig{
+			Engine: enum.AuthEngine("token"),
+		}
+		expectedCloudConfig = CloudConfig{
+			Container: "/tmp",
+			Platform:  enum.Platform("local"),
+		}
 
+		if vaultConfig != expectedVaultConfig || cloudConfig != expectedCloudConfig || config.SnapshotConfig != nil {
+			test.Error("decoded config struct did not contain expected values")
+			test.Errorf("expected vault: %v", expectedVaultConfig)
+			test.Errorf("actual vault: %v", vaultConfig)
+			test.Errorf("expected cloud: %v", expectedCloudConfig)
+			test.Errorf("actual cloud: %v", cloudConfig)
+			test.Errorf("expected snapshot: %v", expectedSnapshotConfig)
+			test.Errorf("actual snapshot: %v", snapshotConfig)
+		}
+	*/
+	// test errors
 	_, err = NewBackupConfig("fixtures/invalid.hcl")
 	if err == nil || err.Error() != "fixtures/invalid.hcl:1,14-14: Missing required argument; The argument \"auth_engine\" is required, but no definition was found., and 1 other diagnostic(s)" {
 		test.Error("the invalid hcl file did not error, or errored unexpectedly")
