@@ -1,17 +1,37 @@
 package main
 
 import (
-	"testing"
+	"fmt"
+	"log"
+	"os"
 
 	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 func Example() {
-	// test that main behaves as expected before snapshot as raft not supported with vault dev mode server
-	test := testing.T{}
-	test.Setenv("VAULT_TOKEN", util.VaultToken)
-	test.Setenv("CONTAINER", "/tmp")
-	test.Setenv("PLATFORM", "local")
+	// write a temporary acceptance test config file
+	configContents := fmt.Sprintf(`cloud {
+  container = "/tmp"
+  platform  = "local"
+}
+
+vault {
+  auth_engine = "token"
+  token       = "%s"
+}
+
+snapshot {
+  cleanup = true
+}
+`, util.VaultToken)
+	if err := os.WriteFile("/tmp/accept.hcl", []byte(configContents), 0o600); err != nil {
+		log.Fatalf("failed to write config file for test: %s", err)
+	}
+
+	// util.Cli reads the config path from os.Args, so replace and later restore them
+	originalArgs := os.Args
+	defer func() { os.Args = originalArgs }()
+	os.Args = []string{originalArgs[0], "-c", "/tmp/accept.hcl"}
 
 	main()
 	// Output:
