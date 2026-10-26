@@ -25,95 +25,55 @@ path "sys/storage/raft/snapshot" {
 
 ### Usage
 
-Vault Raft Backup can be configured with either environment variables or a HCL2 config file. The environment variables method is deprecated as of version 1.5.0, and no new input parameters will be supported with that method.
+Vault Raft Backup can be configured with either environment variables (older versions) or a HCL2 config file (current versions).
 
 Additionally, AWS, Azure, or GCP authentication and configuration must be provided with standard methods that do not require manual inputs. The AWS Golang SDK will automatically read authentication information as per normal (i.e. IAM instance profile, `AWS_SHARED_CREDENTIALS_FILE` credentials file, `AWS_PROFILE` config file, environment variables e.g. `AWS_SESSION_TOKEN` and `AWS_REGION`, etc.). The GCP and Azure Golang SDKs behave similarly for analogous authentication settings (note that this tool assumes Entra Security Principal authentication for Azure). If the snapshot is stored locally instead, then authentication and authorization will vary greatly based on your personal environment.
-
-#### Environment Variables
-
-The following environment variables are read for the configuration of the backup tool.
-
-```
-# VAULT
-# equivalent to VAULT_ADDR with vault cli executable
-# default: http://127.0.0.1:8200
-export VAULT_ADDR=<vault server cluster address>
-# equivalent to VAULT_SKIP_VERIFY with vault cli executable
-# default: false
-export VAULT_SKIP_VERIFY=<boolean>
-# default: determined based on other inputs
-export VAULT_AUTH_ENGINE=<token | aws>
-# equivalent to VAULT_TOKEN with vault cli executable
-# default: empty
-export VAULT_TOKEN=<vault authentication token>
-# default: aws
-export VAULT_AWS_MOUNT=<vault aws auth engine mount path>
-# default: empty
-export VAULT_AWS_ROLE=<vault aws authentication role>
-
-# CLOUD STORAGE
-# default: empty (required if PLATFORM is "azure")
-export AZ_ACCOUNT_URL=<azure account url>
-# required
-export CONTAINER=<name of cloud storage destination, or destination directory if storage platform is "local", for final snapshot transfer and storage>
-# required
-export PLATFORM=<aws, azure, gcp, or local>
-# this is prepended to the base filename in VAULT_SNAPSHOT_PATH
-# default: empty
-export PREFIX=<snapshot filename prefix during storage transfer>
-
-# SNAPSHOT
-# determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
-# default: false
-export SNAPSHOT_CLEANUP=<boolean>
-# determines the level of compression for the snapshot
-# 0: none, 1: fastest, 2: default, 3: most compressed
-# default: 0
-SNAPSHOT_COMPRESSION_LEVEL=<int>
-# default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
-# NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
-export VAULT_SNAPSHOT_PATH=<path to local filesystem for snapshot staging>
-# whether to restore the snapshot instead of backing up (requires local filesystem snapshot storage and additional `write` permissions in the Vault policy)
-# default: false
-SNAPSHOT_RESTORE = <boolean>
-```
 
 #### HCL2 Config File
 
 The HCL2 config file path is passed to the `vault-raft-backup` executable via the `-c` command line argument (e.g. `vault-raft-backup -c config.hcl`). The schema can be viewed below.
 
 ```hcl
-vault_config {
+vault {
   # equivalent to VAULT_ADDR with vault cli executable
   # default: http://127.0.0.1:8200
   address        = <vault server cluster address>
   # equivalent to VAULT_SKIP_VERIFY with vault cli executable
   # default: false
   insecure       = <boolean>
-  # default: determined based on other inputs
-  auth_engine    = <token | aws>
+  # required
+  auth_engine    = <approle | aws | azure | kubernetes | token>
   # equivalent to VAULT_TOKEN with vault cli executable
   # default: empty
   token          = <vault authentication token>
-  # default: aws
-  aws_mount_path = <vault aws auth engine mount path>
+  # default: empty (one of this or "wrap_token" is required if auth_engine is "approle")
+  secret_id = <approle secret id>
+  # default: empty (one of this or "secret_id" is required if auth_engine is "approle")
+  wrap_token = <approle wrapping token>
+  # this is only required if auth_engine is "azure" and and a non-default azure cloud is being used (e.g. gov and china)
   # default: empty
-  aws_role       = <vault aws authentication role>
+  az_resource = <azure resource>
+  # default: empty
+  auth_mount = <vault authentication engine mount point>
+  # default: empty (required for all auth_engine types except "token")
+  vault_role       = <vault role name or id>
+  # default: root
+  namespace = <vault enterprise namespace>
 }
 
-cloud_config {
+cloud {
   # default: empty (required if platform is "azure")
   az_account_url = <azure account url>
   # required
   container = <name of cloud storage destination, or destination directory if storage platform is "local", for final snapshot transfer and storage>
   # required
-  platform  = <aws, azure, gcp, or local>
+  platform  = <aws | azure | gcp | local>
   # this is prepended to the base filename in VAULT_SNAPSHOT_PATH
   # default: empty
   prefix    = <snapshot filename prefix during storage transfer>
 }
 
-snapshot_config {
+snapshot {
   # determines whether or not the local staged snapshot file is removed after a successful transfer to the final storage location
   # default: false
   cleanup = <boolean>
