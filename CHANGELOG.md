@@ -1,4 +1,4 @@
-### 2.0.0 (Next)
+### 2.0.0
 - Support AppRole Pull and Push, Kubernetes, and Azure authentication engine methods.
 - Support Vault Enterprise Namespaces.
 - Remove support for environment variable input parameters.
