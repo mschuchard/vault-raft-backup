@@ -93,7 +93,6 @@ func authClient(config *util.VaultConfig, client *vault.Client) error {
 	token := config.Token
 	authMount := config.AuthMount
 	vaultRole := config.VaultRole
-	secretID := config.SecretID
 	engine, err := config.Engine.New()
 	if err != nil {
 		log.Printf("invalid vault authentication engine %s specified", config.Engine)
@@ -104,9 +103,9 @@ func authClient(config *util.VaultConfig, client *vault.Client) error {
 	switch engine {
 	case enum.VaultToken:
 		// warn if ignored parameters were specified
-		if len(authMount) > 0 || len(vaultRole) > 0 || len(secretID) > 0 {
+		if len(authMount) > 0 || len(vaultRole) > 0 {
 			log.Print("ignored parameters were specified for Vault token authentication method")
-			log.Print("auth_mount, vault_role, and secret_id parameters are all ignored for Vault token authentication")
+			log.Print("auth_mount and vault_role parameters are ignored for Vault token authentication")
 		}
 
 		// validate vault token
@@ -197,28 +196,29 @@ func authClient(config *util.VaultConfig, client *vault.Client) error {
 		authMount = checkAuthParams(authMount, token, engine)
 
 		// validate role_id and secret_id/wrap_token are provided
-		if len(config.VaultRole) == 0 {
+		if len(vaultRole) == 0 {
 			log.Print("vault_role must be specified for AppRole authentication")
 			return errors.New("approle credentials absent")
 		}
 
 		// initialize credentials and login for push and pull
-		var secretID approle.SecretID
+		secretID := config.SecretID
+		var appRoleSecretID approle.SecretID
 		var loginOptions []approle.LoginOption
 
 		// determine push or pull and assign accordingly
 		switch {
 		// both which is an error
-		case len(config.SecretID) > 0 && len(config.WrapToken) > 0:
+		case len(secretID) > 0 && len(config.WrapToken) > 0:
 			log.Print("both secret_id and wrap_token were specified for AppRole authentication; push and pull are mutually exclusive")
 			return errors.New("approle credentials absent")
 		// pull
 		case len(config.WrapToken) > 0:
-			secretID = approle.SecretID{FromString: config.WrapToken}
+			appRoleSecretID = approle.SecretID{FromString: config.WrapToken}
 			loginOptions = append(loginOptions, approle.WithWrappingToken())
 		// push
-		case len(config.SecretID) > 0:
-			secretID = approle.SecretID{FromString: config.SecretID}
+		case len(secretID) > 0:
+			appRoleSecretID = approle.SecretID{FromString: config.SecretID}
 		// neither which is obviously an error
 		default:
 			log.Print("one of secret_id or wrap_token must be specified for AppRole authentication")
@@ -229,8 +229,8 @@ func authClient(config *util.VaultConfig, client *vault.Client) error {
 		loginOptions = append(loginOptions, approle.WithMountPath(authMount))
 		// authenticate with approle
 		appRoleAuth, err := approle.NewAppRoleAuth(
-			config.VaultRole,
-			&secretID,
+			vaultRole,
+			&appRoleSecretID,
 			loginOptions...,
 		)
 		if err != nil {
