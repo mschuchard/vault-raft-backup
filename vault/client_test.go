@@ -109,6 +109,13 @@ func TestAuthClient(test *testing.T) {
 	}
 	approleBackupConfig.WrapToken = wrappedSecretID.WrapInfo.Token
 
+	// first test error for mutual exclusivity
+	if err := authClient(approleBackupConfig, util.VaultClient); err == nil || err.Error() != "approle credentials absent" {
+		test.Errorf("expected error: approle credentials absent, actual: %s", err)
+	}
+
+	// then remove secret id for pull testing
+	approleBackupConfig.SecretID = ""
 	if err := authClient(approleBackupConfig, util.VaultClient); err != nil {
 		test.Error("authenticating a vault client with approle pull (wrapping token) config errored")
 		test.Error(err)
