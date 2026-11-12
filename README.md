@@ -18,8 +18,14 @@ Statically linked binaries for various operating systems and processor architect
 The Vault policy for authorizing the execution of Raft snapshots appears like:
 
 ```hcl
+# backup (default)
 path "sys/storage/raft/snapshot" {
   capabilities = ["read"]
+}
+
+# backup and restore (restore = true in snapshot config block)
+path "sys/storage/raft/snapshot" {
+  capabilities = ["read", "update"]
 }
 ```
 
@@ -84,7 +90,7 @@ snapshot {
   # default: <tmpdir>/vault-YYYY-MM-DD-hhmmss-<\d+>.bak
   # NOTE: if this file does not exist it will be created with 0600; if it does exist it will be completely overwritten
   path = <path on local filesystem for snapshot staging>
-  # whether to restore the snapshot instead of backing up (requires local filesystem snapshot storage and additional `write` permissions in the Vault policy)
+  # whether to restore the snapshot instead of backing up (requires local filesystem snapshot storage and additional permissions in the Vault policy)
   # default: false
   restore = <boolean>
 }
