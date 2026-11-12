@@ -1,3 +1,6 @@
+### 2.0.1 (Next)
+- Fix token validation check.
+
 ### 2.0.0
 - Support AppRole Pull and Push, Kubernetes, and Azure authentication engine methods.
 - Support Vault Enterprise Namespaces.
