@@ -1,6 +1,7 @@
 ### 2.0.1 (Next)
 - Fix token validation check.
 - Validate AppRole push and pull not simultaneously specified.
+- Fix log noise from test helpers.
 
 ### 2.0.0
 - Support AppRole Pull and Push, Kubernetes, and Azure authentication engine methods.

@@ -14,6 +14,7 @@ const (
 	Container    = "my_bucket"
 	Prefix       = "prefix"
 	appRole      = "myAppRole"
+	tokenFile    = "/tmp/vault-test-root-token"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 // helper for retrieving root token from bootstrap
 func rootToken() string {
 	// retrieve root token
-	data, err := os.ReadFile("/tmp/vault-test-root-token")
+	data, err := os.ReadFile(tokenFile)
 	if err != nil {
 		// return unauthenticated client as next best option
 		return ""
