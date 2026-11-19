@@ -5,33 +5,34 @@ import (
 	"testing"
 
 	"github.com/mschuchard/vault-raft-backup/enum"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 	"github.com/mschuchard/vault-raft-backup/util"
 )
 
 var (
 	basicBackupConfig = &util.VaultConfig{
-		Address: util.VaultAddress,
+		Address: testutil.VaultAddress,
 		Engine:  enum.VaultToken,
-		Token:   util.VaultToken,
+		Token:   testutil.VaultToken,
 	}
 	awsBackupConfig = &util.VaultConfig{
-		Address:   util.VaultAddress,
+		Address:   testutil.VaultAddress,
 		Engine:    enum.AWSIAM,
 		VaultRole: "myIAMRole",
 	}
 	azBackupConfig = &util.VaultConfig{
-		Address:    util.VaultAddress,
+		Address:    testutil.VaultAddress,
 		Engine:     enum.AzureIMDS,
 		VaultRole:  "myAzureRole",
 		AzResource: "https://management.azure.com/",
 	}
 	kubeBackupConfig = &util.VaultConfig{
-		Address:   util.VaultAddress,
+		Address:   testutil.VaultAddress,
 		Engine:    enum.KubernetesSA,
 		VaultRole: "mySARole",
 	}
 	approleBackupConfig = &util.VaultConfig{
-		Address: util.VaultAddress,
+		Address: testutil.VaultAddress,
 		Engine:  enum.AppRole,
 	}
 )
@@ -58,47 +59,47 @@ func TestNewVaultClient(test *testing.T) {
 
 // test client auth
 func TestAuthClient(test *testing.T) {
-	if err := authClient(awsBackupConfig, util.VaultClient); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	if err := authClient(awsBackupConfig, testutil.VaultClient); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Error("authenticating a vault client with aws did not error in the expected manner")
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 
 	awsBackupConfig.VaultRole = ""
-	if err := authClient(awsBackupConfig, util.VaultClient); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
+	if err := authClient(awsBackupConfig, testutil.VaultClient); err == nil || !strings.Contains(err.Error(), "NoCredentialProviders: no valid providers in chain") {
 		test.Error("authenticating a vault client with aws did not error in the expected manner")
 		test.Errorf("expected error (contains): NoCredentialProviders: no valid providers in chain, actual: %v", err)
 	}
 
-	if err := authClient(kubeBackupConfig, util.VaultClient); err == nil || !strings.Contains(err.Error(), "error reading service account token from default location") {
+	if err := authClient(kubeBackupConfig, testutil.VaultClient); err == nil || !strings.Contains(err.Error(), "error reading service account token from default location") {
 		test.Error("authenticating a vault client with kubernetes did not error in the expected manner")
 		test.Errorf("expected error (contains): error reading service account token from default location, actual: %v", err)
 	}
 
-	if err := authClient(azBackupConfig, util.VaultClient); err == nil || !strings.Contains(err.Error(), "Azure token endpoint") {
+	if err := authClient(azBackupConfig, testutil.VaultClient); err == nil || !strings.Contains(err.Error(), "Azure token endpoint") {
 		test.Error("authenticating a vault client with azure did not error in the expected manner")
 		test.Errorf("expected error (contains): Azure token endpoint, actual: %v", err)
 	}
 
-	approleBackupConfig.VaultRole = util.RoleID
-	approleBackupConfig.SecretID = util.SecretID
-	if err := authClient(approleBackupConfig, util.VaultClient); err != nil {
+	approleBackupConfig.VaultRole = testutil.RoleID
+	approleBackupConfig.SecretID = testutil.SecretID
+	if err := authClient(approleBackupConfig, testutil.VaultClient); err != nil {
 		test.Error("authenticating a vault client with approle config errored")
 		test.Error(err)
 	}
 
 	// reset client auth to prep for next test
-	util.VaultClient.SetToken(util.VaultToken)
+	testutil.VaultClient.SetToken(testutil.VaultToken)
 
 	// retrieve a wrapped secret id for testing approle auth in "pull" mode
-	util.VaultClient.SetWrappingLookupFunc(func(operation, path string) string {
+	testutil.VaultClient.SetWrappingLookupFunc(func(operation, path string) string {
 		if path == "auth/approle/role/myAppRole/secret-id" {
 			return "60s"
 		}
 		return ""
 	})
-	wrappedSecretID, err := util.VaultClient.Logical().Write("auth/approle/role/myAppRole/secret-id", nil)
+	wrappedSecretID, err := testutil.VaultClient.Logical().Write("auth/approle/role/myAppRole/secret-id", nil)
 	// reset the wrapping lookup func immediately so it does not affect subsequent requests
-	util.VaultClient.SetWrappingLookupFunc(nil)
+	testutil.VaultClient.SetWrappingLookupFunc(nil)
 	if err != nil {
 		test.Error("failed to retrieve wrapped secret ID for approle pull auth")
 		test.Error(err)
@@ -110,46 +111,46 @@ func TestAuthClient(test *testing.T) {
 	approleBackupConfig.WrapToken = wrappedSecretID.WrapInfo.Token
 
 	// first test error for mutual exclusivity
-	if err := authClient(approleBackupConfig, util.VaultClient); err == nil || err.Error() != "approle credentials absent" {
+	if err := authClient(approleBackupConfig, testutil.VaultClient); err == nil || err.Error() != "approle credentials absent" {
 		test.Errorf("expected error: approle credentials absent, actual: %s", err)
 	}
 
 	// then remove secret id for pull testing
 	approleBackupConfig.SecretID = ""
-	if err := authClient(approleBackupConfig, util.VaultClient); err != nil {
+	if err := authClient(approleBackupConfig, testutil.VaultClient); err != nil {
 		test.Error("authenticating a vault client with approle pull (wrapping token) config errored")
 		test.Error(err)
 	}
 
 	// this needs to be last to ensure the client is authenticated with a root token for all other tests
-	if err := authClient(basicBackupConfig, util.VaultClient); err != nil {
+	if err := authClient(basicBackupConfig, testutil.VaultClient); err != nil {
 		test.Error("authenticating a vault client with a basic token config errored")
 		test.Error(err)
 	}
 
 	// test errors
 	invalidAuth := &util.VaultConfig{Engine: "does not exist"}
-	if err := authClient(invalidAuth, util.VaultClient); err == nil || err.Error() != "invalid authengine enum" {
+	if err := authClient(invalidAuth, testutil.VaultClient); err == nil || err.Error() != "invalid authengine enum" {
 		test.Errorf("expected error: invalid authengine enum, actual: %s", err)
 	}
 
 	invalidToken := &util.VaultConfig{Engine: enum.VaultToken, Token: "foobarbaz123!"}
-	if err := authClient(invalidToken, util.VaultClient); err == nil || err.Error() != "invalid vault token" {
+	if err := authClient(invalidToken, testutil.VaultClient); err == nil || err.Error() != "invalid vault token" {
 		test.Errorf("expected error: invalid vault token, actual: %s", err)
 	}
 
 	kubeBackupConfig.VaultRole = ""
-	if err := authClient(kubeBackupConfig, util.VaultClient); err == nil || err.Error() != "no kubernetes vault role specified" {
+	if err := authClient(kubeBackupConfig, testutil.VaultClient); err == nil || err.Error() != "no kubernetes vault role specified" {
 		test.Errorf("expected error: no kubernetes vault role specified, actual: %s", err)
 	}
 
 	azBackupConfig.VaultRole = ""
-	if err := authClient(azBackupConfig, util.VaultClient); err == nil || err.Error() != "no azure vault role specified" {
+	if err := authClient(azBackupConfig, testutil.VaultClient); err == nil || err.Error() != "no azure vault role specified" {
 		test.Errorf("expected error: no azure vault role specified, actual: %s", err)
 	}
 
 	approleBackupConfig.VaultRole = ""
-	if err := authClient(approleBackupConfig, util.VaultClient); err == nil || err.Error() != "approle credentials absent" {
+	if err := authClient(approleBackupConfig, testutil.VaultClient); err == nil || err.Error() != "approle credentials absent" {
 		test.Errorf("expected error: approle credentials absent, actual: %s", err)
 	}
 }

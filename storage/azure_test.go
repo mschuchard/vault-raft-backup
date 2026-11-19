@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mschuchard/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 )
 
 func TestSnapshotBlobUpload(test *testing.T) {
@@ -17,7 +17,7 @@ func TestSnapshotBlobUpload(test *testing.T) {
 	}
 	defer fooFile.Close()
 
-	if err := snapshotBlobUpload(util.Container, fooFile, "empty", "https://foo.com"); err == nil || !strings.Contains(err.Error(), "DefaultAzureCredential: failed to acquire a token.") {
+	if err := snapshotBlobUpload(testutil.Container, fooFile, "empty", "https://foo.com"); err == nil || !strings.Contains(err.Error(), "DefaultAzureCredential: failed to acquire a token.") {
 		test.Errorf("expected error (contains): DefaultAzureCredential: failed to acquire a token., actual: %v", err)
 	}
 }

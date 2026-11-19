@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mschuchard/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 )
 
 func TestSnapshotS3Upload(test *testing.T) {
@@ -17,7 +17,7 @@ func TestSnapshotS3Upload(test *testing.T) {
 	}
 	defer fooFile.Close()
 
-	if err := snapshotS3Upload(util.Container, fooFile, "empty"); err == nil || !strings.Contains(err.Error(), "get credentials: failed to refresh cached credentials") {
+	if err := snapshotS3Upload(testutil.Container, fooFile, "empty"); err == nil || !strings.Contains(err.Error(), "get credentials: failed to refresh cached credentials") {
 		test.Errorf("expected error (contains): get credentials: failed to refresh cached credentials, actual: %v", err)
 	}
 }

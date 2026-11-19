@@ -7,11 +7,11 @@ import (
 	"time"
 
 	vault "github.com/hashicorp/vault/api"
-	"github.com/mschuchard/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 )
 
 func TestVaultRaftSnapshotCreate(test *testing.T) {
-	if err := VaultRaftSnapshotCreate(util.VaultClient, "vault.bak"); err != nil {
+	if err := VaultRaftSnapshotCreate(testutil.VaultClient, "vault.bak"); err != nil {
 		test.Error("vault raft snapshot creation failed")
 		test.Error(err)
 	}
@@ -22,18 +22,18 @@ func TestVaultRaftSnapshotCreate(test *testing.T) {
 
 	os.Remove("./vault.bak")
 
-	if err := VaultRaftSnapshotCreate(util.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
+	if err := VaultRaftSnapshotCreate(testutil.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
 		test.Errorf("expected error (contains): open /foo/vault.bak: no such file or directory, actual: %s", err)
 	}
 }
 
 func TestVaultRaftSnapshotRestore(test *testing.T) {
-	if err := VaultRaftSnapshotCreate(util.VaultClient, "vault.bak"); err != nil {
+	if err := VaultRaftSnapshotCreate(testutil.VaultClient, "vault.bak"); err != nil {
 		test.Error("vault raft snapshot creation for snapshot restoration test failed")
 	}
 	// some weird bug in gha prevents vault server from restarting properly
 	if os.Getenv("GITHUB_ACTIONS") != "true" {
-		if err := VaultRaftSnapshotRestore(util.VaultClient, "vault.bak"); err != nil {
+		if err := VaultRaftSnapshotRestore(testutil.VaultClient, "vault.bak"); err != nil {
 			test.Error("vault raft snapshot restoration failed")
 			test.Error(err)
 		}
@@ -41,12 +41,12 @@ func TestVaultRaftSnapshotRestore(test *testing.T) {
 
 	os.Remove("./vault.bak")
 
-	if err := VaultRaftSnapshotRestore(util.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
+	if err := VaultRaftSnapshotRestore(testutil.VaultClient, "/foo/vault.bak"); err == nil || err.Error() != "open /foo/vault.bak: no such file or directory" {
 		test.Errorf("expected error (contains): open /foo/vault.bak: no such file or directory, actual: %v", err)
 	}
 
 	// ensure vault server is available (it is possible it has not finished restarting after restoration)
-	client, err := vault.NewClient(&vault.Config{Address: util.VaultAddress})
+	client, err := vault.NewClient(&vault.Config{Address: testutil.VaultAddress})
 	if err != nil {
 		log.Fatalf("failed to create vault client for validating server: %s", err)
 	}

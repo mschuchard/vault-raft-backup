@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mschuchard/vault-raft-backup/enum"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 )
 
 func TestNewBackupConfig(test *testing.T) {
@@ -32,9 +33,9 @@ func TestNewBackupConfig(test *testing.T) {
 	}
 	expectedCloudConfig := CloudConfig{
 		AZAccountURL: "https://foo.com",
-		Container:    Container,
+		Container:    testutil.Container,
 		Platform:     enum.AWS,
-		Prefix:       Prefix,
+		Prefix:       testutil.Prefix,
 	}
 	expectedSnapshotConfig := SnapshotConfig{
 		Cleanup:          true,

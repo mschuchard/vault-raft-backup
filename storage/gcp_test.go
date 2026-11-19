@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mschuchard/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 )
 
 func TestSnapshotCSUpload(test *testing.T) {
@@ -16,7 +16,7 @@ func TestSnapshotCSUpload(test *testing.T) {
 	}
 	defer fooFile.Close()
 
-	if err := snapshotCSUpload(util.Container, fooFile, ""); err == nil || err.Error() != "dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information" {
+	if err := snapshotCSUpload(testutil.Container, fooFile, ""); err == nil || err.Error() != "dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information" {
 		test.Errorf("expected error: dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information, actual: %v", err)
 	}
 }

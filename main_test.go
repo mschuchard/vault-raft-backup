@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/mschuchard/vault-raft-backup/util"
+	"github.com/mschuchard/vault-raft-backup/testutil"
 )
 
 func Example() {
@@ -23,12 +23,12 @@ vault {
 snapshot {
   cleanup = true
 }
-`, util.VaultToken)
+`, testutil.VaultToken)
 	if err := os.WriteFile("/tmp/accept.hcl", []byte(configContents), 0o600); err != nil {
 		log.Fatalf("failed to write config file for test: %s", err)
 	}
 
-	// util.Cli reads the config path from os.Args, so replace and later restore them
+	// testutil.Cli reads the config path from os.Args, so replace and later restore them
 	originalArgs := os.Args
 	defer func() { os.Args = originalArgs }()
 	os.Args = []string{originalArgs[0], "-c", "/tmp/accept.hcl"}

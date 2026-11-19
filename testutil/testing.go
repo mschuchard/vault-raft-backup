@@ -1,4 +1,4 @@
-package util
+package testutil
 
 import (
 	"log"
@@ -13,8 +13,7 @@ const (
 	VaultAddress = "http://127.0.0.1:8200"
 	Container    = "my_bucket"
 	Prefix       = "prefix"
-	AppRole      = "myAppRole"
-	tokenFile    = "/tmp/vault-test-root-token"
+	appRole      = "myAppRole"
 )
 
 var (
@@ -26,7 +25,7 @@ var (
 // helper for retrieving root token from bootstrap
 func rootToken() string {
 	// retrieve root token
-	data, err := os.ReadFile(tokenFile)
+	data, err := os.ReadFile("/tmp/vault-test-root-token")
 	if err != nil {
 		// return unauthenticated client as next best option
 		return ""
@@ -48,12 +47,12 @@ func basicVaultClient() *vault.Client {
 // helper for approle auth
 func approleAttrs() (string, string, error) {
 	// retrieve role id and secret id for testing approle auth in "push" mode
-	roleID, err := VaultClient.Logical().Read("auth/approle/role/" + AppRole + "/role-id")
+	roleID, err := VaultClient.Logical().Read("auth/approle/role/" + appRole + "/role-id")
 	if err != nil {
 		log.Print("failed to retrieve role ID for approle auth")
 		return "", "", err
 	}
-	secretID, err := VaultClient.Logical().Write("auth/approle/role/"+AppRole+"/secret-id", nil)
+	secretID, err := VaultClient.Logical().Write("auth/approle/role/"+appRole+"/secret-id", nil)
 	if err != nil {
 		log.Print("failed to retrieve secret ID for approle auth")
 		return "", "", err
